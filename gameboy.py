@@ -1,12 +1,16 @@
 from bootrom import BootRom
-from cpu import CPU
+from emulator import CPU, MMU
 class GameBoy:
-    cpu = CPU()
     def __init__(self, cartridge):
-        
         self.bootrom = BootRom()
         self.cartridge = cartridge
+        self.mmu = MMU()
+        self.mmu.set_bios(self.bootrom)
+
+        self.CPU = CPU(self.mmu)
+
     def power_on(self):
-        pass
+        #while(True):
+        self.CPU.step()
         #print(self.bootrom.data)
         
