@@ -10,7 +10,7 @@ class GameBoy:
         self.CPU = CPU(self.mmu)
 
     def power_on(self):
-        #while(True):
-        self.CPU.step()
-        #print(self.bootrom.data)
+        cont = True
+        while(cont):
+            cont = self.CPU.step()
         
