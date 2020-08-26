@@ -7,17 +7,38 @@ from array import array
 class MMU: 
 
     def __init__(self):
-        pass
-        #self.memory = array('B')
-    
+        self.bootrom_loaded = False
+        self.data = array('B')
+        self.bios = array('B')
+
+    def disable_bootrom(self):
+        self.bootrom_loaded = True
+
+    def set_rom(self, rom):
+        self.data = rom
+
     def set_bios(self, bios):
         self.bios = bios
 
+    def write_u8(self,address, u8):
+        self.data[address] = u8
+    
+    def get_high_byte(value):
+        return (value >> 8) & 0xFF 
+    def get_low_byte(value):
+        return value & 0xFF
+
+
     def read(self, address):
-        return self.bios.data[address]
-        # pass in the bios
+        if self.bootrom_loaded:
+            return self.data[address]
+        else:
+            return self.bios.data[address]
     def _getbyte(self,address):
-        return struct.pack('B', self.bios.data[address])
+        if self.bootrom_loaded:
+            return struct.pack('B', self.data[address])
+        else:
+            return struct.pack('B', self.bios.data[address])
     
     def read_u8(self,address):
         return _getbyte(address)
@@ -53,6 +74,7 @@ class Registers:
         self.SET_F(0x00)
         self.SET_H(0x00)
         self.SET_L(0x00)
+        self.SET_SP(0x00)
         self.ZERO = False
     
     def SET_ZERO_FLAG(self, value):
@@ -82,6 +104,9 @@ class Registers:
     def SET_L(self, value):
         self.l = value
 
+    def SET_SP(self, value):
+        self.sp = value
+
     def GET_A(self):
         return self.a
 
@@ -105,11 +130,13 @@ class Registers:
 
     def GET_L(self):
         return self.l
+    
+    def GET_SP(self):
+        return self.sp
 
 class CPU:
     def __init__(self, mmu):
         self.pc = 0x00
-        self._sp = 0x00
         self._mmu = mmu
         self.debug_opcode = True
         self.reg = Registers()
@@ -118,13 +145,10 @@ class CPU:
         self.opcodes[0x31] = opcodes.LDSP16d
         self.opcodes[0xAF] = opcodes.XORA
         self.opcodes[0x21] = opcodes.LDHL16d
+        self.opcodes[0x32] = opcodes.LDHL8A
         
     def _read_pc_opcode(self):
         return self._mmu.read(self.pc)
-    
-   
-    def set_sp(self, sp):
-        self._sp = sp
         
     def step(self):
         success = False

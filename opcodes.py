@@ -3,23 +3,26 @@
 # length: 3 bytes 
 # 0x31 (1 byte) (2 bytes) unsigned
 def LDHL16d(mmu, cpu):
+    from emulator import MMU
     cpu.pc += 1
     mem = mmu.read_u16(cpu.pc)
     # reimplement this as high byte low byte
-    H = (mem >> 8) & 0xFF 
-    L = mem & 0xFF
-    print('blurp')
-    cpu.debugger.print_state(L)
-    cpu.debugger.print_state(H)
+    H = MMU.get_high_byte(mem)
+    L = MMU.get_low_byte(mem)
+    cpu.reg.SET_H(H)
+    cpu.reg.SET_L(L)
     cpu.debugger.print_state(mem)
     cpu.pc += 1
+
+def LDHL8A(mmu,cpu):
+    pass
 
 # length: 3 bytes 
 # 0x31 (1 byte) (2 bytes) unsigned
 def LDSP16d(mmu, cpu):
     cpu.pc += 1
     mem = mmu.read_u16(cpu.pc)
-    cpu.set_sp(mem)
+    cpu.reg.SET_SP(mem)
     cpu.debugger.print_state(mem)
     cpu.pc += 1
 
