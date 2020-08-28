@@ -2,3 +2,4 @@ http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf
 https://blog.ryanlevick.com/DMG-01/public/book/cpu/registers.html
 https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html
 http://www.codeslinger.co.uk/
+https://blog.ryanlevick.com/DMG-01/public/book/appendix/instruction_guide/index.html

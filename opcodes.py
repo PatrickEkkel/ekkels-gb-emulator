@@ -1,39 +1,72 @@
-
-
 # length: 3 bytes 
 # 0x31 (1 byte) (2 bytes) unsigned
 def LDHL16d(mmu, cpu):
+    cpu.debugger.print_opcode('LDHL16d')
     from emulator import MMU
     cpu.pc += 1
-    mem = mmu.read_u16(cpu.pc)
-    # reimplement this as high byte low byte
-    H = MMU.get_high_byte(mem)
-    L = MMU.get_low_byte(mem)
-    cpu.reg.SET_H(H)
-    cpu.reg.SET_L(L)
-    cpu.debugger.print_state(mem)
+    HL = mmu.read_u16(cpu.pc)
+    cpu.reg.SET_HL(HL)
+    cpu.debugger.print_register('HL',cpu.reg.GET_HL(),16)
     cpu.pc += 1
+    return True
 
 def LDHL8A(mmu,cpu):
-    pass
+    cpu.debugger.print_opcode('LDHL8A')
+    from emulator import MMU
+    # get A
+    AF = cpu.reg.GET_AF()
+    HL = cpu.reg.GET_HL()
+    cpu.debugger.print_register('AF',AF,16)
+    cpu.debugger.print_register('HL',HL,16)
+    A = MMU.get_high_byte(AF)
+    cpu.debugger.print_register('A',A,8)
+    mmu.write(HL,A)
+    HL -= 1
+    cpu.reg.SET_HL(HL)
+    cpu.debugger.print_register('HL',cpu.reg.GET_HL(),8)
+    return True
 
 # length: 3 bytes 
 # 0x31 (1 byte) (2 bytes) unsigned
 def LDSP16d(mmu, cpu):
+    cpu.debugger.print_opcode('LDSP16d')
     cpu.pc += 1
-    mem = mmu.read_u16(cpu.pc)
-    cpu.reg.SET_SP(mem)
-    cpu.debugger.print_state(mem)
+    SP = mmu.read_u16(cpu.pc)
+    cpu.reg.SET_SP(SP)
+    cpu.debugger.print_register('SP',SP,16)
     cpu.pc += 1
+    return True
 
 # length: 1 bytes
 # 0xAF 
 def XORA(mmu, cpu):
-  A = cpu.reg.GET_A()
+  cpu.debugger.print_opcode('XORA')
+  A = cpu.reg.GET_AF()
   A = A ^ A
   if A == 0x0:
       cpu.reg.SET_ZERO_FLAG(True)
-  cpu.debugger.print_state(A)
-  cpu.reg.SET_A(A) 
+  cpu.debugger.print_register('A', A,8)
+  cpu.reg.SET_AF(A) 
+  return True
     
     
+def CB(mmu, cpu):
+    cpu.debugger.print_opcode('CB')
+    cpu.pc += 1
+    opcode = cpu._read_pc_opcode()
+    instruction = cpu.cb_opcodes[opcode]
+    # fetch the special instruction from cb_opcode list 
+    # increment the PC, so we can get the CB instruction
+    # do nothing, its just a prefix
+    result = False
+    if instruction:
+        result = instruction(mmu, cpu)
+    else:
+        hex = hex = cpu.debugger.print_hex(opcode)
+        print(f'Unknown CB opcode {hex} at {cpu.pc}')
+    
+    return result
+    
+# CB opcodes 
+def BIT7H(mmu, cpu):
+    return True
