@@ -37,6 +37,14 @@ class OpcodeTests(unittest.TestCase):
         #assert True
         assert self.mmu.read(0x9fff) == 0x10
 
+    def test_BIT7H(self):
+        data = [0xCB,0x7c]
+        self.create_testcontext(data)
+        self.cpu.reg.SET_HL(0x8000)
+        opcodes.CB(self.mmu,self.cpu)
+
+        assert not self.cpu.reg.GET_ZERO_FLAG()
+
     def test_memory_init(self):
         data = []
         mmu = MMU()
@@ -47,6 +55,13 @@ class OpcodeTests(unittest.TestCase):
         mmu.write(0x8001,0xffff)
         actual_result = mmu.read(0x8001)
         assert actual_result == expected_result
+
+    def test_read_signed_byte(self):
+        mmu = MMU()
+        bootrom = BootRom()
+        mmu.set_bios(bootrom)
+        print(mmu.read_s8(11))
+        assert True
 
 if __name__ == '__main__':
     unittest.main()

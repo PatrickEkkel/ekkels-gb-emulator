@@ -49,7 +49,7 @@ def XORA(mmu, cpu):
   cpu.reg.SET_AF(A) 
   return True
     
-    
+# special prefix for a different set of opcodes
 def CB(mmu, cpu):
     cpu.debugger.print_opcode('CB')
     cpu.pc += 1
@@ -66,7 +66,38 @@ def CB(mmu, cpu):
         print(f'Unknown CB opcode {hex} at {cpu.pc}')
     
     return result
+
+def JRNZN(mmu, cpu):
+    cpu.debugger.print_opcode('JRNZN')
+    cpu.pc += 1
+    val = mmu.read_s8(cpu.pc)
+    jump_address = cpu.pc
+    if not cpu.reg.GET_ZERO_FLAG():
+        print(val)
+        print(cpu.pc)
+        jump_address += val.to_bytes()
+        print(cpu.debugger.print_hex(jump_address))
+        #jump_address = cpu.pc + 1
+        #print(cpu.debugger.print_hex(jump_address))
+        #print(cpu.debugger.print_hex(cpu.pc))
+    return True
     
+
 # CB opcodes 
 def BIT7H(mmu, cpu):
+    from emulator import MMU
+    cpu.debugger.print_opcode('BIT7H')
+    HL = cpu.reg.GET_HL()
+    cpu.debugger.print_register('HL',HL,16)
+    H = MMU.get_high_byte(HL)
+    # check if most significant bit is 1
+    isset = H >> 7 & 0x01
+
+    if isset:
+        cpu.reg.SET_ZERO_FLAG(False)
+    else:
+        cpu.reg.SET_ZERO_FLAG(True)
+
+    cpu.debugger.print_register('H',H,8)
+    
     return True

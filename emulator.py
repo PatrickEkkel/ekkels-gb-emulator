@@ -62,14 +62,21 @@ class MMU:
             return local_data[address]
 
   
-    def _getbyte(self,address):
+    def _getbyte(self,address, signed=False):
+        pack_method = 'B'
+        if signed:
+            pack_method = 'b'
+
         if self.bootrom_loaded:
-            return struct.pack('B', self.data[address])
+            return struct.pack(pack_method, self.data[address])
         else:
-            return struct.pack('B', self.bios.data[address])
+            return struct.pack(pack_method, self.bios.data[address])
     
-    def read_u8(self,address):
-        return _getbyte(address)
+    def read_s8(self, address):
+        print(self.bios.data[address])
+        return self._getbyte(address, signed=True)
+    def read_u8(self, address):
+        return self._getbyte(address)
 
     def read_u16(self,address):
         return int.from_bytes(self._getbyte(address) + self._getbyte(address + 1), 'little')
@@ -113,7 +120,10 @@ class Registers:
         self.ZERO = False
     
     def SET_ZERO_FLAG(self, value):
-        self.ZERO = True
+        self.ZERO = value
+
+    def GET_ZERO_FLAG(self):
+        return self.ZERO
 
     def SET_AF(self, af):
         self.af = af
@@ -173,6 +183,7 @@ class CPU:
         self.opcodes[0xAF] = opcodes.XORA
         self.opcodes[0x21] = opcodes.LDHL16d
         self.opcodes[0x32] = opcodes.LDHL8A
+        self.opcodes[0x20] = opcodes.JRNZN
         self.cb_opcodes[0xcb] = opcodes.CB
         self.cb_opcodes[0x7c] = opcodes.BIT7H
         
