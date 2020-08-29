@@ -60,8 +60,8 @@ class OpcodeTests(unittest.TestCase):
         mmu = MMU()
         bootrom = BootRom()
         mmu.set_bios(bootrom)
-        print(mmu.read_s8(11))
-        assert True
+        actual_result = mmu.read_s8(11)
+        assert actual_result == -5
 
 if __name__ == '__main__':
     unittest.main()

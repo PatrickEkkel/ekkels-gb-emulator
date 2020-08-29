@@ -73,8 +73,11 @@ class MMU:
             return struct.pack(pack_method, self.bios.data[address])
     
     def read_s8(self, address):
-        print(self.bios.data[address])
-        return self._getbyte(address, signed=True)
+        result = self.read(address)
+        if (result & 0x80):
+            result = (result + -0xFF) - 1
+        return result
+
     def read_u8(self, address):
         return self._getbyte(address)
 

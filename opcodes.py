@@ -62,7 +62,7 @@ def CB(mmu, cpu):
     if instruction:
         result = instruction(mmu, cpu)
     else:
-        hex = hex = cpu.debugger.print_hex(opcode)
+        hex = cpu.debugger.print_hex(opcode)
         print(f'Unknown CB opcode {hex} at {cpu.pc}')
     
     return result
@@ -71,15 +71,11 @@ def JRNZN(mmu, cpu):
     cpu.debugger.print_opcode('JRNZN')
     cpu.pc += 1
     val = mmu.read_s8(cpu.pc)
+    #cpu.pc += 1
     jump_address = cpu.pc
     if not cpu.reg.GET_ZERO_FLAG():
-        print(val)
-        print(cpu.pc)
-        jump_address += val.to_bytes()
-        print(cpu.debugger.print_hex(jump_address))
-        #jump_address = cpu.pc + 1
-        #print(cpu.debugger.print_hex(jump_address))
-        #print(cpu.debugger.print_hex(cpu.pc))
+        jump_address += val
+        cpu.pc = jump_address
     return True
     
 
