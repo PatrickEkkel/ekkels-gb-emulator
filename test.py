@@ -6,10 +6,13 @@ import unittest
 
 
 class OpcodeTests(unittest.TestCase):
-    def create_testcontext(self,data):
+    def create_testcontext(self,data,disable_bootrom=True):
         self.mmu = MMU()
-        self.mmu.set_rom(data)
-        self.mmu.disable_bootrom()
+        if data:
+            self.mmu.set_rom(data)
+        if disable_bootrom:
+            self.mmu.disable_bootrom()
+        
         self.cpu = CPU(self.mmu)
 
     def test_LDSP16d(self):
@@ -44,6 +47,41 @@ class OpcodeTests(unittest.TestCase):
         opcodes.CB(self.mmu,self.cpu)
 
         assert not self.cpu.reg.GET_ZERO_FLAG()
+    def test_LDn8d_C(self):
+        data = [0x0E,0x11]
+        self.create_testcontext(data)
+        opcodes.LDn8d(self.mmu, self.cpu)
+        assert self.cpu.reg.GET_C() == 0x11
+
+    def test_LDn8d_A(self):
+        data = [0x3E,0x11]
+        self.create_testcontext(data)
+        opcodes.LDn8d(self.mmu, self.cpu)
+        assert self.cpu.reg.GET_A() == 0x11
+    
+
+    def test_AF_register(self):
+        data = []
+        self.create_testcontext(data)
+        self.cpu.reg.SET_AF(0xffff)
+        assert self.cpu.reg.GET_AF() == 0xffff
+        self.cpu.reg.SET_A(0x15)
+        assert self.cpu.reg.GET_AF() == 0x15ff
+        assert self.cpu.reg.GET_A() ==  0x15
+        assert self.cpu.reg.GET_F() == 0xff
+    
+
+    def test_LDCA(self):
+        self.create_testcontext(None,disable_bootrom=False)
+        bootrom = BootRom()
+        self.mmu.set_bios(bootrom)
+        self.cpu.reg.SET_C(0x11)
+        self.cpu.reg.SET_AF(0xabcd)
+        opcodes.LDCA(self.mmu, self.cpu)
+        expected_address = 0xFF00 + 0x11
+        print(expected_address) 
+        # TODO: this instruction writes to an I/O register, i have not implemented anything yet regarding to I/O
+        assert self.mmu.read(expected_address) == 0x000
 
     def test_memory_init(self):
         data = []

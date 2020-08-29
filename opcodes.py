@@ -1,3 +1,37 @@
+
+def LDCA(mmu, cpu):
+    cpu.debugger.print_opcode('LDCA')
+    C = cpu.reg.GET_C()
+    A = cpu.reg.GET_A()
+    cpu.debugger.print_register('C',C, 8)
+    cpu.debugger.print_register('A',A, 8)
+    offset_address = 0xFF00 + C
+    mmu.write(offset_address, A)
+    return True
+
+
+def LDn8d(mmu, cpu):
+    cpu.debugger.print_opcode('LDn8d')
+    from emulator import MMU
+    # get Register from opcode
+    pc = cpu.pc + 1
+    val = mmu.read(pc)
+    
+    register = cpu.read_opcode() >> 4
+    print(cpu.debugger.format_hex(cpu.read_opcode()))
+    cpu.pc = pc
+    if register == 0x0:
+        cpu.reg.SET_C(val)
+        C = cpu.reg.GET_C()
+        cpu.debugger.print_register('C',C, 8)
+    if register == 0x3:
+        cpu.reg.SET_A(val)
+        A = cpu.reg.GET_A()
+        cpu.debugger.print_register('A',A, 8)
+        
+    return True
+
+
 # length: 3 bytes 
 # 0x31 (1 byte) (2 bytes) unsigned
 def LDHL16d(mmu, cpu):
@@ -53,7 +87,7 @@ def XORA(mmu, cpu):
 def CB(mmu, cpu):
     cpu.debugger.print_opcode('CB')
     cpu.pc += 1
-    opcode = cpu._read_pc_opcode()
+    opcode = cpu.read_opcode()
     instruction = cpu.cb_opcodes[opcode]
     # fetch the special instruction from cb_opcode list 
     # increment the PC, so we can get the CB instruction
@@ -62,20 +96,22 @@ def CB(mmu, cpu):
     if instruction:
         result = instruction(mmu, cpu)
     else:
-        hex = cpu.debugger.print_hex(opcode)
+        hex = cpu.debugger.format_hex(opcode)
         print(f'Unknown CB opcode {hex} at {cpu.pc}')
     
     return result
 
 def JRNZN(mmu, cpu):
     cpu.debugger.print_opcode('JRNZN')
-    cpu.pc += 1
-    val = mmu.read_s8(cpu.pc)
+    pc = cpu.pc + 1
+    val = mmu.read_s8(pc)
     #cpu.pc += 1
-    jump_address = cpu.pc
+    jump_address = pc
     if not cpu.reg.GET_ZERO_FLAG():
         jump_address += val
         cpu.pc = jump_address
+    else:
+        cpu.pc += 1
     return True
     
 

@@ -45,8 +45,15 @@ class MMU:
         # writing to VRAM
         if self._is_vram(address):
             self.vram[address] = value
+        if self._is_io(address):
+            # do nothing with I/O until it is needed
+            pass
+            
     def _is_vram(self, address):
         return address >= 0x8000 and address <= 0x9FFF
+
+    def _is_io(self, address):
+        return address >= 0xFF00 and address <= 0xFF7F
 
     def read(self, address):
         local_data = None
@@ -58,6 +65,8 @@ class MMU:
         # is the address within vram?  
         if self._is_vram(address):
             return self.vram[address]
+        elif self._is_io(address):
+            return 0x0000
         else:
             return local_data[address]
 
@@ -90,24 +99,29 @@ class Debugger:
     def __init__(self, cpu):
         self.cpu = cpu
     
-    def print_hex(self, opcode):
+    def format_hex(self, opcode):
         return ("0x{:x}".format(opcode))
 
     def print_opcode(self, opcode_description):
         if self.cpu.debug_opcode:
-            print(opcode_description)
+            print(opcode_description, end=' ')
 
     def print_register(self, name, value, size):
         if self.cpu.debug_opcode:
-            hex = self.print_hex(value)
-            print(f'REG: {name} val: {hex} size: {size}')
+            hex = self.format_hex(value)
+            print(f'REG: {name}: {hex} size: {size}', end=' ')
 
+    def end(self):
+        print('')
+
+    def show_cpu_flags(self):
+        print(f'ZERO: {self.cpu.reg.GET_ZERO_FLAG()}')
 
     def print_state(self, data):
         pc = self.cpu.pc
-        hex = self.print_hex(data)
+        hex = self.format_hex(data)
         if self.cpu.debug_opcode:
-            print(f'PC: {pc} CPU: {hex}',end=' ')
+            print(f'PC: {pc} CPU: {hex}', end=' ')
 
 
 class Registers:
@@ -151,6 +165,15 @@ class Registers:
 
     def GET_A(self):
         return MMU.get_high_byte(self.af)
+    
+    def GET_F(self):
+        return MMU.get_low_byte(self.af)
+
+    def SET_A(self, value):
+        F = MMU.get_low_byte(self.af)
+        A = value
+        A = A << 8
+        self.af = F | A
 
     def GET_AF(self):
         return self.af
@@ -187,17 +210,21 @@ class CPU:
         self.opcodes[0x21] = opcodes.LDHL16d
         self.opcodes[0x32] = opcodes.LDHL8A
         self.opcodes[0x20] = opcodes.JRNZN
+        self.opcodes[0x0E] = opcodes.LDn8d
+        self.opcodes[0x3E] = opcodes.LDn8d
+        self.opcodes[0xE2] = opcodes.LDCA
         self.cb_opcodes[0xcb] = opcodes.CB
         self.cb_opcodes[0x7c] = opcodes.BIT7H
         
-    def _read_pc_opcode(self):
+    def read_opcode(self):
         return self._mmu.read(self.pc)
         
     def step(self):
         success = False
-        opcode = self._read_pc_opcode()
+        opcode = self.read_opcode()
         
-        hex = self.debugger.print_hex(opcode)
+        hex = self.debugger.format_hex(opcode)
+        hex_pc = self.debugger.format_hex(self.pc)
         try:
             if opcode == 0xcb:
                 instruction = self.cb_opcodes[opcode]
@@ -206,11 +233,14 @@ class CPU:
             if instruction:
                 self.debugger.print_state(opcode)
                 success = instruction(self._mmu,self)
+                self.debugger.end()
+                self.debugger.show_cpu_flags()
                 if not success:
-                    print(f'Opcode failed {hex} at {self.pc}')
+                    
+                    print(f'Opcode failed {hex} at {hex_pc}')
             else:
                 
-                print(f'Unknown opcode {hex} at {self.pc}')
+                print(f'Unknown opcode {hex} at {hex_pc}')
                 
         except Exception as e:
             print(e)            
