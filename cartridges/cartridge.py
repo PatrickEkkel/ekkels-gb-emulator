@@ -29,6 +29,9 @@ class Cartridge:
         return self.data[0x0149]
 
 
+    def read(self, address):
+        return self.data[address]
+
     def print_cartridge_info(self):
         print('Cartridge type: ' + str(self.get_cartridgetype()))
         print('RAM size: type: ' + str(self.get_ramsize()))

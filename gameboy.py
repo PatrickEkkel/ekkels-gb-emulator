@@ -6,6 +6,7 @@ class GameBoy:
         self.cartridge = cartridge
         self.mmu = MMU()
         self.mmu.set_bios(self.bootrom)
+        self.mmu.set_rom(cartridge)
 
         self.CPU = CPU(self.mmu)
 

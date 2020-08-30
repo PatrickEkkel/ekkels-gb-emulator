@@ -26,12 +26,25 @@ class OpcodeTests(unittest.TestCase):
         opcodes.LDSP16d(self.mmu, self.cpu)
         assert self.cpu.reg.GET_SP() == 0xfff9
 
-    def test_LDHL16d(self):
+    def test_LDnn16d(self):
         data = [0x21, 0xff,0x9f]
         self.create_testcontext(data)
-        opcodes.LDHL16d(self.mmu, self.cpu)
+        opcodes.LDnn16d(self.mmu, self.cpu)
         self.cpu.debugger.print_state(self.cpu.reg.GET_HL())
         assert self.cpu.reg.GET_HL() == 0x9fff
+
+    def test_LDDHL8A(self):
+        data = []
+        self.create_testcontext(data)
+        bootrom = BootRom()
+        self.mmu.set_bios(bootrom)
+        self.cpu.reg.SET_AF(0x10ff)
+        self.cpu.reg.SET_HL(0x9fff)
+        opcodes.LDDHL8A(self.mmu,self.cpu)
+        self.cpu.debugger.print_state(self.cpu.reg.GET_HL())
+        #assert True
+        assert self.mmu.read(0x9fff) == 0x10
+        assert self.cpu.reg.GET_HL() == 0x9ffe
 
     def test_LDHL8A(self):
         data = []
@@ -40,10 +53,17 @@ class OpcodeTests(unittest.TestCase):
         self.mmu.set_bios(bootrom)
         self.cpu.reg.SET_AF(0x10ff)
         self.cpu.reg.SET_HL(0x9fff)
-        opcodes.LDHL8A(self.mmu,self.cpu)
+        opcodes.LDHnA(self.mmu,self.cpu)
         self.cpu.debugger.print_state(self.cpu.reg.GET_HL())
         #assert True
         assert self.mmu.read(0x9fff) == 0x10
+
+    def test_LDHnA(self):
+        data = [0xE0,0x78]
+        self.create_testcontext(data)
+        self.cpu.reg.SET_A(0xBA)
+        assert True
+
 
     def test_BIT7H(self):
         data = [0xCB,0x7c]

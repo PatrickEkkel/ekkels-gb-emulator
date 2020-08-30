@@ -7,9 +7,13 @@ from array import array
 class MMU: 
     VRAM_START = 0x8000
     VRAM_END = 0x9FFF
+    BOOTROM_START = 0x0000
+    BOOTROM_END = 0x00FF
+    CARTRIDGE_ROM_START = 0x0100
+
     def __init__(self):
         self.bootrom_loaded = False
-        self.data = array('B')
+        self.rom = None
         self.bios = array('B')
         self.vram = self.init_memory(MMU.VRAM_START,MMU.VRAM_END)
 
@@ -27,7 +31,7 @@ class MMU:
         self.bootrom_loaded = True
 
     def set_rom(self, rom):
-        self.data = rom
+        self.rom = rom
 
     def set_bios(self, bios):
         self.bios = bios
@@ -57,13 +61,27 @@ class MMU:
 
     def read(self, address):
         local_data = None
+        
+        # determine if we are above 0x00FF, 
+        # this implies that we are not trying to read addresses from the bootrom
+        # everything above 0x104 to 7FFF is 'cartrdige ROM' space, switchable via MBC if available 
+
+        if address > MMU.BOOTROM_END:
+            if self.rom:
+                return self.rom.read(address)
+            else:
+                # No cartridge loaded, return 0x000
+                return 0x0000
+
         if self.bootrom_loaded:
             local_data = self.data
         else:
             local_data = self.bios.data
         
+
         # is the address within vram?  
         if self._is_vram(address):
+            print('gotta read that vram bitch')
             return self.vram[address]
         elif self._is_io(address):
             return 0x0000
@@ -98,6 +116,10 @@ class Debugger:
 
     def __init__(self, cpu):
         self.cpu = cpu
+        self.show_registers = True
+        self.show_opcodes = True
+        self.show_cpu_flags = False
+        self.show_program_counter = True
     
     def format_hex(self, opcode):
         return ("0x{:x}".format(opcode))
@@ -107,21 +129,28 @@ class Debugger:
             print(opcode_description, end=' ')
 
     def print_register(self, name, value, size):
-        if self.cpu.debug_opcode:
+        if self.cpu.debug_opcode and self.show_registers:
             hex = self.format_hex(value)
             print(f'REG: {name}: {hex} size: {size}', end=' ')
+
+    def print_iv(self, value):
+        if self.cpu.debug_opcode and self.show_opcodes:
+            hex = self.format_hex(value)
+            print(f'{hex} ',end=' ')
 
     def end(self):
         print('')
 
-    def show_cpu_flags(self):
-        print(f'ZERO: {self.cpu.reg.GET_ZERO()}')
+    def print_cpu_flags(self):
+        if self.cpu.debug_opcode and self.show_cpu_flags:
+            hex = self.format_hex(self.cpu.reg.GET_F())
+            print(f'FLAGS-REG: {hex}')
 
     def print_state(self, data):
-        pc = self.cpu.pc
         hex = self.format_hex(data)
-        if self.cpu.debug_opcode:
-            print(f'PC: {pc} CPU: {hex}', end=' ')
+        hex_pc = self.format_hex(self.cpu.pc)
+        if self.cpu.debug_opcode and self.show_program_counter:
+            print(f'PC: {hex_pc} CPU: {hex}', end=' ')
 
 
 class Registers:
@@ -131,11 +160,10 @@ class Registers:
     HALFCARRY = 0x20
     CARRY = 0x10
     def __init__(self):
-        self.SET_AF(0x00)
+        self.SET_AF(0x0000)
         self.SET_B(0x00)
         self.SET_C(0x00)
-        self.SET_D(0x00)
-        self.SET_E(0x00)
+        self.SET_DE(0x0000)
         self.SET_HL(0x0000)
         self.SET_SP(0x0000)
     
@@ -199,11 +227,14 @@ class Registers:
     def SET_C(self, value):
         self.c = value
 
-    def SET_D(self, value):
-        self.d = value
+    def SET_DE(self, value):
+        self.de = value
 
-    def SET_E(self, value):
-        self.e = value
+    #def SET_D(self, value):
+    #    self.d = value
+
+    #def SET_E(self, value):
+    #    self.e = value
     
     def SET_HL(self, value):
         self.hl = value
@@ -237,11 +268,14 @@ class Registers:
     def GET_C(self):
         return self.c
 
+    def GET_DE(self):
+        return self.de
+
     def GET_D(self):
-        return self.d
+        return MMU.get_high_byte(self.de)
 
     def GET_E(self):
-        return self.e
+        return MMU.get_low_byte(self.de)
     
     def GET_HL(self):
         return self.hl
@@ -260,14 +294,21 @@ class CPU:
         self.cb_opcodes = [None] * 255
         self.opcodes[0x31] = opcodes.LDSP16d
         self.opcodes[0xAF] = opcodes.XORA
-        self.opcodes[0x21] = opcodes.LDHL16d
-        self.opcodes[0x32] = opcodes.LDHL8A
+        self.opcodes[0x21] = opcodes.LDnn16d
+        self.opcodes[0x11] = opcodes.LDnn16d
+        self.opcodes[0x32] = opcodes.LDDHL8A
         self.opcodes[0x20] = opcodes.JRNZN
         self.opcodes[0x0E] = opcodes.LDn8d
         self.opcodes[0x3E] = opcodes.LDn8d
         self.opcodes[0xE2] = opcodes.LDCA
+        self.opcodes[0xC] = opcodes.INCn
+        self.opcodes[0x77] = opcodes.LDHL8A
+        self.opcodes[0xE0] = opcodes.LDHnA
+        self.opcodes[0x1A] = opcodes.LDAn
+
         self.cb_opcodes[0xcb] = opcodes.CB
         self.cb_opcodes[0x7c] = opcodes.BIT7H
+
         
     def read_opcode(self):
         return self._mmu.read(self.pc)
@@ -280,25 +321,20 @@ class CPU:
         
         hex = self.debugger.format_hex(opcode)
         hex_pc = self.debugger.format_hex(self.pc)
-        try:
-            if opcode == 0xcb:
-                instruction = self.cb_opcodes[opcode]
-            else:    
-                instruction = self.opcodes[opcode]
-            if instruction:
-                self.debugger.print_state(opcode)
-                success = instruction(self._mmu,self)
-                self.debugger.end()
-                self.debugger.show_cpu_flags()
-                if not success:
-                    
-                    print(f'Opcode failed {hex} at {hex_pc}')
-            else:
-                
-                print(f'Unknown opcode {hex} at {hex_pc}')
-                
-        except Exception as e:
-            print(e)            
+        
+        if opcode == 0xcb:
+            instruction = self.cb_opcodes[opcode]
+        else:    
+            instruction = self.opcodes[opcode]
+        if instruction:
+            self.debugger.print_state(opcode)
+            success = instruction(self._mmu,self)
+            self.debugger.print_cpu_flags()
+            self.debugger.end()
+            if not success:
+                print(f'Opcode failed {hex} at {hex_pc}')
+        else:       
+            print(f'Unknown opcode {hex} at {hex_pc}')      
         self.pc += 1
         return success
         

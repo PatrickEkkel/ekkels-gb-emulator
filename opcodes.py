@@ -1,17 +1,66 @@
 
 def INCn(mmu, cpu):
     cpu.debugger.print_opcode('INCn')
-
+    cpu.reg.CLEAR_SUBSTRACT()
     parameter = cpu.read_opcode_parameter()
     result = False
+    selected_register = None
     if parameter == 0x0:
         C = cpu.reg.GET_C()
+        selected_register = C
         C = C + 1
+        # get the third bit by shifting 2 positions to the right and do a and against 0000 0001
+        
         cpu.debugger.print_register('C',C, 8)
         cpu.reg.SET_C(C)
         result = True
+    
+
+    if selected_register >> 2 & 0x1 == 0x1:
+        cpu.reg.SET_HALF_CARRY()
+
     return result
 
+# length: 2 bytes 
+# 0xE0 and 1 byte unsigned
+# write contents of register A to memory address FF00 + n
+def LDHnA(mmu, cpu):
+    # get 8 bit unsigned parameter
+    cpu.pc += 1
+    val = mmu.read(cpu.pc)
+    # print disassembly info
+    cpu.debugger.print_opcode('LDHnA')
+    cpu.debugger.print_iv(val)
+   
+    # read A register
+    A = cpu.reg.GET_A()
+    cpu.debugger.print_register('A',A, 8)
+    
+    offset_address = 0xFF00 + val
+
+    mmu.write(offset_address, A)
+    return True
+
+def LDAn(mmu, cpu):
+    cpu.debugger.print_opcode('LDAn')
+
+    parameter = cpu.read_opcode_parameter()
+    result = False
+    if parameter == 0x1:
+        DE = cpu.reg.GET_DE()
+        cpu.debugger.print_register('DE',DE, 16)
+        val = mmu.read(DE)
+        cpu.reg.SET_A(val)
+        A = cpu.reg.GET_A()
+        cpu.debugger.print_register('A',A, 8)
+        result = True
+    
+    return result
+
+       
+# length 1 byte
+# 0xE2 
+# write contents of register A to memory address FF00 + C
 def LDCA(mmu, cpu):
     cpu.debugger.print_opcode('LDCA')
     C = cpu.reg.GET_C()
@@ -31,13 +80,12 @@ def LDn8d(mmu, cpu):
     val = mmu.read(pc)
     
     parameter = cpu.read_opcode_parameter()
-    print(cpu.debugger.format_hex(cpu.read_opcode()))
     cpu.pc = pc
     if parameter == 0x0:
         cpu.reg.SET_C(val)
         C = cpu.reg.GET_C()
         cpu.debugger.print_register('C',C, 8)
-    if parameter == 0x3:
+    elif parameter == 0x3:
         cpu.reg.SET_A(val)
         A = cpu.reg.GET_A()
         cpu.debugger.print_register('A',A, 8)
@@ -46,19 +94,34 @@ def LDn8d(mmu, cpu):
 
 
 # length: 3 bytes 
-# 0x31 (1 byte) (2 bytes) unsigned
-def LDHL16d(mmu, cpu):
-    cpu.debugger.print_opcode('LDHL16d')
+# 0x31 and 2 bytes unsigned
+def LDnn16d(mmu, cpu):
+    cpu.debugger.print_opcode('LDnn16d')
     from emulator import MMU
+    parameter = cpu.read_opcode_parameter()
     cpu.pc += 1
-    HL = mmu.read_u16(cpu.pc)
-    cpu.reg.SET_HL(HL)
-    cpu.debugger.print_register('HL',cpu.reg.GET_HL(),16)
+    val = mmu.read_u16(cpu.pc)
+    cpu.debugger.print_iv(val)
+    if parameter == 0x02:
+        cpu.reg.SET_HL(val)
+        cpu.debugger.print_register('HL',cpu.reg.GET_HL(),16)
+    elif parameter == 0x01:
+        cpu.reg.SET_DE(val)
+        cpu.debugger.print_register('DE',cpu.reg.GET_DE(),16)
+        pass
     cpu.pc += 1
     return True
 
-def LDHL8A(mmu,cpu):
+def LDHL8A(mmu, cpu):
     cpu.debugger.print_opcode('LDHL8A')
+    from emulator import MMU
+    A = cpu.reg.GET_A()
+    HL = cpu.reg.GET_HL()
+    mmu.write(HL, A)
+    return True
+
+def LDDHL8A(mmu, cpu):
+    cpu.debugger.print_opcode('LDDHL8A')
     from emulator import MMU
     # get A
     AF = cpu.reg.GET_AF()
