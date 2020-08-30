@@ -33,6 +33,9 @@ class OpcodeTests(unittest.TestCase):
         self.cpu.debugger.print_state(self.cpu.reg.GET_HL())
         assert self.cpu.reg.GET_HL() == 0x9fff
 
+    def test_CALLnn(self):
+        
+        assert False
     def test_LDDHL8A(self):
         data = []
         self.create_testcontext(data)

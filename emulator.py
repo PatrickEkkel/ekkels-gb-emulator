@@ -2,20 +2,36 @@ import struct
 import opcodes
 from array import array
 
+class Stack:
 
-
+    def __init__(self, cpu, mmu):
+        self.mmu = mmu
+        self.cpu = cpu
+    
+    def push(self, value):
+        sp = self.cpu.reg.GET_SP()
+        self.mmu.write(sp, value)
+        sp -= 1
+        self.cpu.reg.SET_SP(sp)
+        #self.mmu.write()
 class MMU: 
     VRAM_START = 0x8000
     VRAM_END = 0x9FFF
+
+    HRAM_START = 0xFF80
+    HRAM_END = 0xFFFE
+
     BOOTROM_START = 0x0000
     BOOTROM_END = 0x00FF
     CARTRIDGE_ROM_START = 0x0100
+
 
     def __init__(self):
         self.bootrom_loaded = False
         self.rom = None
         self.bios = array('B')
-        self.vram = self.init_memory(MMU.VRAM_START,MMU.VRAM_END)
+        self.vram = self.init_memory(MMU.VRAM_START, MMU.VRAM_END)
+        self.hram = self.init_memory(MMU.HRAM_START, MMU.HRAM_END)
 
 
     def init_memory(self, start,end):
@@ -52,12 +68,17 @@ class MMU:
         if self._is_io(address):
             # do nothing with I/O until it is needed
             pass
+        if self._is_hram(address):
+            self.hram[address] = value
             
     def _is_vram(self, address):
-        return address >= 0x8000 and address <= 0x9FFF
+        return address >= MMU.VRAM_START and address <= MMU.VRAM_END
 
     def _is_io(self, address):
         return address >= 0xFF00 and address <= 0xFF7F
+
+    def _is_hram(self, address):
+        return address >= MMU.HRAM_START and address <= MMU.HRAM_END
 
     def read(self, address):
         local_data = None
@@ -160,12 +181,13 @@ class Registers:
     HALFCARRY = 0x20
     CARRY = 0x10
     def __init__(self):
+        self.SET_SP(0x0000)
         self.SET_AF(0x0000)
         self.SET_B(0x00)
         self.SET_C(0x00)
         self.SET_DE(0x0000)
         self.SET_HL(0x0000)
-        self.SET_SP(0x0000)
+        
     
 
     def _set_flag(self, flag):
@@ -218,6 +240,12 @@ class Registers:
     def GET_SUBSTRACT(self):
         return self._get_flag(Registers.SUBSTRACT)
 
+    def SET_SP(self, value):
+        self.sp = value
+    
+    def GET_SP(self):
+        return self.sp
+
     def SET_AF(self, af):
         self.af = af
 
@@ -239,8 +267,6 @@ class Registers:
     def SET_HL(self, value):
         self.hl = value
     
-    def SET_SP(self, value):
-        self.sp = value
 
     def GET_A(self):
         return MMU.get_high_byte(self.af)
@@ -280,14 +306,12 @@ class Registers:
     def GET_HL(self):
         return self.hl
     
-    def GET_SP(self):
-        return self.sp
-
 class CPU:
     def __init__(self, mmu):
         self.pc = 0x00
         self._mmu = mmu
         self.debug_opcode = True
+        self.stack = Stack(self, mmu)
         self.reg = Registers()
         self.debugger = Debugger(self)
         self.opcodes = [None] * 255
@@ -305,11 +329,12 @@ class CPU:
         self.opcodes[0x77] = opcodes.LDHL8A
         self.opcodes[0xE0] = opcodes.LDHnA
         self.opcodes[0x1A] = opcodes.LDAn
+        #self.opcodes[0xCD] = opcodes.CALLnn
 
         self.cb_opcodes[0xcb] = opcodes.CB
         self.cb_opcodes[0x7c] = opcodes.BIT7H
 
-        
+    
     def read_opcode(self):
         return self._mmu.read(self.pc)
     

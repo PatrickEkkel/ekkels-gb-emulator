@@ -191,6 +191,18 @@ def JRNZN(mmu, cpu):
     return True
     
 
+
+def CALLnn(mmu, cpu):
+    cpu.debugger.print_opcode('CALLnn')
+    # address of next instruction
+    pc = cpu.pc + 1
+    SP = cpu.reg.GET_SP()
+    cpu.debugger.print_register('SP',SP,16)
+    cpu.stack.push(pc)
+    # push address of next instruction to the stack
+    return True
+
+
 # CB opcodes 
 def BIT7H(mmu, cpu):
     from emulator import MMU
