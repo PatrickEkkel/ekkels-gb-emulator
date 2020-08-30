@@ -71,6 +71,21 @@ def LDCA(mmu, cpu):
     mmu.write(offset_address, A)
     return True
 
+def LDnA(mmu, cpu):
+     cpu.debugger.print_opcode('LDnA')
+     parameter = cpu.read_opcode_parameter()
+     A = cpu.reg.GET_A()
+     result = False
+     if parameter == 0x04:
+       C = cpu.reg.GET_C()
+       C = A
+       cpu.debugger.print_register('C',C, 8)
+       cpu.reg.SET_C(C)
+       result = True
+     return result
+
+
+
 
 def LDn8d(mmu, cpu):
     cpu.debugger.print_opcode('LDn8d')
@@ -191,14 +206,18 @@ def JRNZN(mmu, cpu):
     return True
     
 
-
+#
 def CALLnn(mmu, cpu):
     cpu.debugger.print_opcode('CALLnn')
     # address of next instruction
     pc = cpu.pc + 1
+    val = mmu.read_u16(pc)
+    # Decrease the jump value by one, because the step will do a +1 
+    cpu.pc = val - 0x01
     SP = cpu.reg.GET_SP()
     cpu.debugger.print_register('SP',SP,16)
     cpu.stack.push(pc)
+
     # push address of next instruction to the stack
     return True
 

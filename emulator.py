@@ -322,6 +322,7 @@ class CPU:
         self.opcodes[0x11] = opcodes.LDnn16d
         self.opcodes[0x32] = opcodes.LDDHL8A
         self.opcodes[0x20] = opcodes.JRNZN
+        self.opcodes[0x4f] = opcodes.LDnA
         self.opcodes[0x0E] = opcodes.LDn8d
         self.opcodes[0x3E] = opcodes.LDn8d
         self.opcodes[0xE2] = opcodes.LDCA
@@ -329,7 +330,7 @@ class CPU:
         self.opcodes[0x77] = opcodes.LDHL8A
         self.opcodes[0xE0] = opcodes.LDHnA
         self.opcodes[0x1A] = opcodes.LDAn
-        #self.opcodes[0xCD] = opcodes.CALLnn
+        self.opcodes[0xCD] = opcodes.CALLnn
 
         self.cb_opcodes[0xcb] = opcodes.CB
         self.cb_opcodes[0x7c] = opcodes.BIT7H
