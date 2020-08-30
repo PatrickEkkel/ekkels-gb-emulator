@@ -1,11 +1,16 @@
 import opcodes
 from bootrom import BootRom
-from emulator import CPU, MMU
+from emulator import CPU, MMU,Registers
 import unittest 
 
 
 
 class OpcodeTests(unittest.TestCase):
+
+
+    def print_hex(self, value):
+        print("0x{:x}".format(value))
+
     def create_testcontext(self,data,disable_bootrom=True):
         self.mmu = MMU()
         if data:
@@ -46,7 +51,7 @@ class OpcodeTests(unittest.TestCase):
         self.cpu.reg.SET_HL(0x8000)
         opcodes.CB(self.mmu,self.cpu)
 
-        assert not self.cpu.reg.GET_ZERO_FLAG()
+        assert not self.cpu.reg.GET_ZERO()
     def test_LDn8d_C(self):
         data = [0x0E,0x11]
         self.create_testcontext(data)
@@ -93,6 +98,54 @@ class OpcodeTests(unittest.TestCase):
         mmu.write(0x8001,0xffff)
         actual_result = mmu.read(0x8001)
         assert actual_result == expected_result
+
+    def test_INCn(self):
+        data = [0x0C]
+        self.create_testcontext(data)
+        self.cpu.reg.SET_C(0xEE)
+        opcodes.INCn(self.mmu, self.cpu)
+        C = self.cpu.reg.GET_C()
+        assert C == 0xEF
+        
+
+    def test_flags_register(self):
+        register = Registers()
+
+        # flip the flag register and check if it is all working
+        register.SET_ZERO()
+        assert register.GET_ZERO() == True
+        register.CLEAR_ZERO()
+        assert register.GET_ZERO() == False
+        register.SET_SUBSTRACT()
+        assert register.GET_SUBSTRACT() == True
+        register.CLEAR_SUBSTRACT()
+        assert register.GET_SUBSTRACT() == False
+        register.SET_HALF_CARRY()
+        assert register.GET_HALF_CARRY() == True
+        register.CLEAR_HALF_CARRY()
+        assert register.GET_HALF_CARRY() == False
+        register.SET_CARRY()
+        assert register.GET_CARRY() == True
+        register.CLEAR_CARRY()
+        assert register.GET_CARRY() == False
+
+
+        # do a few combinations of flags and see if it behaves correct
+
+        register.SET_ZERO()
+        register.SET_CARRY()
+        register.SET_HALF_CARRY()
+        register.SET_SUBSTRACT()
+
+        assert register.GET_F() == 0xf0
+        register.CLEAR_ZERO()
+        assert register.GET_F() == 0x70
+        register.CLEAR_CARRY() 
+        assert register.GET_F() == 0x60
+        register.CLEAR_HALF_CARRY()
+        assert register.GET_F() == 0x40
+        register.CLEAR_SUBSTRACT()
+        assert register.GET_F() == 0x00
 
     def test_read_signed_byte(self):
         mmu = MMU()

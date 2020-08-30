@@ -1,4 +1,17 @@
 
+def INCn(mmu, cpu):
+    cpu.debugger.print_opcode('INCn')
+
+    parameter = cpu.read_opcode_parameter()
+    result = False
+    if parameter == 0x0:
+        C = cpu.reg.GET_C()
+        C = C + 1
+        cpu.debugger.print_register('C',C, 8)
+        cpu.reg.SET_C(C)
+        result = True
+    return result
+
 def LDCA(mmu, cpu):
     cpu.debugger.print_opcode('LDCA')
     C = cpu.reg.GET_C()
@@ -17,14 +30,14 @@ def LDn8d(mmu, cpu):
     pc = cpu.pc + 1
     val = mmu.read(pc)
     
-    register = cpu.read_opcode() >> 4
+    parameter = cpu.read_opcode_parameter()
     print(cpu.debugger.format_hex(cpu.read_opcode()))
     cpu.pc = pc
-    if register == 0x0:
+    if parameter == 0x0:
         cpu.reg.SET_C(val)
         C = cpu.reg.GET_C()
         cpu.debugger.print_register('C',C, 8)
-    if register == 0x3:
+    if parameter == 0x3:
         cpu.reg.SET_A(val)
         A = cpu.reg.GET_A()
         cpu.debugger.print_register('A',A, 8)
@@ -78,7 +91,7 @@ def XORA(mmu, cpu):
   A = cpu.reg.GET_AF()
   A = A ^ A
   if A == 0x0:
-      cpu.reg.SET_ZERO_FLAG(True)
+      cpu.reg.SET_ZERO()
   cpu.debugger.print_register('A', A,8)
   cpu.reg.SET_AF(A) 
   return True
@@ -107,7 +120,7 @@ def JRNZN(mmu, cpu):
     val = mmu.read_s8(pc)
     #cpu.pc += 1
     jump_address = pc
-    if not cpu.reg.GET_ZERO_FLAG():
+    if not cpu.reg.GET_ZERO():
         jump_address += val
         cpu.pc = jump_address
     else:
@@ -126,9 +139,9 @@ def BIT7H(mmu, cpu):
     isset = H >> 7 & 0x01
 
     if isset:
-        cpu.reg.SET_ZERO_FLAG(False)
+        cpu.reg.CLEAR_ZERO()
     else:
-        cpu.reg.SET_ZERO_FLAG(True)
+        cpu.reg.SET_ZERO()
 
     cpu.debugger.print_register('H',H,8)
     

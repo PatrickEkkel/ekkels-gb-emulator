@@ -115,7 +115,7 @@ class Debugger:
         print('')
 
     def show_cpu_flags(self):
-        print(f'ZERO: {self.cpu.reg.GET_ZERO_FLAG()}')
+        print(f'ZERO: {self.cpu.reg.GET_ZERO()}')
 
     def print_state(self, data):
         pc = self.cpu.pc
@@ -126,6 +126,10 @@ class Debugger:
 
 class Registers:
 
+    ZERO = 0x80
+    SUBSTRACT = 0x40
+    HALFCARRY = 0x20
+    CARRY = 0x10
     def __init__(self):
         self.SET_AF(0x00)
         self.SET_B(0x00)
@@ -134,13 +138,57 @@ class Registers:
         self.SET_E(0x00)
         self.SET_HL(0x0000)
         self.SET_SP(0x0000)
-        self.ZERO = False
     
-    def SET_ZERO_FLAG(self, value):
-        self.ZERO = value
 
-    def GET_ZERO_FLAG(self):
-        return self.ZERO
+    def _set_flag(self, flag):
+        F = self.GET_F()
+        F = flag | F
+        self.SET_F(F)
+    
+    def _clear_flag(self, flag):
+        F = self.GET_F()
+        F = ~flag & F
+        self.SET_F(F)
+
+    def _get_flag(self, flag):
+        return (self.GET_F() & flag) > 0
+
+
+    def SET_CARRY(self):
+        self._set_flag(Registers.CARRY)
+
+    def GET_CARRY(self):
+        return self._get_flag(Registers.CARRY)
+
+    def CLEAR_CARRY(self):
+        return self._clear_flag(Registers.CARRY)
+
+    def SET_HALF_CARRY(self):
+        self._set_flag(Registers.HALFCARRY)
+    
+    def GET_HALF_CARRY(self):
+        return self._get_flag(Registers.HALFCARRY)
+
+    def CLEAR_HALF_CARRY(self):
+        return self._clear_flag(Registers.HALFCARRY)
+
+    def CLEAR_ZERO(self):
+        self._clear_flag(Registers.ZERO)
+
+    def SET_ZERO(self):
+        self._set_flag(Registers.ZERO)
+
+    def GET_ZERO(self):
+        return self._get_flag(Registers.ZERO)
+
+    def CLEAR_SUBSTRACT(self):
+        self._clear_flag(Registers.SUBSTRACT)
+    
+    def SET_SUBSTRACT(self):
+        self._set_flag(Registers.SUBSTRACT)
+    
+    def GET_SUBSTRACT(self):
+        return self._get_flag(Registers.SUBSTRACT)
 
     def SET_AF(self, af):
         self.af = af
@@ -173,6 +221,11 @@ class Registers:
         F = MMU.get_low_byte(self.af)
         A = value
         A = A << 8
+        self.af = F | A
+
+    def SET_F(self, value):
+        F = value
+        A = MMU.get_high_byte(self.af)
         self.af = F | A
 
     def GET_AF(self):
@@ -218,7 +271,9 @@ class CPU:
         
     def read_opcode(self):
         return self._mmu.read(self.pc)
-        
+    
+    def read_opcode_parameter(self):
+        return self._mmu.read(self.pc) >> 4
     def step(self):
         success = False
         opcode = self.read_opcode()
