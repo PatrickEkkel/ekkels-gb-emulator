@@ -15,21 +15,31 @@ class Stack:
         self.cpu.reg.SET_SP(sp)
         #self.mmu.write()
 class MMU: 
-    VRAM_START = 0x8000
-    VRAM_END = 0x9FFF
+    VRAM_START             = 0x8000
+    VRAM_END               = 0x9FFF
 
-    HRAM_START = 0xFF80
-    HRAM_END = 0xFFFE
+    HRAM_START             = 0xFF80
+    HRAM_END               = 0xFFFE
 
-    BOOTROM_START = 0x0000
-    BOOTROM_END = 0x00FF
-    CARTRIDGE_ROM_START = 0x0100
+    BOOTROM_START          = 0x0000
+    BOOTROM_END            = 0x00FF
 
+    CARTRIDGE_ROM_START    = 0x0100
+
+    IO_REGISTER_START      = 0xFF00
+    IO_REGISTER_END        = 0xFF7F
+
+    CARTRIDGE_ROM_00_START = 0x000
+    CARTRIDGE_ROM_00_END   = 0x3FFF
+
+    CARTRIDGE_ROM_01_START = 0x4000
+    CARTRIDGE_ROM_01_END   = 0x7FFF
 
     def __init__(self):
-        self.bootrom_loaded = False
+        self.booted = False
         self.rom = None
-        self.bios = array('B')
+        self.bios = None
+        self.io = self.init_memory(MMU.IO_REGISTER_START,MMU.IO_REGISTER_END)
         self.vram = self.init_memory(MMU.VRAM_START, MMU.VRAM_END)
         self.hram = self.init_memory(MMU.HRAM_START, MMU.HRAM_END)
 
@@ -44,7 +54,7 @@ class MMU:
 
 
     def disable_bootrom(self):
-        self.bootrom_loaded = True
+        self.booted = True
 
     def set_rom(self, rom):
         self.rom = rom
@@ -64,18 +74,24 @@ class MMU:
     def write(self,address, value):
         # writing to VRAM
         if self._is_vram(address):
+            print('vram is writing')
             self.vram[address] = value
         if self._is_io(address):
+            print('io is writing')
             # do nothing with I/O until it is needed
-            pass
+            self.io[address] = value
         if self._is_hram(address):
+            print('hram is writing')
             self.hram[address] = value
             
+    def _is_rom(self, address):
+        return address >= MMU.CARTRIDGE_ROM_00_START and address <= MMU.CARTRIDGE_ROM_01_END
+
     def _is_vram(self, address):
         return address >= MMU.VRAM_START and address <= MMU.VRAM_END
 
     def _is_io(self, address):
-        return address >= 0xFF00 and address <= 0xFF7F
+        return address >= MMU.IO_REGISTER_START and address <= MMU.IO_REGISTER_END
 
     def _is_hram(self, address):
         return address >= MMU.HRAM_START and address <= MMU.HRAM_END
@@ -87,27 +103,29 @@ class MMU:
         # this implies that we are not trying to read addresses from the bootrom
         # everything above 0x104 to 7FFF is 'cartrdige ROM' space, switchable via MBC if available 
 
-        if address > MMU.BOOTROM_END:
-            if self.rom:
+
+        #if self.bootrom_loaded:
+        #    local_data = self.data
+        #else:
+        #    local_data = self.bios.data
+    
+        # is the address within vram?  
+        if self._is_rom(address):
+            if self.booted:
+                return self.rom.read(address)
+            elif not self.booted and address >= MMU.BOOTROM_END:
                 return self.rom.read(address)
             else:
-                # No cartridge loaded, return 0x000
-                return 0x0000
-
-        if self.bootrom_loaded:
-            local_data = self.data
-        else:
-            local_data = self.bios.data
-        
-
-        # is the address within vram?  
-        if self._is_vram(address):
-            print('gotta read that vram bitch')
+                return self.bios.read(address)
+        elif self._is_hram(address):
+            return self.hram[address]
+        elif self._is_vram(address):
             return self.vram[address]
         elif self._is_io(address):
-            return 0x0000
+            return self.io[address]
         else:
-            return local_data[address]
+            # trying to access unmapped memory
+            return 0x0000
 
   
     def _getbyte(self,address, signed=False):
@@ -115,10 +133,10 @@ class MMU:
         if signed:
             pack_method = 'b'
 
-        if self.bootrom_loaded:
-            return struct.pack(pack_method, self.data[address])
+        if self.booted:
+            return struct.pack(pack_method, self.rom.read(address))
         else:
-            return struct.pack(pack_method, self.bios.data[address])
+            return struct.pack(pack_method, self.bios.read(address))
     
     def read_s8(self, address):
         result = self.read(address)

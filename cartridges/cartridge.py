@@ -8,12 +8,24 @@ class Cartridge:
     
     def __init__(self, path):
         self.data = array('B')
-        size = os.path.getsize(path)
+        if path:
+            size = os.path.getsize(path)
+            with open(path, 'rb') as bootrom:
+                self.data.fromfile(bootrom, size)
+                logger.debug('Gameboy cartridge loaded')
+            self._create_mbc()
+
+    def dump_header(self):
+        header_size = 0x14F - 0x100
+        result = [None] * (header_size + 0x01)
+        ic = 0
+        for byte in self.data:
+
+            if ic >= 0x100 and ic <= 0x14F:
+                result[ic-0x100] = byte
+            ic += 1
         
-        with open(path, 'rb') as bootrom:
-            self.data.fromfile(bootrom, size)
-            logger.debug('Gameboy cartridge loaded')
-        self._create_mbc()
+        return result
 
 
     def _create_mbc(self):

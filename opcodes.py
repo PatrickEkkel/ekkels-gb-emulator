@@ -37,10 +37,12 @@ def LDHnA(mmu, cpu):
     cpu.debugger.print_register('A',A, 8)
     
     offset_address = 0xFF00 + val
-
+    
     mmu.write(offset_address, A)
     return True
-
+# length: 1 byte
+# 0x1A
+# Read the Value of register DE from memory and put the contents of adress DE in A
 def LDAn(mmu, cpu):
     cpu.debugger.print_opcode('LDAn')
 

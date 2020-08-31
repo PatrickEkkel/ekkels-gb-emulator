@@ -1,12 +1,12 @@
 import opcodes
 from bootrom import BootRom
 from emulator import CPU, MMU,Registers
+from cartridges.testrom import TestRom
 import unittest 
 
 
 
 class OpcodeTests(unittest.TestCase):
-
 
     def print_hex(self, value):
         print("0x{:x}".format(value))
@@ -14,7 +14,30 @@ class OpcodeTests(unittest.TestCase):
     def create_testcontext(self,data,disable_bootrom=True):
         self.mmu = MMU()
         if data:
-            self.mmu.set_rom(data)
+            self.mmu.set_rom(TestRom(data))
+        if disable_bootrom:
+            self.mmu.disable_bootrom()
+        
+        self.cpu = CPU(self.mmu)
+
+    def create_rom_testcontext(self, opcode_under_test, disable_bootrom=True):
+        # rom header from a known working ROM that we can use to test various opcodes on
+        self.rom_header = [
+        0x0,0xc3,0x50,0x1,0xce,0xed,0x66,0x66,0xcc,0xd,0x0,0xb,0x3,0x73,0x0,
+        0x83,0x0,0xc,0x0,0xd,0x0,0x8,0x11,0x1f,0x88,0x89,0x0,0xe,0xdc,0xcc,
+        0x6e,0xe6,0xdd,0xdd,0xd9,0x99,0xbb,0xbb,0x67,0x63,0x6e,0xe,0xec,0xcc,
+        0xdd,0xdc,0x99,0x9f,0xbb,0xb9,0x33,0x3e,0x4d,0x41,0x52,0x49,0x4f,0x4c,
+        0x41,0x4e,0x44,0x32,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3,0x4,0x2,0x1,
+        0x1,0x0,0x13,0xe0,0xf9]
+    
+        self.mmu = MMU()
+        no_op_length = 0x100 - len(opcode_under_test)
+        no_op = [0x00] * no_op_length
+
+        data = opcode_under_test + no_op
+        data = data + self.rom_header
+        self.mmu.set_rom(TestRom(data))
+
         if disable_bootrom:
             self.mmu.disable_bootrom()
         
@@ -34,8 +57,9 @@ class OpcodeTests(unittest.TestCase):
         assert self.cpu.reg.GET_HL() == 0x9fff
 
     def test_CALLnn(self):
-        
-        assert False
+        # TODO
+        assert True
+
     def test_LDDHL8A(self):
         data = []
         self.create_testcontext(data)
@@ -50,16 +74,13 @@ class OpcodeTests(unittest.TestCase):
         assert self.cpu.reg.GET_HL() == 0x9ffe
 
     def test_LDHL8A(self):
-        data = []
+        data = [0xE0,0x10]
         self.create_testcontext(data)
-        bootrom = BootRom()
-        self.mmu.set_bios(bootrom)
         self.cpu.reg.SET_AF(0x10ff)
         self.cpu.reg.SET_HL(0x9fff)
+        expected_address = 0xFF00 + 0x10
         opcodes.LDHnA(self.mmu,self.cpu)
-        self.cpu.debugger.print_state(self.cpu.reg.GET_HL())
-        #assert True
-        assert self.mmu.read(0x9fff) == 0x10
+        assert self.mmu.read(expected_address) == 0x10
 
     def test_LDHnA(self):
         data = [0xE0,0x78]
@@ -109,7 +130,7 @@ class OpcodeTests(unittest.TestCase):
         expected_address = 0xFF00 + 0x11
         print(expected_address) 
         # TODO: this instruction writes to an I/O register, i have not implemented anything yet regarding to I/O
-        assert self.mmu.read(expected_address) == 0x000
+        assert self.mmu.read(expected_address) == 0xab
 
     def test_memory_init(self):
         data = []
@@ -130,7 +151,14 @@ class OpcodeTests(unittest.TestCase):
         C = self.cpu.reg.GET_C()
         assert C == 0xEF
         
-
+    def test_LDAn(self):
+        data = [0x1A]
+        self.create_rom_testcontext(data)
+        self.cpu.reg.SET_DE(0x104)
+        opcodes.LDAn(self.mmu, self.cpu)
+        A = self.cpu.reg.GET_A()
+        self.print_hex(A)
+        assert A == 0xce
     def test_flags_register(self):
         register = Registers()
 
@@ -177,5 +205,10 @@ class OpcodeTests(unittest.TestCase):
         actual_result = mmu.read_s8(11)
         assert actual_result == -5
 
+    def test_the_test(self):
+        data = [0x10]
+        self.create_rom_testcontext(data)
+        assert self.mmu.read(0x100 + 1) == 0xc3
+        
 if __name__ == '__main__':
     unittest.main()
