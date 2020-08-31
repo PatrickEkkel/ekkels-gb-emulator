@@ -36,6 +36,7 @@ class OpcodeTests(unittest.TestCase):
 
         data = opcode_under_test + no_op
         data = data + self.rom_header
+        self.address_space = data
         self.mmu.set_rom(TestRom(data))
 
         if disable_bootrom:
@@ -57,9 +58,17 @@ class OpcodeTests(unittest.TestCase):
         assert self.cpu.reg.GET_HL() == 0x9fff
 
     def test_CALLnn(self):
-        # TODO
-        assert True
-
+        data = [0x00,0xCD,0x00,0x01]
+        self.create_rom_testcontext(data)
+        self.cpu.pc = 1
+        self.cpu.reg.SET_SP(0xFFFF)
+        opcodes.CALLnn(self.mmu, self.cpu)
+        # simulate the step method by added 1 to the pc (just like in the emulation)
+        self.cpu.pc += 1
+        
+        assert self.cpu.pc == 0x100
+        assert self.cpu.reg.GET_SP() == 0xFFFE
+        assert self.mmu.read(0xFFFE) == 0x02
     def test_LDDHL8A(self):
         data = []
         self.create_testcontext(data)

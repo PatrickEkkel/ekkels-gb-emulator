@@ -207,13 +207,15 @@ def JRNZN(mmu, cpu):
         cpu.pc += 1
     return True
     
-
-#
+# length: 3 bytes 
+# 0xCD 
+# pushes the PC to the stack and jump to specified 16 bit operand
 def CALLnn(mmu, cpu):
     cpu.debugger.print_opcode('CALLnn')
     # address of next instruction
     pc = cpu.pc + 1
     val = mmu.read_u16(pc)
+    cpu.debugger.print_iv(val)
     # Decrease the jump value by one, because the step will do a +1 
     cpu.pc = val - 0x01
     SP = cpu.reg.GET_SP()

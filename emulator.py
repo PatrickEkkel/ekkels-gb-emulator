@@ -10,8 +10,8 @@ class Stack:
     
     def push(self, value):
         sp = self.cpu.reg.GET_SP()
-        self.mmu.write(sp, value)
         sp -= 1
+        self.mmu.write(sp, value)
         self.cpu.reg.SET_SP(sp)
         #self.mmu.write()
 class MMU: 
@@ -76,13 +76,16 @@ class MMU:
         if self._is_vram(address):
             print('vram is writing')
             self.vram[address] = value
-        if self._is_io(address):
+        elif self._is_io(address):
             print('io is writing')
             # do nothing with I/O until it is needed
             self.io[address] = value
-        if self._is_hram(address):
+        elif self._is_hram(address):
             print('hram is writing')
             self.hram[address] = value
+        else:
+            print('nothing to write')
+        
             
     def _is_rom(self, address):
         return address >= MMU.CARTRIDGE_ROM_00_START and address <= MMU.CARTRIDGE_ROM_01_END
