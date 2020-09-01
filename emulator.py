@@ -204,13 +204,11 @@ class Registers:
     def __init__(self):
         self.SET_SP(0x0000)
         self.SET_AF(0x0000)
-        self.SET_B(0x00)
-        self.SET_C(0x00)
+        self.SET_BC(0x0000)
         self.SET_DE(0x0000)
         self.SET_HL(0x0000)
         
     
-
     def _set_flag(self, flag):
         F = self.GET_F()
         F = flag | F
@@ -271,10 +269,17 @@ class Registers:
         self.af = af
 
     def SET_B(self, value):
-        self.b = value
+        C = MMU.get_low_byte(self.bc)
+        B = value
+        B = B << 8
+        self.bc = C | B
+
 
     def SET_C(self, value):
-        self.c = value
+        C = value
+        B = MMU.get_high_byte(self.bc)
+        self.bc = B | C
+
 
     def SET_DE(self, value):
         self.de = value
@@ -310,10 +315,16 @@ class Registers:
         return self.af
 
     def GET_B(self):
-        return self.b
+        return MMU.get_high_byte(self.bc)
     
     def GET_C(self):
-        return self.c
+        return MMU.get_low_byte(self.bc)
+
+    def SET_BC(self, value):
+        self.bc = value
+
+    def GET_BC(self):
+        return self.bc
 
     def GET_DE(self):
         return self.de
@@ -339,12 +350,14 @@ class CPU:
         self.cb_opcodes = [None] * 255
         self.opcodes[0x31] = opcodes.LDSP16d
         self.opcodes[0xAF] = opcodes.XORA
+        self.opcodes[0xC5] = opcodes.PUSHBC
         self.opcodes[0x21] = opcodes.LDnn16d
         self.opcodes[0x11] = opcodes.LDnn16d
         self.opcodes[0x32] = opcodes.LDDHL8A
         self.opcodes[0x20] = opcodes.JRNZN
         self.opcodes[0x4f] = opcodes.LDnA
         self.opcodes[0x0E] = opcodes.LDn8d
+        self.opcodes[0x06] = opcodes.LDn8d
         self.opcodes[0x3E] = opcodes.LDn8d
         self.opcodes[0xE2] = opcodes.LDCA
         self.opcodes[0xC] = opcodes.INCn
@@ -360,8 +373,12 @@ class CPU:
     def read_opcode(self):
         return self._mmu.read(self.pc)
     
-    def read_opcode_parameter(self):
+    def read_lower_opcode_parameter(self):
+        return self._mmu.read(self.pc) << 4
+
+    def read_upper_opcode_parameter(self):
         return self._mmu.read(self.pc) >> 4
+
     def step(self):
         success = False
         opcode = self.read_opcode()

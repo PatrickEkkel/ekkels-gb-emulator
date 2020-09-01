@@ -2,7 +2,7 @@
 def INCn(mmu, cpu):
     cpu.debugger.print_opcode('INCn')
     cpu.reg.CLEAR_SUBSTRACT()
-    parameter = cpu.read_opcode_parameter()
+    parameter = cpu.read_upper_opcode_parameter()
     result = False
     selected_register = None
     if parameter == 0x0:
@@ -46,7 +46,7 @@ def LDHnA(mmu, cpu):
 def LDAn(mmu, cpu):
     cpu.debugger.print_opcode('LDAn')
 
-    parameter = cpu.read_opcode_parameter()
+    parameter = cpu.read_upper_opcode_parameter()
     result = False
     if parameter == 0x1:
         DE = cpu.reg.GET_DE()
@@ -75,7 +75,7 @@ def LDCA(mmu, cpu):
 
 def LDnA(mmu, cpu):
      cpu.debugger.print_opcode('LDnA')
-     parameter = cpu.read_opcode_parameter()
+     parameter = cpu.read_upper_opcode_parameter()
      A = cpu.reg.GET_A()
      result = False
      if parameter == 0x04:
@@ -87,7 +87,18 @@ def LDnA(mmu, cpu):
      return result
 
 
+def PUSHBC(mmu, cpu):
+    cpu.debugger.print_opcode('PUSHBC')
+    
+    B = cpu.reg.GET_B()
+    C = cpu.reg.GET_C()
 
+    cpu.debugger.print_register('B',C, 8)
+    cpu.debugger.print_register('C',C, 8)
+
+    cpu.stack.push(B)
+    cpu.stack.push(C)
+    return True
 
 def LDn8d(mmu, cpu):
     cpu.debugger.print_opcode('LDn8d')
@@ -96,18 +107,32 @@ def LDn8d(mmu, cpu):
     pc = cpu.pc + 1
     val = mmu.read(pc)
     
-    parameter = cpu.read_opcode_parameter()
+    upper_parameter = cpu.read_upper_opcode_parameter()
+
+    lower_parameter = cpu.read_lower_opcode_parameter()
+    
+    result = False
     cpu.pc = pc
-    if parameter == 0x0:
-        cpu.reg.SET_C(val)
-        C = cpu.reg.GET_C()
-        cpu.debugger.print_register('C',C, 8)
-    elif parameter == 0x3:
-        cpu.reg.SET_A(val)
-        A = cpu.reg.GET_A()
-        cpu.debugger.print_register('A',A, 8)
+
+    if lower_parameter == 0x60:
+        if upper_parameter == 0x0:
+            cpu.reg.SET_B(val)
+            B = cpu.reg.GET_B()
+            cpu.debugger.print_register('B', B, 8)
+            result = True
+    else:
+        if upper_parameter == 0x0:
+            cpu.reg.SET_C(val)
+            C = cpu.reg.GET_C()
+            cpu.debugger.print_register('C',C, 8)
+            result = True
+        elif upper_parameter == 0x3:
+            cpu.reg.SET_A(val)
+            A = cpu.reg.GET_A()
+            cpu.debugger.print_register('A',A, 8)
+            result = True
         
-    return True
+    return result
 
 
 # length: 3 bytes 
@@ -115,7 +140,7 @@ def LDn8d(mmu, cpu):
 def LDnn16d(mmu, cpu):
     cpu.debugger.print_opcode('LDnn16d')
     from emulator import MMU
-    parameter = cpu.read_opcode_parameter()
+    parameter = cpu.read_upper_opcode_parameter()
     cpu.pc += 1
     val = mmu.read_u16(cpu.pc)
     cpu.debugger.print_iv(val)

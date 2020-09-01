@@ -218,6 +218,19 @@ class OpcodeTests(unittest.TestCase):
         data = [0x10]
         self.create_rom_testcontext(data)
         assert self.mmu.read(0x100 + 1) == 0xc3
+
+
+    def test_registers(self):
+        data = [0x00]
+        self.create_testcontext(data)
+        self.cpu.reg.SET_BC(0x0000)
+        self.cpu.reg.SET_C(0x20)
+        self.cpu.reg.SET_B(0xAB)
+        assert self.cpu.reg.GET_C() == 0x20
+        assert self.cpu.reg.GET_B() == 0xAB
+        assert self.cpu.reg.GET_BC() == 0xAB20
+
+        pass
         
 if __name__ == '__main__':
     unittest.main()
