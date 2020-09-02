@@ -309,7 +309,7 @@ class Registers:
     def SET_F(self, value):
         F = value
         A = MMU.get_high_byte(self.af)
-        self.af = F | A
+        self.af = A | F
 
     def GET_AF(self):
         return self.af

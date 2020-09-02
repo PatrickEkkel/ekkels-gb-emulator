@@ -256,6 +256,36 @@ def CALLnn(mmu, cpu):
     return True
 
 
+def RLA(mmu, cpu):
+    cpu.debugger.print_opcode('RLA')
+    # get the value from the C register
+    A = cpu.reg.GET_A()
+    previous_carry = cpu.reg.GET_CARRY()
+
+    cpu.debugger.print_register('A', cpu.reg.GET_A(),8)
+    # get msb from register
+    msb = (A & 0x80) == 0x80
+    
+    A = bitwise_functions.shift_left(A, 8)
+    A |= previous_carry
+
+    cpu.reg.SET_A(A)
+    if A == 0x00:
+        cpu.reg.SET_ZERO()
+    else:
+        cpu.reg.CLEAR_ZERO()
+    # set the contents of msb to the carry flag
+    if msb:
+        cpu.reg.SET_CARRY()
+    else:
+        cpu.reg.CLEAR_CARRY()
+    # clear substract and half carry
+    cpu.reg.CLEAR_SUBSTRACT()
+    cpu.reg.CLEAR_HALF_CARRY()
+    return True
+
+
+
 # CB opcodes 
 def BIT7H(mmu, cpu):
     from emulator import MMU
@@ -292,10 +322,11 @@ def RLC(mmu, cpu):
     msb = (C & 0x80) == 0x80
     
     
-    result = bitwise_functions.shift_left(C, 8)
-    result |= previous_carry
-    #result = bitwise_functions.rotate_left(C,8,previous_carry)
-    if result == 0x00:
+    C = bitwise_functions.shift_left(C, 8)
+    C |= previous_carry
+
+    cpu.reg.SET_C(C)
+    if C == 0x00:
         cpu.reg.SET_ZERO()
     else:
         cpu.reg.CLEAR_ZERO()
