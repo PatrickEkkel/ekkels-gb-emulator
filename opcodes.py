@@ -1,3 +1,6 @@
+import struct
+
+
 
 def INCn(mmu, cpu):
     cpu.debugger.print_opcode('INCn')
@@ -219,6 +222,9 @@ def CB(mmu, cpu):
     
     return result
 
+
+
+
 def JRNZN(mmu, cpu):
     cpu.debugger.print_opcode('JRNZN')
     pc = cpu.pc + 1
@@ -268,4 +274,47 @@ def BIT7H(mmu, cpu):
 
     cpu.debugger.print_register('H',H,8)
     
+    return True
+
+# length: 2 bytes 
+# 0xCB 0x11  
+# Rotates C register left and sets carry bit if most significant bit is 1
+def RLC(mmu, cpu):
+    cpu.debugger.print_opcode('RLC')
+    # get the value from the C register
+    C = cpu.reg.GET_C()
+    C = struct.pack('B',C)
+
+    # clear flags
+    cpu.reg.CLEAR_SUBSTRACT()
+    cpu.reg.CLEAR_HALF_CARRY()
+
+    CARRY = cpu.reg.GET_CARRY()
+    
+    cpu.debugger.print_register('C', cpu.reg.GET_C(),8)
+
+    # extract MSB from register C
+    msb = (C & 0x80) == 0x80
+
+    # if bit 7 is set, than set the carryflag
+    if msb:
+        cpu.reg.SET_CARRY()
+    else:
+        cpu.reg.CLEAR_CARRY()
+    
+
+    lsb = 0x00
+    lsb = cpu.reg.GET_CARRY()
+
+    if lsb:
+        lsb = 0x01 
+
+    C = C << 1
+    C = C|lsb
+    print('whut')
+    print(C)
+
+    if C == 0x00:
+        cpu.reg.SET_ZERO()
+
     return True

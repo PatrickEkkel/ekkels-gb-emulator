@@ -159,7 +159,29 @@ class OpcodeTests(unittest.TestCase):
         opcodes.INCn(self.mmu, self.cpu)
         C = self.cpu.reg.GET_C()
         assert C == 0xEF
+    
+    def test_RLC(self):
+        data =[0xCB,0x11]
+        self.create_testcontext(data)
+
+        # check if carry flag is set with value 255
+        self.cpu.reg.SET_C(0xFF)
         
+        opcodes.RLC(self.mmu, self.cpu)
+        assert self.cpu.reg.GET_CARRY()
+
+        # check if zero flag is set with value 0
+        self.cpu.reg.SET_C(0x00)
+        opcodes.RLC(self.mmu, self.cpu)
+        assert self.cpu.reg.GET_ZERO()
+        self.cpu.reg.CLEAR_ZERO()
+        self.cpu.reg.SET_C(0x80)
+        opcodes.RLC(self.mmu, self.cpu)
+        
+        assert self.cpu.reg.GET_CARRY()
+        
+
+
     def test_LDAn(self):
         data = [0x1A]
         self.create_rom_testcontext(data)
