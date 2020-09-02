@@ -1,5 +1,4 @@
-import struct
-
+import bitwise_functions
 
 
 def INCn(mmu, cpu):
@@ -279,42 +278,33 @@ def BIT7H(mmu, cpu):
 # length: 2 bytes 
 # 0xCB 0x11  
 # Rotates C register left and sets carry bit if most significant bit is 1
+# It seems what we are doing here is called 'Rotate trough carry' 
+# where the most significant bit is shifted out, put in a carry bit and
+# 
 def RLC(mmu, cpu):
     cpu.debugger.print_opcode('RLC')
     # get the value from the C register
     C = cpu.reg.GET_C()
-    C = struct.pack('B',C)
+    previous_carry = cpu.reg.GET_CARRY()
 
-    # clear flags
-    cpu.reg.CLEAR_SUBSTRACT()
-    cpu.reg.CLEAR_HALF_CARRY()
-
-    CARRY = cpu.reg.GET_CARRY()
-    
     cpu.debugger.print_register('C', cpu.reg.GET_C(),8)
-
-    # extract MSB from register C
+    # get msb from register
     msb = (C & 0x80) == 0x80
-
-    # if bit 7 is set, than set the carryflag
+    
+    
+    result = bitwise_functions.shift_left(C, 8)
+    result |= previous_carry
+    #result = bitwise_functions.rotate_left(C,8,previous_carry)
+    if result == 0x00:
+        cpu.reg.SET_ZERO()
+    else:
+        cpu.reg.CLEAR_ZERO()
+    # set the contents of msb to the carry flag
     if msb:
         cpu.reg.SET_CARRY()
     else:
         cpu.reg.CLEAR_CARRY()
-    
-
-    lsb = 0x00
-    lsb = cpu.reg.GET_CARRY()
-
-    if lsb:
-        lsb = 0x01 
-
-    C = C << 1
-    C = C|lsb
-    print('whut')
-    print(C)
-
-    if C == 0x00:
-        cpu.reg.SET_ZERO()
-
+    # clear substract and half carry
+    cpu.reg.CLEAR_SUBSTRACT()
+    cpu.reg.CLEAR_HALF_CARRY()
     return True

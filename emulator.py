@@ -368,6 +368,7 @@ class CPU:
 
         self.cb_opcodes[0xcb] = opcodes.CB
         self.cb_opcodes[0x7c] = opcodes.BIT7H
+        self.cb_opcodes[0x11] = opcodes.RLC
 
     
     def read_opcode(self):

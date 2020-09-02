@@ -162,25 +162,45 @@ class OpcodeTests(unittest.TestCase):
     
     def test_RLC(self):
         data =[0xCB,0x11]
+        
         self.create_testcontext(data)
-
-        # check if carry flag is set with value 255
-        self.cpu.reg.SET_C(0xFF)
+        # test rotate bit with carry set and value 0x80
+        # expecting bit left rotate from 1000 0000 to 0000 0001 which is non zero and msb is put in carry flag
+        self.cpu.reg.SET_CARRY()
+        self.cpu.reg.SET_C(0x80)
         
         opcodes.RLC(self.mmu, self.cpu)
+        self.cpu.debugger.end()
         assert self.cpu.reg.GET_CARRY()
-
-        # check if zero flag is set with value 0
-        self.cpu.reg.SET_C(0x00)
-        opcodes.RLC(self.mmu, self.cpu)
-        assert self.cpu.reg.GET_ZERO()
-        self.cpu.reg.CLEAR_ZERO()
+        assert not self.cpu.reg.GET_ZERO()
+        
+        # carry is cleared, value is set to 0x80, expecting ZERO bit SET
+        self.cpu.reg.CLEAR_CARRY()
         self.cpu.reg.SET_C(0x80)
         opcodes.RLC(self.mmu, self.cpu)
-        
+        self.cpu.debugger.end()
+        assert self.cpu.reg.GET_ZERO()
         assert self.cpu.reg.GET_CARRY()
-        
+        # carry bit is cleared, zero bit is cleared, putting in value 0x40
+        # rotation should go from 0100 0000 to 1000 0000
 
+        self.cpu.reg.CLEAR_CARRY()
+        self.cpu.reg.CLEAR_ZERO()
+        self.cpu.reg.SET_C(0x40)
+        opcodes.RLC(self.mmu, self.cpu)
+        self.cpu.debugger.end()
+        assert not self.cpu.reg.GET_CARRY()
+        assert not self.cpu.reg.GET_ZERO()
+
+        self.cpu.reg.SET_CARRY()
+        self.cpu.reg.CLEAR_ZERO()
+        self.cpu.reg.SET_C(0x00)
+        opcodes.RLC(self.mmu, self.cpu)
+        self.cpu.debugger.end()
+        assert not self.cpu.reg.GET_ZERO()
+        assert not self.cpu.reg.GET_CARRY()
+
+        
 
     def test_LDAn(self):
         data = [0x1A]
