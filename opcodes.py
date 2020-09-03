@@ -1,6 +1,27 @@
 import bitwise_functions
 
 
+def DECn(mmu, cpu):
+    cpu.debugger.print_opcode('DECn')
+    
+
+    parameter = cpu.read_upper_opcode_parameter()
+    val = 0x00
+    # do decrement on register B
+    if parameter = 0x0:
+        B = cpu.reg.GET_B()
+        cpu.debugger.print_register('B',B, 8)
+        B -= 1
+        val = B
+    
+
+    # set the necessary flags 
+
+    half_carry = val ^ 0x01
+    # set substract flag
+    cpu.reg.SET_SUBSTRACT()
+
+
 def INCn(mmu, cpu):
     cpu.debugger.print_opcode('INCn')
     cpu.reg.CLEAR_SUBSTRACT()
@@ -88,6 +109,15 @@ def LDnA(mmu, cpu):
        result = True
      return result
 
+def POPBC(mmu, cpu):
+    cpu.debugger.print_opcode('POPBC')
+    val_l = cpu.stack.pop()
+    val_r = cpu.stack.pop()
+
+    cpu.reg.SET_BC(bitwise_functions.merge_8bit_values(val_l, val_r))
+    BC = cpu.reg.GET_BC()
+    cpu.debugger.print_register('BC', BC, 16)
+    return True
 
 def PUSHBC(mmu, cpu):
     cpu.debugger.print_opcode('PUSHBC')

@@ -54,7 +54,6 @@ class OpcodeTests(unittest.TestCase):
         data = [0x21, 0xff,0x9f]
         self.create_testcontext(data)
         opcodes.LDnn16d(self.mmu, self.cpu)
-        self.cpu.debugger.print_state(self.cpu.reg.GET_HL())
         assert self.cpu.reg.GET_HL() == 0x9fff
 
     def test_CALLnn(self):
@@ -77,8 +76,6 @@ class OpcodeTests(unittest.TestCase):
         self.cpu.reg.SET_AF(0x10ff)
         self.cpu.reg.SET_HL(0x9fff)
         opcodes.LDDHL8A(self.mmu,self.cpu)
-        self.cpu.debugger.print_state(self.cpu.reg.GET_HL())
-        #assert True
         assert self.mmu.read(0x9fff) == 0x10
         assert self.cpu.reg.GET_HL() == 0x9ffe
 
@@ -97,6 +94,17 @@ class OpcodeTests(unittest.TestCase):
         self.cpu.reg.SET_A(0xBA)
         assert True
 
+    def test_POPBC(self):
+        data = [0x10,0x20]
+        self.create_testcontext(data)
+        self.cpu.reg.SET_BC(0x00)
+        self.cpu.reg.SET_SP(0xFFFF)
+        self.cpu.stack.push(0xAA)
+        self.cpu.stack.push(0xBB)
+        opcodes.POPBC(self.mmu, self.cpu)
+
+        assert self.cpu.reg.GET_BC() == 0xBBAA
+        assert self.cpu.reg.GET_SP() == 0xFFFF
 
     def test_BIT7H(self):
         data = [0xCB,0x7c]
@@ -137,7 +145,6 @@ class OpcodeTests(unittest.TestCase):
         self.cpu.reg.SET_AF(0xabcd)
         opcodes.LDCA(self.mmu, self.cpu)
         expected_address = 0xFF00 + 0x11
-        print(expected_address) 
         # TODO: this instruction writes to an I/O register, i have not implemented anything yet regarding to I/O
         assert self.mmu.read(expected_address) == 0xab
 
@@ -166,9 +173,9 @@ class OpcodeTests(unittest.TestCase):
         self.create_testcontext(data)
         self.cpu.reg.SET_A(0x80)
         self.cpu.reg.SET_CARRY()
-        print('blurpking')
-        self.print_hex(self.cpu.reg.GET_A())
-        #assert self.cpu.reg.GET_A() == 0x80
+        assert self.cpu.reg.GET_A() == 0x80
+        assert self.cpu.reg.GET_CARRY()
+        assert self.cpu.reg.GET_AF() == 0x8010
 
     def test_RLA(self):
         data =[0x17]
@@ -213,8 +220,6 @@ class OpcodeTests(unittest.TestCase):
         self.cpu.debugger.end()
         assert not self.cpu.reg.GET_ZERO()
         assert not self.cpu.reg.GET_CARRY()
-        print(self.cpu.reg.GET_A())
-        print(self.cpu.reg.GET_A())
         assert self.cpu.reg.GET_A() == 0x01
 
     def test_RLC(self):
@@ -231,7 +236,6 @@ class OpcodeTests(unittest.TestCase):
         assert self.cpu.reg.GET_CARRY()
         assert not self.cpu.reg.GET_ZERO()
         assert self.cpu.reg.GET_C() == 0x01
-        #self.print_hex(self.cpu.reg.GET_C())
         
         # carry is cleared, value is set to 0x80, expecting ZERO bit SET
         self.cpu.reg.CLEAR_CARRY()
@@ -271,7 +275,6 @@ class OpcodeTests(unittest.TestCase):
         self.cpu.reg.SET_DE(0x104)
         opcodes.LDAn(self.mmu, self.cpu)
         A = self.cpu.reg.GET_A()
-        self.print_hex(A)
         assert A == 0xce
     def test_flags_register(self):
         register = Registers()

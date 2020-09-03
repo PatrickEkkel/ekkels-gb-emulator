@@ -13,7 +13,14 @@ class Stack:
         sp -= 1
         self.mmu.write(sp, value)
         self.cpu.reg.SET_SP(sp)
-        #self.mmu.write()
+    
+    def pop(self):
+        sp = self.cpu.reg.GET_SP()
+        return_val = self.mmu.read(sp)
+        sp += 1
+        self.cpu.reg.SET_SP(sp)
+        return return_val
+
 class MMU: 
     VRAM_START             = 0x8000
     VRAM_END               = 0x9FFF
@@ -265,8 +272,10 @@ class Registers:
     def GET_SP(self):
         return self.sp
 
-    def SET_AF(self, af):
-        self.af = af
+    def SET_AF(self, value):
+        self.A = MMU.get_high_byte(value)
+        self.F = MMU.get_low_byte(value)
+        self.AF = value
 
     def SET_B(self, value):
         C = MMU.get_low_byte(self.bc)
@@ -295,24 +304,26 @@ class Registers:
     
 
     def GET_A(self):
-        return MMU.get_high_byte(self.af)
+        return self.A
     
     def GET_F(self):
-        return MMU.get_low_byte(self.af)
+        return self.F
 
     def SET_A(self, value):
-        F = MMU.get_low_byte(self.af)
-        A = value
-        A = A << 8
-        self.af = F | A
+        self.A = value
+        #F = MMU.get_low_byte(self.af)
+        #A = value
+        #A = A << 8
+        #self.af = F | A
 
     def SET_F(self, value):
-        F = value
-        A = MMU.get_high_byte(self.af)
-        self.af = A | F
+        self.F = value
+        #F = value
+        #A = MMU.get_high_byte(self.af)
+        #self.af = A | F
 
     def GET_AF(self):
-        return self.af
+        return (self.GET_A() << 8) | self.GET_F()
 
     def GET_B(self):
         return MMU.get_high_byte(self.bc)
@@ -360,15 +371,17 @@ class CPU:
         self.opcodes[0x06] = opcodes.LDn8d
         self.opcodes[0x3E] = opcodes.LDn8d
         self.opcodes[0xE2] = opcodes.LDCA
+        self.opcodes[0x17] = opcodes.RLA
         self.opcodes[0xC] = opcodes.INCn
         self.opcodes[0x77] = opcodes.LDHL8A
         self.opcodes[0xE0] = opcodes.LDHnA
         self.opcodes[0x1A] = opcodes.LDAn
         self.opcodes[0xCD] = opcodes.CALLnn
-
+        self.opcodes[0xC1] = opcodes.POPBC
         self.cb_opcodes[0xcb] = opcodes.CB
         self.cb_opcodes[0x7c] = opcodes.BIT7H
         self.cb_opcodes[0x11] = opcodes.RLC
+
 
     
     def read_opcode(self):
