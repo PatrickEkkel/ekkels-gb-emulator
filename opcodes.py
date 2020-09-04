@@ -4,23 +4,36 @@ import bitwise_functions
 def DECn(mmu, cpu):
     cpu.debugger.print_opcode('DECn')
     
-
+    result = False
     parameter = cpu.read_upper_opcode_parameter()
     val = 0x00
     # do decrement on register B
-    if parameter = 0x0:
+    if parameter == 0x00:
         B = cpu.reg.GET_B()
         cpu.debugger.print_register('B',B, 8)
-        B -= 1
+        B -= 0x01
         val = B
+        cpu.reg.SET_B(B)
+        result = True
     
 
     # set the necessary flags 
+    half_carry = ((val & 0xF) - (0x01 & 0xF) & 0x10) == 0x10
 
-    half_carry = val ^ 0x01
+    # set the zero flag
+    if val == 0x00:
+        cpu.reg.SET_ZERO()
+    else:
+        cpu.reg.CLEAR_ZERO()
+
+    if half_carry:
+        cpu.reg.SET_HALF_CARRY()
+    else:
+        cpu.reg.CLEAR_HALF_CARRY()
     # set substract flag
     cpu.reg.SET_SUBSTRACT()
 
+    return result
 
 def INCn(mmu, cpu):
     cpu.debugger.print_opcode('INCn')
@@ -258,7 +271,7 @@ def JRNZN(mmu, cpu):
     cpu.debugger.print_opcode('JRNZN')
     pc = cpu.pc + 1
     val = mmu.read_s8(pc)
-    #cpu.pc += 1
+    cpu.debugger.print_iv(val)
     jump_address = pc
     if not cpu.reg.GET_ZERO():
         jump_address += val

@@ -81,14 +81,10 @@ class MMU:
     def write(self,address, value):
         # writing to VRAM
         if self._is_vram(address):
-            print('vram is writing')
             self.vram[address] = value
         elif self._is_io(address):
-            print('io is writing')
-            # do nothing with I/O until it is needed
             self.io[address] = value
         elif self._is_hram(address):
-            print('hram is writing')
             self.hram[address] = value
         else:
             print('nothing to write')
@@ -169,6 +165,8 @@ class Debugger:
         self.show_opcodes = True
         self.show_cpu_flags = False
         self.show_program_counter = True
+        self.step_instruction = False
+        self.stop_at = 0x98
     
     def format_hex(self, opcode):
         return ("0x{:x}".format(opcode))
@@ -200,6 +198,11 @@ class Debugger:
         hex_pc = self.format_hex(self.cpu.pc)
         if self.cpu.debug_opcode and self.show_program_counter:
             print(f'PC: {hex_pc} CPU: {hex}', end=' ')
+
+    def debug(self, pc):
+        if self.step_instruction or self.stop_at == pc:
+            input('press enter to continue')
+        return 
 
 
 class Registers:
@@ -278,17 +281,11 @@ class Registers:
         self.AF = value
 
     def SET_B(self, value):
-        C = MMU.get_low_byte(self.bc)
-        B = value
-        B = B << 8
-        self.bc = C | B
+        self.B = value
 
 
     def SET_C(self, value):
-        C = value
-        B = MMU.get_high_byte(self.bc)
-        self.bc = B | C
-
+        self.C = value
 
     def SET_DE(self, value):
         self.de = value
@@ -311,31 +308,26 @@ class Registers:
 
     def SET_A(self, value):
         self.A = value
-        #F = MMU.get_low_byte(self.af)
-        #A = value
-        #A = A << 8
-        #self.af = F | A
-
+       
     def SET_F(self, value):
         self.F = value
-        #F = value
-        #A = MMU.get_high_byte(self.af)
-        #self.af = A | F
 
     def GET_AF(self):
         return (self.GET_A() << 8) | self.GET_F()
 
     def GET_B(self):
-        return MMU.get_high_byte(self.bc)
-    
+        return self.B
+        
     def GET_C(self):
-        return MMU.get_low_byte(self.bc)
+        return self.C
 
     def SET_BC(self, value):
-        self.bc = value
+        self.B = MMU.get_high_byte(value)
+        self.C = MMU.get_low_byte(value)
+        self.BC = value
 
     def GET_BC(self):
-        return self.bc
+        return (self.GET_B() << 8) | self.GET_C()
 
     def GET_DE(self):
         return self.de
@@ -378,6 +370,7 @@ class CPU:
         self.opcodes[0x1A] = opcodes.LDAn
         self.opcodes[0xCD] = opcodes.CALLnn
         self.opcodes[0xC1] = opcodes.POPBC
+        self.opcodes[0x05] = opcodes.DECn
         self.cb_opcodes[0xcb] = opcodes.CB
         self.cb_opcodes[0x7c] = opcodes.BIT7H
         self.cb_opcodes[0x11] = opcodes.RLC
@@ -407,6 +400,7 @@ class CPU:
         if instruction:
             self.debugger.print_state(opcode)
             success = instruction(self._mmu,self)
+            self.debugger.debug(self.pc)
             self.debugger.print_cpu_flags()
             self.debugger.end()
             if not success:
