@@ -66,8 +66,8 @@ class OpcodeTests(unittest.TestCase):
         self.cpu.pc += 1
         
         assert self.cpu.pc == 0x100
-        assert self.cpu.reg.GET_SP() == 0xFFFE
-        assert self.mmu.read(0xFFFE) == 0x02
+        assert self.cpu.reg.GET_SP() == 0xFFFD
+        assert self.mmu.read(0xFFFD) == 0x02
 
 
     def test_LDDHL8A(self):

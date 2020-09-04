@@ -29,6 +29,7 @@ def shift_left(num, bits):
     num &= (2**bits-1)
     return num
 
+
 # take two 8 bit values and concatinate them into one 16 bit value
 def merge_8bit_values(a,b):
     return (a << 8) | b

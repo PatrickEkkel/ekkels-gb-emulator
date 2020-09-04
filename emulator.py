@@ -8,6 +8,13 @@ class Stack:
         self.mmu = mmu
         self.cpu = cpu
     
+
+    def push_u16bit(self, value):
+        lowbyte = MMU.get_high_byte(value)
+        highbyte = MMU.get_low_byte(value)
+        self.push(lowbyte)
+        self.push(highbyte)
+
     def push(self, value):
         sp = self.cpu.reg.GET_SP()
         sp -= 1
@@ -351,7 +358,7 @@ class CPU:
         self.debugger = Debugger(self)
         self.opcodes = [None] * 255
         self.cb_opcodes = [None] * 255
-        self.opcodes[0x00] = opcodes.NOP
+        #self.opcodes[0x00] = opcodes.NOP
         self.opcodes[0x31] = opcodes.LDSP16d
         self.opcodes[0xAF] = opcodes.XORA
         self.opcodes[0xC5] = opcodes.PUSHBC
@@ -361,6 +368,7 @@ class CPU:
         self.opcodes[0x22] = opcodes.LDDHL8A
         self.opcodes[0x20] = opcodes.JRNZN
         self.opcodes[0x4f] = opcodes.LDnA
+        self.opcodes[0x7b] = opcodes.LDnn
         self.opcodes[0x0E] = opcodes.LDn8d
         self.opcodes[0x06] = opcodes.LDn8d
         self.opcodes[0x3E] = opcodes.LDn8d
@@ -376,6 +384,7 @@ class CPU:
         self.opcodes[0xC1] = opcodes.POPBC
         self.opcodes[0x05] = opcodes.DECn
         self.opcodes[0xc9] = opcodes.RET
+        self.opcodes[0xFE] = opcodes.CPn
         self.cb_opcodes[0xcb] = opcodes.CB
         self.cb_opcodes[0x7c] = opcodes.BIT7H
         self.cb_opcodes[0x11] = opcodes.RLC

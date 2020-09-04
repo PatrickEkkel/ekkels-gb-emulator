@@ -148,6 +148,46 @@ def LDCA(mmu, cpu):
     mmu.write(offset_address, A)
     return True
 
+def LDnn(mmu, cpu):
+    cpu.debugger.print_opcode('LDnn')
+    parameter = cpu.read_upper_opcode_parameter()
+    cpu.debugger.print_iv(parameter)
+    result = False
+    if parameter == 0x7:
+        E = cpu.reg.GET_E()
+        A = cpu.reg.GET_A()
+        cpu.debugger.print_register('E',E, 8)
+        cpu.debugger.print_register('A',A, 8)
+        A = E
+        cpu.reg.SET_A(A)
+        result = True
+
+    return result
+     
+def CPn(mmu, cpu):
+    cpu.debugger.print_opcode('CPn')
+     
+    cpu.pc += 1
+    n = mmu.read(cpu.pc)
+    cpu.debugger.print_iv(n)
+    A = cpu.reg.GET_A()
+    
+    cpu.reg.SET_SUBSTRACT()
+
+    if A == n:
+        cpu.reg.SET_ZERO()
+    elif A < n:
+        cpu.reg.SET_CARRY()
+
+    half_carry = ((A & 0xF) < (n & 0xF) & 0x10) == 0x10
+
+    if half_carry:
+        cpu.reg.SET_HALF_CARRY()
+
+    
+    return True
+    
+
 def LDnA(mmu, cpu):
      cpu.debugger.print_opcode('LDnA')
      parameter = cpu.read_upper_opcode_parameter()
@@ -332,15 +372,20 @@ def JRNZN(mmu, cpu):
 # pushes the PC to the stack and jump to specified 16 bit operand
 def CALLnn(mmu, cpu):
     cpu.debugger.print_opcode('CALLnn')
+    from emulator import MMU
+    
     # address of next instruction
     pc = cpu.pc + 1
     val = mmu.read_u16(pc)
+    pc += 1
+
     cpu.debugger.print_iv(val)
     # Decrease the jump value by one, because the step will do a +1 
     cpu.pc = val - 0x01
     SP = cpu.reg.GET_SP()
     cpu.debugger.print_register('SP',SP,16)
-    cpu.stack.push(pc)
+    cpu.stack.push_u16bit(pc)
+    #cpu.stack.push(pc)
 
     # push address of next instruction to the stack
     return True
