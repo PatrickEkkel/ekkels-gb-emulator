@@ -1,6 +1,11 @@
 import bitwise_functions
 
 
+def NOP(mmu, cpu):
+    cpu.debugger.print_opcode('NOP')
+    
+    return True
+
 def DECn(mmu, cpu):
     cpu.debugger.print_opcode('DECn')
     
@@ -34,6 +39,40 @@ def DECn(mmu, cpu):
     cpu.reg.SET_SUBSTRACT()
 
     return result
+
+def RET(mmu, cpu):
+    cpu.debugger.print_opcode('RET')
+    val1 = cpu.stack.pop()
+    val2 = cpu.stack.pop()
+    
+    jump_address =  bitwise_functions.merge_8bit_values(val2, val1)
+    cpu.debugger.print_iv(jump_address)
+    cpu.pc = jump_address
+    return True
+
+def INCnn(mmu, cpu):
+    cpu.debugger.print_opcode('INCnn')
+    parameter = cpu.read_upper_opcode_parameter()
+    result = False
+
+    if parameter == 0x01:
+        result = True
+        DE = cpu.reg.GET_DE()
+        cpu.debugger.print_register('DE',DE, 16)
+        DE += 1
+        cpu.reg.SET_DE(DE)
+    
+    elif parameter == 0x02:
+        result = True
+        HL = cpu.reg.GET_HL()
+        cpu.debugger.print_register('HL',HL, 16)
+        HL += 1
+        cpu.reg.SET_HL(HL)
+    
+    return result
+    
+
+
 
 def INCn(mmu, cpu):
     cpu.debugger.print_opcode('INCn')
@@ -209,16 +248,24 @@ def LDHL8A(mmu, cpu):
 
 def LDDHL8A(mmu, cpu):
     cpu.debugger.print_opcode('LDDHL8A')
+    parameter = cpu.read_upper_opcode_parameter()
     from emulator import MMU
     # get A
+    A = cpu.reg.GET_A()
     AF = cpu.reg.GET_AF()
     HL = cpu.reg.GET_HL()
     cpu.debugger.print_register('AF',AF,16)
     cpu.debugger.print_register('HL',HL,16)
-    A = MMU.get_high_byte(AF)
+    #A = MMU.get_high_byte(AF)
     cpu.debugger.print_register('A',A,8)
     mmu.write(HL,A)
-    HL -= 1
+    result = False 
+    if parameter == 0x03:
+        HL -= 1
+        result = True
+    elif parameter == 0x02:
+        HL += 1
+        result = True
     cpu.reg.SET_HL(HL)
     cpu.debugger.print_register('HL',cpu.reg.GET_HL(),8)
     return True

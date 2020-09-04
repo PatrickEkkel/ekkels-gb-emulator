@@ -68,8 +68,10 @@ class OpcodeTests(unittest.TestCase):
         assert self.cpu.pc == 0x100
         assert self.cpu.reg.GET_SP() == 0xFFFE
         assert self.mmu.read(0xFFFE) == 0x02
+
+
     def test_LDDHL8A(self):
-        data = []
+        data = [0x32]
         self.create_testcontext(data)
         bootrom = BootRom()
         self.mmu.set_bios(bootrom)

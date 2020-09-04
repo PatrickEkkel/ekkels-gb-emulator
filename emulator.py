@@ -166,7 +166,7 @@ class Debugger:
         self.show_cpu_flags = False
         self.show_program_counter = True
         self.step_instruction = False
-        self.stop_at = 0x98
+        self.stop_at = None
     
     def format_hex(self, opcode):
         return ("0x{:x}".format(opcode))
@@ -351,12 +351,14 @@ class CPU:
         self.debugger = Debugger(self)
         self.opcodes = [None] * 255
         self.cb_opcodes = [None] * 255
+        self.opcodes[0x00] = opcodes.NOP
         self.opcodes[0x31] = opcodes.LDSP16d
         self.opcodes[0xAF] = opcodes.XORA
         self.opcodes[0xC5] = opcodes.PUSHBC
         self.opcodes[0x21] = opcodes.LDnn16d
         self.opcodes[0x11] = opcodes.LDnn16d
         self.opcodes[0x32] = opcodes.LDDHL8A
+        self.opcodes[0x22] = opcodes.LDDHL8A
         self.opcodes[0x20] = opcodes.JRNZN
         self.opcodes[0x4f] = opcodes.LDnA
         self.opcodes[0x0E] = opcodes.LDn8d
@@ -365,15 +367,19 @@ class CPU:
         self.opcodes[0xE2] = opcodes.LDCA
         self.opcodes[0x17] = opcodes.RLA
         self.opcodes[0xC] = opcodes.INCn
+        self.opcodes[0x23] = opcodes.INCnn
+        self.opcodes[0x13] = opcodes.INCnn
         self.opcodes[0x77] = opcodes.LDHL8A
         self.opcodes[0xE0] = opcodes.LDHnA
         self.opcodes[0x1A] = opcodes.LDAn
         self.opcodes[0xCD] = opcodes.CALLnn
         self.opcodes[0xC1] = opcodes.POPBC
         self.opcodes[0x05] = opcodes.DECn
+        self.opcodes[0xc9] = opcodes.RET
         self.cb_opcodes[0xcb] = opcodes.CB
         self.cb_opcodes[0x7c] = opcodes.BIT7H
         self.cb_opcodes[0x11] = opcodes.RLC
+
 
 
     
