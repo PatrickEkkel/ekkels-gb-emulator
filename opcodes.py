@@ -393,10 +393,12 @@ def CB(mmu, cpu):
     return result
 
 def JRn(mmu, cpu):
-
+    cpu.debugger.print_opcode('JRn')
     pc = cpu.pc
-
-    
+    cpu.pc += 1
+    jump_address = mmu.read_s8(cpu.pc)
+    cpu.debugger.print_iv(jump_address)
+    cpu.pc += jump_address
     return True
 
 

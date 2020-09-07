@@ -378,6 +378,7 @@ class CPU:
         self.opcodes[0x22] = opcodes.LDDHL8A
         self.opcodes[0x20] = opcodes.JRNZn
         self.opcodes[0x28] = opcodes.JRZn
+        self.opcodes[0x18] = opcodes.JRn
         self.opcodes[0x4f] = opcodes.LDnA
         self.opcodes[0x7b] = opcodes.LDnn
         self.opcodes[0x0E] = opcodes.LDn8d
