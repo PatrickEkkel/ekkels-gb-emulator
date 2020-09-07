@@ -10,16 +10,38 @@ def DECn(mmu, cpu):
     cpu.debugger.print_opcode('DECn')
     
     result = False
-    parameter = cpu.read_upper_opcode_parameter()
+    upper_param = cpu.read_upper_opcode_parameter()
+    lower_param = cpu.read_lower_opcode_parameter()
+
     val = 0x00
-    # do decrement on register B
-    if parameter == 0x00:
-        B = cpu.reg.GET_B()
-        cpu.debugger.print_register('B',B, 8)
-        B -= 0x01
-        val = B
-        cpu.reg.SET_B(B)
-        result = True
+    
+    if lower_param == 0x50:  
+        # do decrement on register B
+        if upper_param == 0x00:
+            B = cpu.reg.GET_B()
+            cpu.debugger.print_register('B',B, 8)
+            B -= 0x01
+            val = B
+            cpu.reg.SET_B(B)
+            result = True
+    if lower_param == 0xD0:
+        # do decrement on register C
+        if upper_param == 0x00:
+            C = cpu.reg.GET_C()
+            cpu.debugger.print_register('C',C, 8)
+            C -= 0x01
+            val = C
+            cpu.reg.SET_C(C)
+            result = True
+    
+        # do decrement on register A
+        elif upper_param == 0x03:
+            A = cpu.reg.GET_A()
+            cpu.debugger.print_register('A',A, 8)
+            A -= 0x01
+            val = A
+            cpu.reg.SET_A(A)
+            result = True
     
 
     # set the necessary flags 
@@ -186,8 +208,22 @@ def CPn(mmu, cpu):
 
     
     return True
-    
 
+    
+# TODO: test needed
+# length: 3 bytes
+# Put value A into nn 
+# 0xEA 16 bit immediate value
+def LDnn16a(mmu, cpu):
+    cpu.debugger.print_opcode('LDnn16a')
+    A = cpu.reg.GET_A()
+    cpu.pc += 1
+    address = mmu.read_u16(cpu.pc)
+    cpu.debugger.print_register('A',A, 8)
+    mmu.write(address, A)
+    cpu.pc += 1
+    return True
+       
 def LDnA(mmu, cpu):
      cpu.debugger.print_opcode('LDnA')
      parameter = cpu.read_upper_opcode_parameter()
@@ -245,12 +281,17 @@ def LDn8d(mmu, cpu):
             cpu.debugger.print_register('B', B, 8)
             result = True
     else:
-        if upper_parameter == 0x0:
+        if upper_parameter == 0x00:
             cpu.reg.SET_C(val)
             C = cpu.reg.GET_C()
             cpu.debugger.print_register('C',C, 8)
             result = True
-        elif upper_parameter == 0x3:
+        elif upper_parameter == 0x02:
+            cpu.reg.SET_L(val)
+            L = cpu.reg.GET_L()
+            cpu.debugger.print_register('L',L, 8)
+            result = True
+        elif upper_parameter == 0x03:
             cpu.reg.SET_A(val)
             A = cpu.reg.GET_A()
             cpu.debugger.print_register('A',A, 8)
@@ -351,11 +392,31 @@ def CB(mmu, cpu):
     
     return result
 
+def JRn(mmu, cpu):
+
+    pc = cpu.pc
+
+    
+    return True
 
 
+def JRZn(mmu, cpu):
+    cpu.debugger.print_opcode('JRZn')
+    cpu.pc += 1
+    val = mmu.read_s8(cpu.pc)
+    cpu.debugger.print_iv(val)
+    #jump_address = cpu.pc + val
+    if cpu.reg.GET_ZERO():
+        jump_address = cpu.pc + val
+        cpu.pc = jump_address
+    else:
+        cpu.pc += 1
+    return True
+    
 
-def JRNZN(mmu, cpu):
-    cpu.debugger.print_opcode('JRNZN')
+    
+def JRNZn(mmu, cpu):
+    cpu.debugger.print_opcode('JRNZn')
     pc = cpu.pc + 1
     val = mmu.read_s8(pc)
     cpu.debugger.print_iv(val)

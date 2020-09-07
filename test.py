@@ -67,7 +67,34 @@ class OpcodeTests(unittest.TestCase):
         
         assert self.cpu.pc == 0x100
         assert self.cpu.reg.GET_SP() == 0xFFFD
-        assert self.mmu.read(0xFFFD) == 0x02
+        assert self.mmu.read(0xFFFD) == 0x03
+
+    def test_JRZn(self):
+        data = [0x28,0x10]
+        self.create_rom_testcontext(data)
+        self.cpu.reg.SET_ZERO()
+        opcodes.JRZn(self.mmu, self.cpu)
+        assert self.cpu.pc == 0x11
+        data = [0x28,0x10]
+        self.create_rom_testcontext(data)
+        self.cpu.reg.CLEAR_ZERO()
+        opcodes.JRZn(self.mmu, self.cpu)
+        assert self.cpu.pc == 0x02
+
+    def test_JRNZn(self):
+        data = [0x20,0x10]
+        self.create_rom_testcontext(data)
+        self.cpu.reg.CLEAR_ZERO()
+        opcodes.JRNZn(self.mmu, self.cpu)
+        assert self.cpu.pc == 0x11
+        
+        data = [0x20,0x10]
+        self.create_rom_testcontext(data)
+        self.cpu.reg.SET_ZERO()
+        opcodes.JRNZn(self.mmu, self.cpu)
+        self.print_hex(self.cpu.pc)
+        assert self.cpu.pc == 0x01
+
 
 
     def test_LDDHL8A(self):

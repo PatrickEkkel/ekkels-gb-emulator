@@ -297,14 +297,11 @@ class Registers:
     def SET_DE(self, value):
         self.de = value
 
-    #def SET_D(self, value):
-    #    self.d = value
-
-    #def SET_E(self, value):
-    #    self.e = value
-    
     def SET_HL(self, value):
-        self.hl = value
+        #self.hl = value
+        self.H = MMU.get_high_byte(value)
+        self.L = MMU.get_low_byte(value)
+        self.HL = value
     
 
     def GET_A(self):
@@ -318,6 +315,12 @@ class Registers:
        
     def SET_F(self, value):
         self.F = value
+
+    def SET_L(self, value):
+        self.L = value
+
+    def SET_H(self, value):
+        self.H = value
 
     def GET_AF(self):
         return (self.GET_A() << 8) | self.GET_F()
@@ -345,8 +348,15 @@ class Registers:
     def GET_E(self):
         return MMU.get_low_byte(self.de)
     
+    def GET_H(self):
+        return self.H
+    
+    def GET_L(self):
+        return self.L
+
     def GET_HL(self):
-        return self.hl
+        return (self.GET_H() << 8) | self.GET_L()
+        #return self.hl
     
 class CPU:
     def __init__(self, mmu):
@@ -366,10 +376,12 @@ class CPU:
         self.opcodes[0x11] = opcodes.LDnn16d
         self.opcodes[0x32] = opcodes.LDDHL8A
         self.opcodes[0x22] = opcodes.LDDHL8A
-        self.opcodes[0x20] = opcodes.JRNZN
+        self.opcodes[0x20] = opcodes.JRNZn
+        self.opcodes[0x28] = opcodes.JRZn
         self.opcodes[0x4f] = opcodes.LDnA
         self.opcodes[0x7b] = opcodes.LDnn
         self.opcodes[0x0E] = opcodes.LDn8d
+        self.opcodes[0x2E] = opcodes.LDn8d
         self.opcodes[0x06] = opcodes.LDn8d
         self.opcodes[0x3E] = opcodes.LDn8d
         self.opcodes[0xE2] = opcodes.LDCA
@@ -383,8 +395,11 @@ class CPU:
         self.opcodes[0xCD] = opcodes.CALLnn
         self.opcodes[0xC1] = opcodes.POPBC
         self.opcodes[0x05] = opcodes.DECn
+        self.opcodes[0x3D] = opcodes.DECn
+        self.opcodes[0x0D] = opcodes.DECn
         self.opcodes[0xc9] = opcodes.RET
         self.opcodes[0xFE] = opcodes.CPn
+        self.opcodes[0xEA] = opcodes.LDnn16a
         self.cb_opcodes[0xcb] = opcodes.CB
         self.cb_opcodes[0x7c] = opcodes.BIT7H
         self.cb_opcodes[0x11] = opcodes.RLC
@@ -396,10 +411,10 @@ class CPU:
         return self._mmu.read(self.pc)
     
     def read_lower_opcode_parameter(self):
-        return self._mmu.read(self.pc) << 4
+        return self._mmu.read(self.pc) << 4 & 0xFF
 
     def read_upper_opcode_parameter(self):
-        return self._mmu.read(self.pc) >> 4
+        return self._mmu.read(self.pc) >> 4 & 0xFF
 
     def step(self):
         success = False
