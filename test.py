@@ -165,6 +165,27 @@ class OpcodeTests(unittest.TestCase):
         assert self.cpu.reg.GET_A() ==  0x15
         assert self.cpu.reg.GET_F() == 0xff
     
+    def test_LDnCA(self):
+        data = [0x4F]
+        self.create_testcontext(data)
+        self.cpu.reg.SET_A(0x80)
+        opcodes.LDnA(self.mmu, self.cpu)
+        assert self.cpu.reg.GET_C() == 0x80
+
+    def test_LDnHA(self):
+        data = [0x67]
+        self.create_testcontext(data)
+        self.cpu.reg.SET_A(0x80)
+        opcodes.LDnA(self.mmu, self.cpu)
+        assert self.cpu.reg.GET_H() == 0x80
+
+    def test_LDnDA(self):
+        data = [0x57]
+        self.create_testcontext(data)
+        self.cpu.reg.SET_A(0x80)
+        opcodes.LDnA(self.mmu, self.cpu)
+        assert self.cpu.reg.GET_D() == 0x80
+
 
     def test_LDCA(self):
         self.create_testcontext(None,disable_bootrom=False)

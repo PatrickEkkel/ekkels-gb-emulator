@@ -226,15 +226,33 @@ def LDnn16a(mmu, cpu):
        
 def LDnA(mmu, cpu):
      cpu.debugger.print_opcode('LDnA')
-     parameter = cpu.read_upper_opcode_parameter()
+     upper_param = cpu.read_upper_opcode_parameter()
+     lower_param = cpu.read_lower_opcode_parameter()
      A = cpu.reg.GET_A()
      result = False
-     if parameter == 0x04:
-       C = cpu.reg.GET_C()
-       C = A
-       cpu.debugger.print_register('C',C, 8)
-       cpu.reg.SET_C(C)
-       result = True
+     
+     if lower_param == 0x70:
+         if upper_param == 0x06:
+             H = cpu.reg.GET_H()
+             H = A
+             cpu.debugger.print_register('H', H, 8)
+             cpu.reg.SET_H(H)
+             result = True
+         elif upper_param == 0x05:
+             D = cpu.reg.GET_D()
+             D = A
+             cpu.debugger.print_register('D', D, 8)
+             cpu.reg.SET_D(D)
+             result = True
+
+     elif lower_param == 0xF0:     
+        if upper_param == 0x04:
+             C = cpu.reg.GET_C()
+             C = A
+             cpu.debugger.print_register('C',C, 8)
+             cpu.reg.SET_C(C)
+             result = True
+      
      return result
 
 def POPBC(mmu, cpu):

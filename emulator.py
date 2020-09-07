@@ -293,12 +293,19 @@ class Registers:
 
     def SET_C(self, value):
         self.C = value
+    
+    def SET_D(self, value):
+        self.D = value
+    
+    def SET_E(self, value):
+        self.E = value
 
     def SET_DE(self, value):
-        self.de = value
+        self.D = MMU.get_high_byte(value)
+        self.E = MMU.get_low_byte(value)
+        self.DE = value
 
     def SET_HL(self, value):
-        #self.hl = value
         self.H = MMU.get_high_byte(value)
         self.L = MMU.get_low_byte(value)
         self.HL = value
@@ -340,13 +347,14 @@ class Registers:
         return (self.GET_B() << 8) | self.GET_C()
 
     def GET_DE(self):
-        return self.de
+        return (self.GET_D() << 8) | self.GET_E()
+
 
     def GET_D(self):
-        return MMU.get_high_byte(self.de)
+        return self.D
 
     def GET_E(self):
-        return MMU.get_low_byte(self.de)
+        return self.E
     
     def GET_H(self):
         return self.H
@@ -380,6 +388,8 @@ class CPU:
         self.opcodes[0x28] = opcodes.JRZn
         self.opcodes[0x18] = opcodes.JRn
         self.opcodes[0x4f] = opcodes.LDnA
+        self.opcodes[0x67] = opcodes.LDnA
+        self.opcodes[0x57] = opcodes.LDnA
         self.opcodes[0x7b] = opcodes.LDnn
         self.opcodes[0x0E] = opcodes.LDn8d
         self.opcodes[0x2E] = opcodes.LDn8d
