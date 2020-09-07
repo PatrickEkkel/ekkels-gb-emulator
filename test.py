@@ -270,6 +270,31 @@ class OpcodeTests(unittest.TestCase):
         assert self.cpu.reg.GET_C() == 0x01
         
         
+    def test_CP(self):
+        data1 = [0xFE,0xBB]
+        self.create_testcontext(data1)
+        self.cpu.reg.SET_A(0xBB)
+        opcodes.CPn(self.mmu, self.cpu)
+        assert self.cpu.reg.GET_SUBSTRACT()
+        assert self.cpu.reg.GET_ZERO()
+
+
+        # set carry test
+        data2 = [0xFE,0x02]
+        self.create_testcontext(data1)
+        self.cpu.reg.SET_A(0x01)
+        opcodes.CPn(self.mmu, self.cpu)
+        assert self.cpu.reg.GET_SUBSTRACT()
+        assert self.cpu.reg.GET_CARRY()
+        assert not self.cpu.reg.GET_ZERO()
+
+
+        data3 = [0xFE,0x04]
+        self.cpu.reg.SET_A(0x01)
+        self.create_testcontext(data3)
+        opcodes.CPn(self.mmu, self.cpu)
+        assert self.cpu.reg.GET_HALF_CARRY()
+
 
     def test_LDAn(self):
         data = [0x1A]

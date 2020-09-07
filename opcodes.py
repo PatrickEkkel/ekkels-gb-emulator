@@ -179,7 +179,7 @@ def CPn(mmu, cpu):
     elif A < n:
         cpu.reg.SET_CARRY()
 
-    half_carry = ((A & 0xF) < (n & 0xF) & 0x10) == 0x10
+    half_carry = (A & 0x0F) < (n & 0x0F)
 
     if half_carry:
         cpu.reg.SET_HALF_CARRY()
