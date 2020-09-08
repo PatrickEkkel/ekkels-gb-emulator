@@ -218,7 +218,7 @@ def LDnn(mmu, cpu):
         result = True
 
     return result
-     
+
 def CPn(mmu, cpu):
     cpu.debugger.print_opcode('CPn')
      
@@ -226,13 +226,13 @@ def CPn(mmu, cpu):
     n = mmu.read(cpu.pc)
     cpu.debugger.print_iv(n)
     A = cpu.reg.GET_A()
-    
+    cpu.debugger.print_register('A',A, 8)
     cpu.reg.SET_SUBSTRACT()
-
-    if A == n:
+    result = A - n
+    if result == 0x00:
         cpu.reg.SET_ZERO()
-    #else:
-    #    cpu.reg.CLEAR_ZERO()
+    else:
+        cpu.reg.CLEAR_ZERO()
 
     
     if A < n:
@@ -478,7 +478,14 @@ def JRZn(mmu, cpu):
         cpu.pc += 1
     return True
     
+def JPnn(mmu, cpu):
+    cpu.debugger.print_opcode('JRZn')
+    cpu.pc += 1
+    nn = mmu.read_u16(cpu.pc)
+    cpu.debugger.print_iv(nn)
+    cpu.pc = nn - 1
 
+    return True
     
 def JRNZn(mmu, cpu):
     cpu.debugger.print_opcode('JRNZn')

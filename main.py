@@ -1,11 +1,11 @@
 import config
 from gameboy import GameBoy
-from cartridges.supermario2 import SuperMario2
+from cartridges.tetris import Tetris
 
-game = SuperMario2()
+game = Tetris()
 game.print_cartridge_info()
 gb = GameBoy(game)
-gb.power_on()
+gb.power_on(skipbios=True)
 
 
 #header = game.dump_header()

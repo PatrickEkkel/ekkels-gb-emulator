@@ -172,9 +172,9 @@ class Debugger:
         self.show_opcodes = True
         self.show_cpu_flags = False
         self.show_program_counter = True
-        self.step_instruction = False
-        self.stop_at = None
-        self.stop_at_opcode = 0xFE
+        self.step_instruction = True
+        self.stop_at = None #0x32
+        self.stop_at_opcode = None
     
     def format_hex(self, opcode):
         return ("0x{:x}".format(opcode))
@@ -380,7 +380,7 @@ class CPU:
         self.debugger = Debugger(self)
         self.opcodes = [None] * 255
         self.cb_opcodes = [None] * 255
-        #self.opcodes[0x00] = opcodes.NOP
+        self.opcodes[0x00] = opcodes.NOP
         self.opcodes[0x31] = opcodes.LDSP16d
         self.opcodes[0xAF] = opcodes.XORA
         self.opcodes[0xC5] = opcodes.PUSHBC
@@ -390,6 +390,7 @@ class CPU:
         self.opcodes[0x22] = opcodes.LDDHL8A
         self.opcodes[0x20] = opcodes.JRNZn
         self.opcodes[0x28] = opcodes.JRZn
+        self.opcodes[0xc3] = opcodes.JPnn
         self.opcodes[0x18] = opcodes.JRn
         self.opcodes[0x4f] = opcodes.LDnA
         self.opcodes[0x67] = opcodes.LDnA
