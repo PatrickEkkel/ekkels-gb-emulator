@@ -352,6 +352,13 @@ class OpcodeTests(unittest.TestCase):
         opcodes.CPn(self.mmu, self.cpu)
         assert self.cpu.reg.GET_HALF_CARRY()
 
+    def test_wrap_around_register(self):
+        data = [0x05]
+        self.create_testcontext(data)
+        self.cpu.reg.SET_BC(0x0010)
+        opcodes.DECn(self.mmu, self.cpu)
+        self.print_hex(self.cpu.reg.GET_BC())
+        assert True
 
     def test_LDAn(self):
         data = [0x1A]

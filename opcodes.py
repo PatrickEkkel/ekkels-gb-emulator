@@ -5,7 +5,9 @@ def NOP(mmu, cpu):
     cpu.debugger.print_opcode('NOP')
     
     return True
-
+# 0x05,0x3D,0x0D length: 1 byte
+# decrements the value of register n by 1
+# flags zhn-
 def DECn(mmu, cpu):
     cpu.debugger.print_opcode('DECn')
     
@@ -19,8 +21,7 @@ def DECn(mmu, cpu):
         # do decrement on register B
         if upper_param == 0x00:
             B = cpu.reg.GET_B()
-            cpu.debugger.print_register('B',B, 8)
-            B -= 0x01
+            B -= 0x01        
             val = B
             cpu.reg.SET_B(B)
             result = True
@@ -28,7 +29,6 @@ def DECn(mmu, cpu):
         # do decrement on register C
         if upper_param == 0x00:
             C = cpu.reg.GET_C()
-            cpu.debugger.print_register('C',C, 8)
             C -= 0x01
             val = C
             cpu.reg.SET_C(C)
@@ -37,13 +37,11 @@ def DECn(mmu, cpu):
         # do decrement on register A
         elif upper_param == 0x03:
             A = cpu.reg.GET_A()
-            cpu.debugger.print_register('A',A, 8)
             A -= 0x01
             val = A
             cpu.reg.SET_A(A)
             result = True
     
-
     # set the necessary flags 
     half_carry = ((val & 0xF) - (0x01 & 0xF) & 0x10) == 0x10
 
@@ -80,14 +78,12 @@ def INCnn(mmu, cpu):
     if parameter == 0x01:
         result = True
         DE = cpu.reg.GET_DE()
-        cpu.debugger.print_register('DE',DE, 16)
         DE += 1
         cpu.reg.SET_DE(DE)
     
     elif parameter == 0x02:
         result = True
         HL = cpu.reg.GET_HL()
-        cpu.debugger.print_register('HL',HL, 16)
         HL += 1
         cpu.reg.SET_HL(HL)
     
@@ -109,17 +105,14 @@ def INCn(mmu, cpu):
             B = cpu.reg.GET_B()
             selected_register = B
             B = B + 1
-            cpu.debugger.print_register('B',B, 8)
             cpu.reg.SET_B(B)
             result = True
-    #elif lower_param == 0xC0
     if lower_param == 0xC0:
         if upper_param == 0x00:
             C = cpu.reg.GET_C()
             selected_register = C
             C = C + 1
             # get the third bit by shifting 2 positions to the right and do a and against 0000 0001
-            cpu.debugger.print_register('C',C, 8)
             cpu.reg.SET_C(C)
             result = True
     
@@ -143,7 +136,6 @@ def LDHAn(mmu, cpu):
    
     # read A register
     A = cpu.reg.GET_A()
-    cpu.debugger.print_register('A',A, 8)
     
     offset_address = 0xFF00 + n
     value = mmu.read(offset_address)
@@ -164,7 +156,6 @@ def LDHnA(mmu, cpu):
    
     # read A register
     A = cpu.reg.GET_A()
-    cpu.debugger.print_register('A',A, 8)
     
     offset_address = 0xFF00 + val
     
@@ -180,11 +171,9 @@ def LDAn(mmu, cpu):
     result = False
     if parameter == 0x1:
         DE = cpu.reg.GET_DE()
-        cpu.debugger.print_register('DE',DE, 16)
         val = mmu.read(DE)
         cpu.reg.SET_A(val)
         A = cpu.reg.GET_A()
-        cpu.debugger.print_register('A',A, 8)
         result = True
     
     return result
@@ -197,8 +186,6 @@ def LDCA(mmu, cpu):
     cpu.debugger.print_opcode('LDCA')
     C = cpu.reg.GET_C()
     A = cpu.reg.GET_A()
-    cpu.debugger.print_register('C',C, 8)
-    cpu.debugger.print_register('A',A, 8)
     offset_address = 0xFF00 + C
     mmu.write(offset_address, A)
     return True
@@ -211,8 +198,6 @@ def LDnn(mmu, cpu):
     if parameter == 0x7:
         E = cpu.reg.GET_E()
         A = cpu.reg.GET_A()
-        cpu.debugger.print_register('E',E, 8)
-        cpu.debugger.print_register('A',A, 8)
         A = E
         cpu.reg.SET_A(A)
         result = True
@@ -226,7 +211,6 @@ def CPn(mmu, cpu):
     n = mmu.read(cpu.pc)
     cpu.debugger.print_iv(n)
     A = cpu.reg.GET_A()
-    cpu.debugger.print_register('A',A, 8)
     cpu.reg.SET_SUBSTRACT()
     result = A - n
     if result == 0x00:
@@ -260,7 +244,6 @@ def LDnn16a(mmu, cpu):
     A = cpu.reg.GET_A()
     cpu.pc += 1
     address = mmu.read_u16(cpu.pc)
-    cpu.debugger.print_register('A',A, 8)
     mmu.write(address, A)
     cpu.pc += 1
     return True
@@ -276,13 +259,11 @@ def LDnA(mmu, cpu):
          if upper_param == 0x06:
              H = cpu.reg.GET_H()
              H = A
-             cpu.debugger.print_register('H', H, 8)
              cpu.reg.SET_H(H)
              result = True
          elif upper_param == 0x05:
              D = cpu.reg.GET_D()
              D = A
-             cpu.debugger.print_register('D', D, 8)
              cpu.reg.SET_D(D)
              result = True
 
@@ -290,7 +271,6 @@ def LDnA(mmu, cpu):
         if upper_param == 0x04:
              C = cpu.reg.GET_C()
              C = A
-             cpu.debugger.print_register('C',C, 8)
              cpu.reg.SET_C(C)
              result = True
       
@@ -303,7 +283,6 @@ def POPBC(mmu, cpu):
 
     cpu.reg.SET_BC(bitwise_functions.merge_8bit_values(val_l, val_r))
     BC = cpu.reg.GET_BC()
-    cpu.debugger.print_register('BC', BC, 16)
     return True
 
 def PUSHBC(mmu, cpu):
@@ -311,9 +290,6 @@ def PUSHBC(mmu, cpu):
     
     B = cpu.reg.GET_B()
     C = cpu.reg.GET_C()
-
-    cpu.debugger.print_register('B',C, 8)
-    cpu.debugger.print_register('C',C, 8)
 
     cpu.stack.push(B)
     cpu.stack.push(C)
@@ -336,28 +312,23 @@ def LDn8d(mmu, cpu):
         if upper_parameter == 0x0:
             cpu.reg.SET_B(val)
             B = cpu.reg.GET_B()
-            cpu.debugger.print_register('B', B, 8)
             result = True
     elif lower_parameter == 0xE0:
         if upper_parameter == 0x00:
             cpu.reg.SET_C(val)
             C = cpu.reg.GET_C()
-            cpu.debugger.print_register('C',C, 8)
             result = True
         elif upper_parameter == 0x01:
             cpu.reg.SET_E(val)
             E = cpu.reg.GET_L()
-            cpu.debugger.print_register('E',E, 8)
             result = True
         elif upper_parameter == 0x02:
             cpu.reg.SET_L(val)
             L = cpu.reg.GET_L()
-            cpu.debugger.print_register('L',L, 8)
             result = True
         elif upper_parameter == 0x03:
             cpu.reg.SET_A(val)
             A = cpu.reg.GET_A()
-            cpu.debugger.print_register('A',A, 8)
             result = True
         
     return result
@@ -374,11 +345,8 @@ def LDnn16d(mmu, cpu):
     cpu.debugger.print_iv(val)
     if parameter == 0x02:
         cpu.reg.SET_HL(val)
-        cpu.debugger.print_register('HL',cpu.reg.GET_HL(),16)
     elif parameter == 0x01:
         cpu.reg.SET_DE(val)
-        cpu.debugger.print_register('DE',cpu.reg.GET_DE(),16)
-        pass
     cpu.pc += 1
     return True
 
@@ -398,10 +366,6 @@ def LDDHL8A(mmu, cpu):
     A = cpu.reg.GET_A()
     AF = cpu.reg.GET_AF()
     HL = cpu.reg.GET_HL()
-    cpu.debugger.print_register('AF',AF,16)
-    cpu.debugger.print_register('HL',HL,16)
-    #A = MMU.get_high_byte(AF)
-    cpu.debugger.print_register('A',A,8)
     mmu.write(HL,A)
     result = False 
     if parameter == 0x03:
@@ -411,7 +375,6 @@ def LDDHL8A(mmu, cpu):
         HL += 1
         result = True
     cpu.reg.SET_HL(HL)
-    cpu.debugger.print_register('HL',cpu.reg.GET_HL(),8)
     return True
 
 # length: 3 bytes 
@@ -421,7 +384,6 @@ def LDSP16d(mmu, cpu):
     cpu.pc += 1
     SP = mmu.read_u16(cpu.pc)
     cpu.reg.SET_SP(SP)
-    cpu.debugger.print_register('SP',SP,16)
     cpu.pc += 1
     return True
 
@@ -433,7 +395,6 @@ def XORA(mmu, cpu):
   A = A ^ A
   if A == 0x0:
       cpu.reg.SET_ZERO()
-  cpu.debugger.print_register('A', A,8)
   cpu.reg.SET_AF(A) 
   return True
     
@@ -516,10 +477,8 @@ def CALLnn(mmu, cpu):
     # Decrease the jump value by one, because the step will do a +1 
     cpu.pc = val - 0x01
     SP = cpu.reg.GET_SP()
-    cpu.debugger.print_register('SP',SP,16)
     cpu.stack.push_u16bit(pc)
-    #cpu.stack.push(pc)
-
+    
     # push address of next instruction to the stack
     return True
 
@@ -530,7 +489,6 @@ def RLA(mmu, cpu):
     A = cpu.reg.GET_A()
     previous_carry = cpu.reg.GET_CARRY()
 
-    cpu.debugger.print_register('A', cpu.reg.GET_A(),8)
     # get msb from register
     msb = (A & 0x80) == 0x80
     
@@ -559,7 +517,6 @@ def BIT7H(mmu, cpu):
     from emulator import MMU
     cpu.debugger.print_opcode('BIT7H')
     HL = cpu.reg.GET_HL()
-    cpu.debugger.print_register('HL',HL,16)
     H = MMU.get_high_byte(HL)
     # check if most significant bit is 1
     isset = H >> 7 & 0x01
@@ -569,8 +526,6 @@ def BIT7H(mmu, cpu):
     else:
         cpu.reg.SET_ZERO()
 
-    cpu.debugger.print_register('H',H,8)
-    
     return True
 
 # length: 2 bytes 
@@ -585,7 +540,6 @@ def RLC(mmu, cpu):
     C = cpu.reg.GET_C()
     previous_carry = cpu.reg.GET_CARRY()
 
-    cpu.debugger.print_register('C', cpu.reg.GET_C(),8)
     # get msb from register
     msb = (C & 0x80) == 0x80
     

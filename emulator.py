@@ -172,7 +172,7 @@ class Debugger:
         self.show_opcodes = True
         self.show_cpu_flags = False
         self.show_program_counter = True
-        self.step_instruction = True
+        self.step_instruction = False
         self.stop_at = None #0x32
         self.stop_at_opcode = None
     
@@ -183,11 +183,16 @@ class Debugger:
         if self.cpu.debug_opcode:
             print(opcode_description, end=' ')
 
-    def print_register(self, name, value, size):
-        if self.cpu.debug_opcode and self.show_registers:
-            hex = self.format_hex(value)
-            print(f'REG: {name}: {hex} size: {size}', end=' ')
-
+    def print_register(self):
+        if self.show_registers:
+            AF = self.format_hex(self.cpu.reg.GET_AF())
+            BC = self.format_hex(self.cpu.reg.GET_BC())
+            DE = self.format_hex(self.cpu.reg.GET_DE())
+            HL = self.format_hex(self.cpu.reg.GET_HL())
+            print(f'AF: {AF}')
+            print(f'BC: {BC}')
+            print(f'DE: {DE}')
+            print(f'HL: {HL}')
     def print_iv(self, value):
         if self.cpu.debug_opcode and self.show_opcodes:
             hex = self.format_hex(value)
@@ -210,6 +215,7 @@ class Debugger:
     def debug(self, pc, opcode):
         if self.step_instruction or self.stop_at == pc:
             input('press enter to continue')
+            self.print_register()
         if self.stop_at_opcode == opcode:
             input('press enter to continue')
 
@@ -243,7 +249,11 @@ class Registers:
     def _get_flag(self, flag):
         return (self.GET_F() & flag) > 0
 
-
+    def _write_register(self,value):
+        if value < 0x00:
+            return 0xff
+        else:
+            return value
     def SET_CARRY(self):
         self._set_flag(Registers.CARRY)
 
@@ -292,17 +302,16 @@ class Registers:
         self.AF = value
 
     def SET_B(self, value):
-        self.B = value
-
+        self.B = self._write_register(value)
 
     def SET_C(self, value):
-        self.C = value
+        self.C = self._write_register(value)
     
     def SET_D(self, value):
-        self.D = value
+        self.D = self._write_register(value)
     
     def SET_E(self, value):
-        self.E = value
+        self.E = self._write_register(value)
 
     def SET_DE(self, value):
         self.D = MMU.get_high_byte(value)
@@ -322,16 +331,16 @@ class Registers:
         return self.F
 
     def SET_A(self, value):
-        self.A = value
+        self.A = self._write_register(value)
        
     def SET_F(self, value):
-        self.F = value
+        self.F = self._write_register(value)
 
     def SET_L(self, value):
-        self.L = value
+        self.L = self._write_register(value)
 
     def SET_H(self, value):
-        self.H = value
+        self.H = self._write_register(value)
 
     def GET_AF(self):
         return (self.GET_A() << 8) | self.GET_F()
