@@ -209,13 +209,22 @@ class OpcodeTests(unittest.TestCase):
         actual_result = mmu.read(0x8001)
         assert actual_result == expected_result
 
-    def test_INCn(self):
+    def test_INCC(self):
         data = [0x0C]
         self.create_testcontext(data)
         self.cpu.reg.SET_C(0xEE)
         opcodes.INCn(self.mmu, self.cpu)
         C = self.cpu.reg.GET_C()
         assert C == 0xEF
+
+
+    def test_INCB(self):
+        data = [0x04]
+        self.create_testcontext(data)
+        self.cpu.reg.SET_B(0xEE)
+        opcodes.INCn(self.mmu, self.cpu)
+        B = self.cpu.reg.GET_B()
+        assert B == 0xEF
 
 
     def test_A_register(self):

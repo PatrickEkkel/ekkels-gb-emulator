@@ -99,24 +99,57 @@ def INCnn(mmu, cpu):
 def INCn(mmu, cpu):
     cpu.debugger.print_opcode('INCn')
     cpu.reg.CLEAR_SUBSTRACT()
-    parameter = cpu.read_upper_opcode_parameter()
+    upper_param = cpu.read_upper_opcode_parameter()
+    lower_param = cpu.read_lower_opcode_parameter()
     result = False
     selected_register = None
-    if parameter == 0x0:
-        C = cpu.reg.GET_C()
-        selected_register = C
-        C = C + 1
-        # get the third bit by shifting 2 positions to the right and do a and against 0000 0001
-        
-        cpu.debugger.print_register('C',C, 8)
-        cpu.reg.SET_C(C)
-        result = True
+
+    if lower_param == 0x40:
+        if upper_param == 0x00:
+            B = cpu.reg.GET_B()
+            selected_register = B
+            B = B + 1
+            cpu.debugger.print_register('B',B, 8)
+            cpu.reg.SET_B(B)
+            result = True
+    #elif lower_param == 0xC0
+    if lower_param == 0xC0:
+        if upper_param == 0x00:
+            C = cpu.reg.GET_C()
+            selected_register = C
+            C = C + 1
+            # get the third bit by shifting 2 positions to the right and do a and against 0000 0001
+            cpu.debugger.print_register('C',C, 8)
+            cpu.reg.SET_C(C)
+            result = True
     
 
     if selected_register >> 2 & 0x1 == 0x1:
         cpu.reg.SET_HALF_CARRY()
 
     return result
+
+# length: 2 bytes 
+# 0xF0 and 1 byte unsigned
+# write contents of address FF00 + n into register A
+
+def LDHAn(mmu, cpu):
+    # get 8 bit unsigned parameter
+    cpu.pc += 1
+    n = mmu.read(cpu.pc)
+    # print disassembly info
+    cpu.debugger.print_opcode('LDHnA')
+    cpu.debugger.print_iv(n)
+   
+    # read A register
+    A = cpu.reg.GET_A()
+    cpu.debugger.print_register('A',A, 8)
+    
+    offset_address = 0xFF00 + n
+    value = mmu.read(offset_address)
+    cpu.reg.SET_A(value)
+    return True
+
 
 # length: 2 bytes 
 # 0xE0 and 1 byte unsigned
@@ -198,13 +231,21 @@ def CPn(mmu, cpu):
 
     if A == n:
         cpu.reg.SET_ZERO()
-    elif A < n:
+    #else:
+    #    cpu.reg.CLEAR_ZERO()
+
+    
+    if A < n:
         cpu.reg.SET_CARRY()
+    else:
+        cpu.reg.CLEAR_CARRY()
 
     half_carry = (A & 0x0F) < (n & 0x0F)
 
     if half_carry:
         cpu.reg.SET_HALF_CARRY()
+    else:
+        cpu.reg.CLEAR_HALF_CARRY()
 
     
     return True
@@ -291,18 +332,22 @@ def LDn8d(mmu, cpu):
     
     result = False
     cpu.pc = pc
-
     if lower_parameter == 0x60:
         if upper_parameter == 0x0:
             cpu.reg.SET_B(val)
             B = cpu.reg.GET_B()
             cpu.debugger.print_register('B', B, 8)
             result = True
-    else:
+    elif lower_parameter == 0xE0:
         if upper_parameter == 0x00:
             cpu.reg.SET_C(val)
             C = cpu.reg.GET_C()
             cpu.debugger.print_register('C',C, 8)
+            result = True
+        elif upper_parameter == 0x01:
+            cpu.reg.SET_E(val)
+            E = cpu.reg.GET_L()
+            cpu.debugger.print_register('E',E, 8)
             result = True
         elif upper_parameter == 0x02:
             cpu.reg.SET_L(val)

@@ -174,6 +174,7 @@ class Debugger:
         self.show_program_counter = True
         self.step_instruction = False
         self.stop_at = None
+        self.stop_at_opcode = 0xFE
     
     def format_hex(self, opcode):
         return ("0x{:x}".format(opcode))
@@ -206,9 +207,12 @@ class Debugger:
         if self.cpu.debug_opcode and self.show_program_counter:
             print(f'PC: {hex_pc} CPU: {hex}', end=' ')
 
-    def debug(self, pc):
+    def debug(self, pc, opcode):
         if self.step_instruction or self.stop_at == pc:
             input('press enter to continue')
+        if self.stop_at_opcode == opcode:
+            input('press enter to continue')
+
         return 
 
 
@@ -392,16 +396,19 @@ class CPU:
         self.opcodes[0x57] = opcodes.LDnA
         self.opcodes[0x7b] = opcodes.LDnn
         self.opcodes[0x0E] = opcodes.LDn8d
+        self.opcodes[0x1E] = opcodes.LDn8d
         self.opcodes[0x2E] = opcodes.LDn8d
         self.opcodes[0x06] = opcodes.LDn8d
         self.opcodes[0x3E] = opcodes.LDn8d
         self.opcodes[0xE2] = opcodes.LDCA
         self.opcodes[0x17] = opcodes.RLA
         self.opcodes[0xC] = opcodes.INCn
+        self.opcodes[0x04] = opcodes.INCn
         self.opcodes[0x23] = opcodes.INCnn
         self.opcodes[0x13] = opcodes.INCnn
         self.opcodes[0x77] = opcodes.LDHL8A
         self.opcodes[0xE0] = opcodes.LDHnA
+        self.opcodes[0xF0] = opcodes.LDHAn
         self.opcodes[0x1A] = opcodes.LDAn
         self.opcodes[0xCD] = opcodes.CALLnn
         self.opcodes[0xC1] = opcodes.POPBC
@@ -440,8 +447,8 @@ class CPU:
             instruction = self.opcodes[opcode]
         if instruction:
             self.debugger.print_state(opcode)
+            self.debugger.debug(self.pc, opcode)
             success = instruction(self._mmu,self)
-            self.debugger.debug(self.pc)
             self.debugger.print_cpu_flags()
             self.debugger.end()
             if not success:
