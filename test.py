@@ -369,6 +369,15 @@ class OpcodeTests(unittest.TestCase):
         A = self.cpu.reg.GET_A()
         assert A == 0xce
     
+    def test_zero_plus_halfcarry_register(self):
+        data = []
+        self.create_testcontext(data)
+        self.cpu.reg.SET_AF(0x0080)
+        self.cpu.reg.CLEAR_ZERO()
+        self.cpu.reg.SET_HALF_CARRY()
+        self.cpu.reg.SET_SUBSTRACT()
+        assert self.cpu.reg.GET_AF() == 0x0060
+
     def test_zero_flags_register(self):
         data1 = [0xAF,0x00]
         self.create_testcontext(data1)

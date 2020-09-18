@@ -1,3 +1,4 @@
+import instructionset
 import struct
 import opcodes
 from array import array
@@ -381,7 +382,8 @@ class Registers:
 
     def initialize_without_bootrom(self):
         self.SET_BC(0x0013)
-        self.SET_AF(0x01B0)
+        #self.SET_AF(0x01B0)
+        self.SET_AF(0x0000)
         self.SET_DE(0x00D8)
         self.SET_HL(0x014D)
         self.SET_SP(0xFFFE)
@@ -394,13 +396,12 @@ class CPU:
         self.stack = Stack(self, mmu)
         self.reg = Registers()
         self.debugger = Debugger(self)
-        self.opcodes = [None] * 255
+        self.opcodes = instructionset.create_instructionset()
         self.cb_opcodes = [None] * 255
         self.opcodes[0x00] = opcodes.NOP
         self.opcodes[0x31] = opcodes.LDSP16d
-        self.opcodes[0xAF] = opcodes.XORn
         self.opcodes[0xC5] = opcodes.PUSHBC
-        self.opcodes[0x21] = opcodes.LDnn16d
+        #self.opcodes[0x21] = opcodes.LDnn16d
         self.opcodes[0x11] = opcodes.LDnn16d
         self.opcodes[0x32] = opcodes.LDDHL8A
         self.opcodes[0x22] = opcodes.LDDHL8A
@@ -429,7 +430,7 @@ class CPU:
         self.opcodes[0x1A] = opcodes.LDAn
         self.opcodes[0xCD] = opcodes.CALLnn
         self.opcodes[0xC1] = opcodes.POPBC
-        self.opcodes[0x05] = opcodes.DECn
+        #self.opcodes[0x05] = opcodes.DECn
         self.opcodes[0x3D] = opcodes.DECn
         self.opcodes[0x0D] = opcodes.DECn
         self.opcodes[0xc9] = opcodes.RET
