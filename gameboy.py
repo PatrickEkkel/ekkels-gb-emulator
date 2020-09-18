@@ -15,6 +15,7 @@ class GameBoy:
         if skipbios:
             self.mmu.disable_bootrom()
             self.CPU.pc = 0x100
+            self.CPU.reg.initialize_without_bootrom()
 
         cont = True
         while(cont):

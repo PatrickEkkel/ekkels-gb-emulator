@@ -44,6 +44,7 @@ class OpcodeTests(unittest.TestCase):
         
         self.cpu = CPU(self.mmu)
 
+    
     def test_LDSP16d(self):
         data = [0x31,0xf9,0xff]
         self.create_testcontext(data)
@@ -367,6 +368,17 @@ class OpcodeTests(unittest.TestCase):
         opcodes.LDAn(self.mmu, self.cpu)
         A = self.cpu.reg.GET_A()
         assert A == 0xce
+    
+    def test_zero_flags_register(self):
+        data1 = [0xAF,0x00]
+        self.create_testcontext(data1)
+        self.cpu.reg.SET_AF(0x01B0)
+        
+        opcodes.XORn(self.mmu, self.cpu)
+        #self.cpu.reg.SET_ZERO()
+        self.print_hex(self.cpu.reg.GET_AF())
+        assert self.cpu.reg.GET_AF() == 0x0080
+
     def test_flags_register(self):
         register = Registers()
 

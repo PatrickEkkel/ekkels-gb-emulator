@@ -172,8 +172,8 @@ class Debugger:
         self.show_opcodes = True
         self.show_cpu_flags = False
         self.show_program_counter = True
-        self.step_instruction = False
-        self.stop_at = None #0x32
+        self.step_instruction = True
+        self.stop_at = 0x21b
         self.stop_at_opcode = None
     
     def format_hex(self, opcode):
@@ -378,6 +378,13 @@ class Registers:
     def GET_HL(self):
         return (self.GET_H() << 8) | self.GET_L()
         #return self.hl
+
+    def initialize_without_bootrom(self):
+        self.SET_BC(0x0013)
+        self.SET_AF(0x01B0)
+        self.SET_DE(0x00D8)
+        self.SET_HL(0x014D)
+        self.SET_SP(0xFFFE)
     
 class CPU:
     def __init__(self, mmu):
@@ -391,7 +398,7 @@ class CPU:
         self.cb_opcodes = [None] * 255
         self.opcodes[0x00] = opcodes.NOP
         self.opcodes[0x31] = opcodes.LDSP16d
-        self.opcodes[0xAF] = opcodes.XORA
+        self.opcodes[0xAF] = opcodes.XORn
         self.opcodes[0xC5] = opcodes.PUSHBC
         self.opcodes[0x21] = opcodes.LDnn16d
         self.opcodes[0x11] = opcodes.LDnn16d

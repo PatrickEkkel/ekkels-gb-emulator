@@ -389,14 +389,20 @@ def LDSP16d(mmu, cpu):
 
 # length: 1 bytes
 # 0xAF 
-def XORA(mmu, cpu):
-  cpu.debugger.print_opcode('XORA')
-  A = cpu.reg.GET_AF()
-  A = A ^ A
-  if A == 0x0:
+def XORn(mmu, cpu):
+  cpu.debugger.print_opcode('XORn')
+  lower_param = cpu.read_lower_opcode_parameter()
+  result = False
+  if lower_param == 0xF0:
+    A = cpu.reg.GET_A()
+    A = A ^ A
+    if A == 0x0:
       cpu.reg.SET_ZERO()
-  cpu.reg.SET_AF(A) 
-  return True
+    else:
+      cpu.reg.CLEAR_ZERO()
+    cpu.reg.SET_A(A) 
+    result = True
+  return result
     
 # special prefix for a different set of opcodes
 def CB(mmu, cpu):
