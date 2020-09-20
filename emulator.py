@@ -398,7 +398,7 @@ class CPU:
         self.debugger = Debugger(self)
         self.opcodes = instructionset.create_instructionset()
         self.cb_opcodes = [None] * 255
-        self.opcodes[0x00] = opcodes.NOP
+        #self.opcodes[0x00] = opcodes.NOP
         self.opcodes[0x31] = opcodes.LDSP16d
         self.opcodes[0xC5] = opcodes.PUSHBC
         #self.opcodes[0x21] = opcodes.LDnn16d
@@ -407,13 +407,13 @@ class CPU:
         self.opcodes[0x22] = opcodes.LDDHL8A
         self.opcodes[0x20] = opcodes.JRNZn
         self.opcodes[0x28] = opcodes.JRZn
-        self.opcodes[0xc3] = opcodes.JPnn
+        #self.opcodes[0xc3] = opcodes.JPnn
         self.opcodes[0x18] = opcodes.JRn
         self.opcodes[0x4f] = opcodes.LDnA
         self.opcodes[0x67] = opcodes.LDnA
         self.opcodes[0x57] = opcodes.LDnA
         self.opcodes[0x7b] = opcodes.LDnn
-        self.opcodes[0x0E] = opcodes.LDn8d
+        #self.opcodes[0x0E] = opcodes.LDn8d
         self.opcodes[0x1E] = opcodes.LDn8d
         self.opcodes[0x2E] = opcodes.LDn8d
         self.opcodes[0x06] = opcodes.LDn8d
