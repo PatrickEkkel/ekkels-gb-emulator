@@ -11,7 +11,14 @@ class ProgramTests(unittest.TestCase):
         print("0x{:x}".format(value))
 
     def create_gameboy(self, program):
-        game = TestRom(program)
+
+        romdata = [0x0000] * 65535
+        pc = 0x0100
+        for instruction in program:
+            romdata[pc] = instruction
+            pc += 1
+
+        game = TestRom(romdata)
         game.print_cartridge_info()
         gb = GameBoy(game)
         gb.power_on(skipbios=True)
@@ -19,13 +26,21 @@ class ProgramTests(unittest.TestCase):
 
     # test the flags register after XOR and DEC opcodes
     def test_program1(self):
-        test_program = ['NOP','JP 0150', 'JP 020C', 'LD HL DFFF','LD C 10', 'DEC B']
+        test_program = [
+        'NOP',
+        'JP start:',
+        'start:',
+        'JP init:',
+        'NOP',
+        'init:',
+        'LD HL DFFF',
+        'LD C 10',
+        'DEC B']
         bitstream = instructionset.create_bitstream(test_program)
-        for b in bitstream:
-            #print(b)
-            self.print_hex(b)
-
-        #gb = self.create_gameboy(test_program)
+        #for b in bitstream:
+        #    self.print_hex(b)
+        
+        gb = self.create_gameboy(bitstream)
         assert True
     
     def test_program2(self):

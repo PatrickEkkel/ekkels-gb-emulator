@@ -40,6 +40,21 @@ def _convert_operand(operand):
     else:
         return (result, int(operand, 16), adressing_mode)
 
+def encode_one_byte_instruction(r, opcode, mnemonic_dict):
+    result = mnemonic_dict[r[0]]['register_options']['x']
+    return (result, None, None, 1)
+
+
+def encode_16bit_value(value):
+    result =  "{:x}".format(value)
+    #paddington
+    if len(result) == 3:
+        result = "0{:x}".format(value)
+    elif len(result) == 2:
+        result = "00{:x}".format(value)
+    
+    return result
+        
 
 def encode_two_byte_instruction(r, opcode, mnemonic_dict):
     operand = r[1]
@@ -52,7 +67,7 @@ def encode_two_byte_instruction(r, opcode, mnemonic_dict):
         result = mnemonic_dict[normalized_instruction]['register_options']['x']
     else:
         result = mnemonic_dict[normalized_instruction]['register_options'][operand]
-    return (result, encoding_operand, first_operand)
+    return (result, encoding_operand, first_operand, 2)
 
 
 
@@ -72,46 +87,100 @@ def encode_three_byte_instruction(r, opcode, mnemonic_dict):
         result = mnemonic_dict[normalized_instruction]['register_options']['x']
     else:
         result = mnemonic_dict[normalized_instruction]['register_options'][operand_1]
-    return (result, second_operand, converted_value_operand)
+    return (result, second_operand, converted_value_operand, 3)
 
+
+
+def resolve_instruction(instruction, r, opcode,mnemonic_dict):
+    encoded_instruction = None
+    if len(r) == 1:
+        encoded_instruction = encode_one_byte_instruction(r, opcode,mnemonic_dict)
+            
+    elif len(r) == 2:
+        encoded_instruction = encode_two_byte_instruction(r, opcode, mnemonic_dict)
+      
+
+    elif len(r) == 3:
+        encoded_instruction = encode_three_byte_instruction(r, opcode, mnemonic_dict)
+    return encoded_instruction
+
+
+def is_label(instruction, r):
+    return ':' in instruction and len(r) == 1
 
         
 # very crude GB ASM to binary conversion, used to test small programs and CPU correctness
 def create_bitstream(program):
     mnemonic_dict = create_mnemonic_dictionary()
     bitstream = []
+    gc_labels = {}
+    pc = 0x0100
+
+    # index all the labels
+    for instruction in program:
+        r = instruction.split(' ')
+        opcode = r[0]
+        print(instruction)
+        if is_label(instruction, r):
+            gc_labels[instruction] = pc 
+        # special case, instruction with label, meaning its an address so instructionlegnth is 2 bytes + 1 byte for the opcode
+        elif ':' in instruction and len(r) > 1:
+            pc += 3
+        else:
+            # get the length of the instruction 
+            pc += len(r)
+    
+    # reset the pc counter
+    pc = 0x0100
     for instruction in program:
         r = instruction.split(' ')
         converted_operand_value = None
         operand_value = None
         converter_register_operand = None
         opcode = r[0]
-        if len(r) == 1:
-            decoded_instruction = mnemonic_dict[instruction]['register_options']['x']
-            
-        elif len(r) == 2:
-            encoded_instruction = encode_two_byte_instruction(r, opcode, mnemonic_dict)
-            converted_operand_value = encoded_instruction[1]
-            operand_value = encoded_instruction[2]
-            decoded_instruction = encoded_instruction[0]
+        if is_label(instruction, r):
+            pass
+            #bitstream.append(0x00)
+            #pc += 1
 
-        elif len(r) == 3:
-
-            encoded_instruction = encode_three_byte_instruction(r, opcode, mnemonic_dict)
-            converted_operand_value = encoded_instruction[1]
-            operand_value = encoded_instruction[2]
-            decoded_instruction = encoded_instruction[0]
+        elif ':' in instruction and len(r) > 1:
+            # identify label within mnemonic
+            bc = 0
+            for i in r:
+                if ':' in i:
+                    # lookup label in global label dictionary
+                    address = gc_labels[i]
+                    
+                    r[bc] = encode_16bit_value(address)
+                    encoded_instruction = resolve_instruction(instruction, r, opcode, mnemonic_dict)
+                    decoded_instruction = encoded_instruction[0]
+                    operand_value = encoded_instruction[2]
+                    converted_operand_value = encoded_instruction[1]
+                    break
+                bc += 1
+                    
+        else:
+           encoded_instruction = resolve_instruction(instruction, r, opcode, mnemonic_dict)
+           decoded_instruction = encoded_instruction[0]
+           operand_value = encoded_instruction[2]
+           converted_operand_value = encoded_instruction[1]
         
-        bitstream.append(decoded_instruction)
-        if converted_operand_value:
-            addressing_mode = operand_value[2]
-            if addressing_mode == 16:
-                highbyte = bitwise_functions.get_highbyte(converted_operand_value)
-                lowbyte = bitwise_functions.get_lowbyte(converted_operand_value)
-                bitstream.append(lowbyte)
-                bitstream.append(highbyte)
-            elif addressing_mode == 8:
-                bitstream.append(converted_operand_value)
+        if not is_label(instruction, r):
+            bitstream.append(decoded_instruction)
+            
+            if converted_operand_value:
+                addressing_mode = operand_value[2]
+                if addressing_mode == 16:
+                    highbyte = bitwise_functions.get_highbyte(converted_operand_value)
+                    lowbyte = bitwise_functions.get_lowbyte(converted_operand_value)
+                    bitstream.append(lowbyte)
+                    bitstream.append(highbyte)
+                    pc += 2
+                elif addressing_mode == 8:
+                    bitstream.append(converted_operand_value)
+                    pc += 1
+        
+     
     return bitstream
 
 
@@ -119,6 +188,7 @@ def create_instructionset():
     result = [None] * 255
     for i in instructions:
         for opcode in i['register_options'].values():
+            #print(opcode)
             result[opcode] = i['opcode']
         #result[i['i']] = i['opcode']
     return result
