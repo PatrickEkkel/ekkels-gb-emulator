@@ -41,3 +41,9 @@ def get_highbyte(value):
 
 def get_lowbyte(value):
     return value & 0xFF
+
+
+def convert_unsigned_to_signed(address, result):
+        if (address & 0x80):
+            address = (result + -0xFF) - 1
+        return address

@@ -1,12 +1,14 @@
 import opcodes
 import bitwise_functions
 
-instructions = [{'m': 'XOR A'      , 'opcode': opcodes.XORn     ,'length': 1, 'cycles': 4 , 'register_options': {'A': 0xAF} },
-                {'m': 'LD r nn'    , 'opcode': opcodes.LDn8d    ,'length': 2, 'cycles': 8 , 'register_options': {'C': 0x0E,'B': 0x06 } },
-                {'m': 'JP nnnn'    , 'opcode': opcodes.JPnn     ,'length': 3, 'cycles': 16, 'register_options': {'x': 0xC3 } },
-                {'m': 'NOP'        , 'opcode': opcodes.NOP      ,'length': 1, 'cycles': 4 , 'register_options': {'x': 0x00 } },
-                {'m': 'DEC r'      , 'opcode': opcodes.DECn     ,'length': 1, 'cycles': 4 , 'register_options': {'B': 0x05 } },
-                {'m': 'LD rr nnnn' , 'opcode': opcodes.LDnn16d  ,'length': 3, 'cycles': 12, 'register_options': {'HL': 0x21} },  
+instructions = [{'m': 'XOR A'      , 'opcode': opcodes.XORn     , 'length': 1, 'cycles': 4       , 'register_options': {'A': 0xAF} },
+                {'m': 'LD r nn'    , 'opcode': opcodes.LDn8d    , 'length': 2, 'cycles': 8       , 'register_options': {'C': 0x0E,'B': 0x06 } },
+                {'m': 'JP nnnn'    , 'opcode': opcodes.JPnn     , 'length': 3, 'cycles': 16      , 'register_options': {'x': 0xC3 } },
+                {'m': 'NOP'        , 'opcode': opcodes.NOP      , 'length': 1, 'cycles': 4       , 'register_options': {'x': 0x00 } },
+                {'m': 'DEC r'      , 'opcode': opcodes.DECn     , 'length': 1, 'cycles': 4       , 'register_options': {'B': 0x05 } },
+                {'m': 'LD rr nnnn' , 'opcode': opcodes.LDnn16d  , 'length': 3, 'cycles': 12      , 'register_options': {'HL': 0x21} }, 
+                {'m': 'LDD (HL) A' , 'opcode': opcodes.LDDHL8A  , 'length': 1, 'cycles': 8       , 'register_options': {'x': 0x32 } },
+                {'m': 'JRNZ nn'      , 'opcode': opcodes.JRNZn    , 'length': 2, 'cycles': [8, 12] , 'register_options': {'x': 0x20 } }, 
                ]
 
 
@@ -31,6 +33,10 @@ def _convert_operand(operand):
     elif len(operand) == 2 and ('H' in operand or 'L' in operand):
         result = 'rr'
         adressing_mode = -1
+    elif len(operand) == 3:
+        result = 'nnn'
+        adressing_mode = 8
+
     elif len(operand) == 2:
         result = 'nn'
         adressing_mode = 8
@@ -44,7 +50,11 @@ def encode_one_byte_instruction(r, opcode, mnemonic_dict):
     result = mnemonic_dict[r[0]]['register_options']['x']
     return (result, None, None, 1)
 
-
+def encode_8bit_value(value):
+    result =  "{:x}".format(value)
+    
+    return result
+    
 def encode_16bit_value(value):
     result =  "{:x}".format(value)
     #paddington
@@ -90,10 +100,19 @@ def encode_three_byte_instruction(r, opcode, mnemonic_dict):
     return (result, second_operand, converted_value_operand, 3)
 
 
+def handle_special_instruction(r, opcode, mnemonic_dict):
+    result =  mnemonic_dict[r]['register_options']['x']
+    return (result, None, None, 1)
+
 
 def resolve_instruction(instruction, r, opcode,mnemonic_dict):
     encoded_instruction = None
-    if len(r) == 1:
+
+    # check if this is 'special' instruction. 
+
+    if r[0] == 'LDD':
+        encoded_instruction = handle_special_instruction(instruction, opcode,mnemonic_dict)
+    elif len(r) == 1:
         encoded_instruction = encode_one_byte_instruction(r, opcode,mnemonic_dict)
             
     elif len(r) == 2:
@@ -150,8 +169,17 @@ def create_bitstream(program):
                 if ':' in i:
                     # lookup label in global label dictionary
                     address = gc_labels[i]
+                    # there is different adressing modes for JP we need 16 bit, for JR we need 8 bit (signed)
+                    if 'JRNZ' == r[0]:
+                        # get the difference between the current pc and the label
+                        dest =  (pc - address) * -1
+                        print('blargh')
+                        print(dest)
+                        r[bc] =  str(dest) # encode_16bit_value(dest)
+                    else:
+                        r[bc] = encode_16bit_value(address)
                     
-                    r[bc] = encode_16bit_value(address)
+                    
                     encoded_instruction = resolve_instruction(instruction, r, opcode, mnemonic_dict)
                     decoded_instruction = encoded_instruction[0]
                     operand_value = encoded_instruction[2]

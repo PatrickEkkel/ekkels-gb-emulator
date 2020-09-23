@@ -35,7 +35,11 @@ class ProgramTests(unittest.TestCase):
         'init:',
         'LD HL DFFF',
         'LD C 10',
-        'DEC B']
+        'LD B 00',
+        'loop:',
+        'LDD (HL) A',
+        'DEC B',
+        'JRNZ loop:']
         bitstream = instructionset.create_bitstream(test_program)
         #for b in bitstream:
         #    self.print_hex(b)

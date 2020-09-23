@@ -1,4 +1,5 @@
 https://gekkio.fi/files/gb-docs/gbctr.pdf
+https://onlinetoolz.net/unsigned-signed#base=16&value=fc&bits=8
 http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf
 https://blog.ryanlevick.com/DMG-01/public/book/cpu/registers.html
 https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html
