@@ -458,12 +458,9 @@ def JRNZn(mmu, cpu):
     cpu.debugger.print_opcode('JRNZn')
     pc = cpu.pc + 1
     val = mmu.read_s8(pc)
-    #print(mmu.read_u8(pc))
-    #print(val)
     cpu.debugger.print_iv(val)
     jump_address = pc
     if not cpu.reg.GET_ZERO():
-        print('jup')
         jump_address += val
         cpu.pc = jump_address
     else:

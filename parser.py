@@ -155,9 +155,10 @@ class Tokenizer:
 class GBA_ASM:
     def __init__(self):
         self.label_lookuptable = {}
+        self.encoded_program = []
         self.instructions = create_mnemonic_dictionary()
-        self.program_counter = 0x00
         self.offset = 0x100
+        self.program_counter = self.offset + 0x00
 
 
     def print_hex(self, opcode):
@@ -171,16 +172,77 @@ class GBA_ASM:
             opcode = tokenizer.tokenize(p)
 
             if isinstance(opcode, Label):
-                #print(self.print_hex())
-                program_counter += 2
                 current_address = self.offset + program_counter
                 self.label_lookuptable[opcode.get_label()] = current_address
+                program_counter += 2
+
             else:
                 program_counter += 1
 
+
+    def _handle_opcode(self, opcode):
+        opcode_meta = self.instructions.get(opcode.get_mnemonic_label())
+        if not opcode_meta:
+            raise ParserError(f' unknown opcode {opcode.get_mnemonic_label()}')
+
+        else:
+            if opcode.register:
+                self.encoded_program.append(opcode_meta['register_options'][opcode.register])
+            else:
+                self.encoded_program.append(opcode_meta['register_options']['x'])
+
+            if opcode.address:
+                # does not support 8 bit adresses yet
+                if len(opcode.address) == 4:
+                    opcode.address = encode_16bit_value(opcode.address)
+                    fb = opcode.address[2:4]
+                    sb = opcode.address[0:2]
+                    self.encoded_program.append(int(fb, 16))
+                    self.encoded_program.append(int(sb, 16))
+                elif len(opcode.address) == 2:
+                    fb = opcode.address[0:2]
+                    self.encoded_program.append(int(fb, 16))
+                elif str(opcode.address) == '0':
+                    opcode.address = 0x0
+                    self.encoded_program.append(0x0)
+
+    def _handle_opcode_label(self, opcode):
+        # the asm command contains label that needs to be translated
+        # to an address
+        label = opcode.get_label()
+
+        address = self.label_lookuptable.get((opcode.get_label()))
+        if address is None:
+            raise ParserError(f'label {label} is not defined')
+        else:
+             # labels are always 16 bit addresses
+             opcode.address = encode_16bit_value(address)
+             opcode_meta = self.instructions[opcode.get_mnemonic_label()]
+             encoded_opcode = opcode_meta['register_options']['x']
+             # check if opcode needs a signed or an unsigned value
+
+             # is it 8 bit signed?
+             if opcode_meta['datatype'] == 'a8':
+                 self.encoded_program.append(encoded_opcode)
+                 result = address
+                 if address > self.program_counter:
+                     print('yes it is ahead')
+                     self.encoded_program.append(int(0x00, 16))
+                 else:
+                     # this results in a working value, +1 offset is a bit weird...
+                     signed_address = ((self.program_counter+1) - address - self.offset) * -1
+                     self.encoded_program.append(signed_address)
+             else:
+                 self.encoded_program.append(encoded_opcode)
+                 # split value in two 8 byte values and store
+                 fb = opcode.address[2:4]
+                 sb = opcode.address[0:2]
+                 self.encoded_program.append(int(fb, 16))
+                 self.encoded_program.append(int(sb, 16))
+
     def parse(self, program):
         instructions = create_mnemonic_dictionary()
-        encoded_program = []
+
         self._preprocess(program)
         for p in program:
             tokenizer = Tokenizer()
@@ -188,51 +250,9 @@ class GBA_ASM:
             address = None
             if isinstance(opcode, Opcode):
                 if opcode.has_label():
-                   # the asm command contains label that needs to be translated
-                   # to an address
-                   label = opcode.get_label()
-                   address = self.label_lookuptable.get((opcode.get_label()))
-                   if address is None:
-                       raise ParserError(f'label {label} is not defined')
-                   else:
-                        # labels are always 16 bit addresses
-                        opcode.address = encode_16bit_value(address)
-                        #print(opcode.get_mnemonic_label())
-                        encoded_opcode = self.instructions[opcode.get_mnemonic_label()]['register_options']['x']
-                        hex_opcode = self.print_hex(encoded_opcode)
-                        encoded_program.append(encoded_opcode)
-                        # split value in two 8 byte values and store
-                        fb = opcode.address[2:4]
-                        sb = opcode.address[0:2]
-                        encoded_program.append(int(fb, 16))
-                        encoded_program.append(int(sb, 16))
-                        #encoded_program.append(address)
+                    self._handle_opcode_label(opcode)
                 else:
-                    opcode_meta = self.instructions.get(opcode.get_mnemonic_label())
-                    if not opcode_meta:
-                        raise ParserError(f' unknown opcode {opcode.get_mnemonic_label()}')
+                    self._handle_opcode(opcode)
 
-                    else:
-                        if opcode.register:
-                            encoded_program.append(opcode_meta['register_options'][opcode.register])
-                        else:
-                            encoded_program.append(opcode_meta['register_options']['x'])
-
-                        if opcode.address:
-                            # does not support 8 bit adresses yet
-                            if len(opcode.address) == 4:
-                                opcode.address = encode_16bit_value(opcode.address)
-                                fb = opcode.address[2:4]
-                                sb = opcode.address[0:2]
-                                encoded_program.append(int(fb, 16))
-                                encoded_program.append(int(sb, 16))
-                            elif len(opcode.address) == 2:
-                                fb = opcode.address[0:2]
-                                encoded_program.append(int(fb, 16))
-                            elif str(opcode.address) == '0':
-                                opcode.address = 0x0
-                                encoded_program.append(0x0)
-                                #print('nope its not working')
-                        #if opcode.address:
-                        #    encoded_program.append(int(opcode.address, 16))
-        return encoded_program
+            self.program_counter += 1
+        return self.encoded_program
