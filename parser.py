@@ -1,8 +1,22 @@
 from instructionset import create_mnemonic_dictionary
 
+
+def encode_8bit_value(value):
+    if isinstance(value, str):
+        value = int(value, 16)
+        result =  "{:x}".format(value)
+    else:
+        result =  "{:x}".format(value)
+    return result
+
 def encode_16bit_value(value):
     if value:
-        result =  "{:x}".format(value)
+        if isinstance(value, str):
+            value = int(value, 16)
+            result =  "{:x}".format(value)
+        else:
+            result =  "{:x}".format(value)
+
         #paddington
         if len(result) == 1:
             result = "000{:x}".format(value)
@@ -59,7 +73,8 @@ class Opcode(Token):
             result = 'nnnn'
         elif len(self.address) == 2:
             result = 'nn'
-
+        elif len(self.address) == 1:
+            result = 'nn'
         return result
 
     def get_mnemonic_label(self):
@@ -92,9 +107,14 @@ class Tokenizer:
     def tokenize(self, line):
         self.tokens = line.split(' ')
         result = None
+
         if len(self.tokens) > 0:
             if self._is_label():
                 result = Label(self._get_label())
+            elif self._get_mnemonic() == 'LDD':
+                result = Opcode()
+                result.mnemonic = line
+
             else:
                 result = Opcode()
                 result.mnemonic = self._get_mnemonic()
@@ -102,11 +122,12 @@ class Tokenizer:
                 result.register = self._get_register()
                 result.address = self._get_address()
                 # determine, 8 bit or 16 bit value
+
                 if result.address:
                     if len(result.address) == 4:
                         result.address = encode_16bit_value(result.address)
                     elif len(result.address) == 2:
-                        print('8 bit value nog niet ondersteund')
+                        result.address = encode_8bit_value(result.address)
 
         return result
 
@@ -176,7 +197,7 @@ class GBA_ASM:
                    else:
                         # labels are always 16 bit addresses
                         opcode.address = encode_16bit_value(address)
-                        print(opcode.get_mnemonic_label())
+                        #print(opcode.get_mnemonic_label())
                         encoded_opcode = self.instructions[opcode.get_mnemonic_label()]['register_options']['x']
                         hex_opcode = self.print_hex(encoded_opcode)
                         encoded_program.append(encoded_opcode)
@@ -196,6 +217,22 @@ class GBA_ASM:
                             encoded_program.append(opcode_meta['register_options'][opcode.register])
                         else:
                             encoded_program.append(opcode_meta['register_options']['x'])
+
+                        if opcode.address:
+                            # does not support 8 bit adresses yet
+                            if len(opcode.address) == 4:
+                                opcode.address = encode_16bit_value(opcode.address)
+                                fb = opcode.address[2:4]
+                                sb = opcode.address[0:2]
+                                encoded_program.append(int(fb, 16))
+                                encoded_program.append(int(sb, 16))
+                            elif len(opcode.address) == 2:
+                                fb = opcode.address[0:2]
+                                encoded_program.append(int(fb, 16))
+                            elif str(opcode.address) == '0':
+                                opcode.address = 0x0
+                                encoded_program.append(0x0)
+                                #print('nope its not working')
                         #if opcode.address:
                         #    encoded_program.append(int(opcode.address, 16))
         return encoded_program

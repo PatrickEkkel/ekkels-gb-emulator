@@ -1,17 +1,24 @@
 import opcodes
 import bitwise_functions
 
-instructions = [{'m': 'XOR A'      , 'opcode': opcodes.XORn     , 'length': 1, 'cycles': 4       , 'register_options': {'A': 0xAF} },
+instructions = [{'m': 'XOR r'      , 'opcode': opcodes.XORn     , 'length': 1, 'cycles': 4       , 'register_options': {'A': 0xAF} },
                 {'m': 'LD r nn'    , 'opcode': opcodes.LDn8d    , 'length': 2, 'cycles': 8       , 'register_options': {'C': 0x0E,'B': 0x06 } },
                 {'m': 'JP nnnn'    , 'opcode': opcodes.JPnn     , 'length': 3, 'cycles': 16      , 'register_options': {'x': 0xC3 } },
                 {'m': 'NOP'        , 'opcode': opcodes.NOP      , 'length': 1, 'cycles': 4       , 'register_options': {'x': 0x00 } },
                 {'m': 'DEC r'      , 'opcode': opcodes.DECn     , 'length': 1, 'cycles': 4       , 'register_options': {'B': 0x05 } },
                 {'m': 'LD rr nnnn' , 'opcode': opcodes.LDnn16d  , 'length': 3, 'cycles': 12      , 'register_options': {'HL': 0x21} },
-                {'m': 'LDD'        , 'opcode': opcodes.LDDHL8A  , 'length': 1, 'cycles': 8       , 'register_options': {'x': 0x32 } },
-                {'m': 'JRNZ'       , 'opcode': opcodes.JRNZn    , 'length': 2, 'cycles': [8, 12] , 'register_options': {'x': 0x20 } },
+                {'m': 'LDD (HL-) A', 'opcode': opcodes.LDDHL8A  , 'length': 1, 'cycles': 8       , 'register_options': {'x': 0x32 } },
+                {'m': 'JRNZ nnnn'       , 'opcode': opcodes.JRNZn    , 'length': 2, 'cycles': [8, 12] , 'register_options': {'x': 0x20 } },
                ]
 
 
+
+def get_instruction_by_mnemonic(mnemonic):
+    instructions = create_mnemonic_dictionary()
+
+    for i in instructions:
+        if i['m'] == mnemonic:
+            return i
 
 def create_mnemonic_dictionary():
     result = {}

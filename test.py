@@ -2,7 +2,7 @@ import opcodes
 from bootrom import BootRom
 from emulator import CPU, MMU,Registers
 from cartridges.testrom import TestRom
-import unittest 
+import unittest
 
 
 
@@ -17,7 +17,7 @@ class OpcodeTests(unittest.TestCase):
             self.mmu.set_rom(TestRom(data))
         if disable_bootrom:
             self.mmu.disable_bootrom()
-        
+
         self.cpu = CPU(self.mmu)
 
     def create_rom_testcontext(self, opcode_under_test, disable_bootrom=True):
@@ -29,7 +29,7 @@ class OpcodeTests(unittest.TestCase):
         0xdd,0xdc,0x99,0x9f,0xbb,0xb9,0x33,0x3e,0x4d,0x41,0x52,0x49,0x4f,0x4c,
         0x41,0x4e,0x44,0x32,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3,0x4,0x2,0x1,
         0x1,0x0,0x13,0xe0,0xf9]
-    
+
         self.mmu = MMU()
         no_op_length = 0x100 - len(opcode_under_test)
         no_op = [0x00] * no_op_length
@@ -41,10 +41,10 @@ class OpcodeTests(unittest.TestCase):
 
         if disable_bootrom:
             self.mmu.disable_bootrom()
-        
+
         self.cpu = CPU(self.mmu)
 
-    
+
     def test_LDSP16d(self):
         data = [0x31,0xf9,0xff]
         self.create_testcontext(data)
@@ -65,7 +65,7 @@ class OpcodeTests(unittest.TestCase):
         opcodes.CALLnn(self.mmu, self.cpu)
         # simulate the step method by added 1 to the pc (just like in the emulation)
         self.cpu.pc += 1
-        
+
         assert self.cpu.pc == 0x100
         assert self.cpu.reg.GET_SP() == 0xFFFD
         assert self.mmu.read(0xFFFD) == 0x03
@@ -88,7 +88,7 @@ class OpcodeTests(unittest.TestCase):
         self.cpu.reg.CLEAR_ZERO()
         opcodes.JRNZn(self.mmu, self.cpu)
         assert self.cpu.pc == 0x11
-        
+
         data = [0x20,0x10]
         self.create_rom_testcontext(data)
         self.cpu.reg.SET_ZERO()
@@ -154,7 +154,7 @@ class OpcodeTests(unittest.TestCase):
         self.create_testcontext(data)
         opcodes.LDn8d(self.mmu, self.cpu)
         assert self.cpu.reg.GET_A() == 0x11
-    
+
 
     def test_AF_register(self):
         data = []
@@ -165,7 +165,7 @@ class OpcodeTests(unittest.TestCase):
         assert self.cpu.reg.GET_AF() == 0x15ff
         assert self.cpu.reg.GET_A() ==  0x15
         assert self.cpu.reg.GET_F() == 0xff
-    
+
     def test_LDnCA(self):
         data = [0x4F]
         self.create_testcontext(data)
@@ -205,7 +205,7 @@ class OpcodeTests(unittest.TestCase):
         bootrom = BootRom()
         mmu.set_bios(bootrom)
         expected_result = 0xffff
-        
+
         mmu.write(0x8001,0xffff)
         actual_result = mmu.read(0x8001)
         assert actual_result == expected_result
@@ -239,19 +239,19 @@ class OpcodeTests(unittest.TestCase):
 
     def test_RLA(self):
         data =[0x17]
-        
+
         self.create_testcontext(data)
         # test rotate bit with carry set and value 0x80
         # expecting bit left rotate from 1000 0000 to 0000 0001 which is non zero and msb is put in carry flag
         self.cpu.reg.SET_CARRY()
         self.cpu.reg.SET_A(0x80)
-        
+
         opcodes.RLA(self.mmu, self.cpu)
         self.cpu.debugger.end()
         assert self.cpu.reg.GET_CARRY()
         assert not self.cpu.reg.GET_ZERO()
         assert self.cpu.reg.GET_CARRY() == 0x01
-        
+
         # carry is cleared, value is set to 0x80, expecting ZERO bit SET
         self.cpu.reg.CLEAR_CARRY()
         self.cpu.reg.SET_A(0x80)
@@ -271,7 +271,7 @@ class OpcodeTests(unittest.TestCase):
         assert not self.cpu.reg.GET_CARRY()
         #assert not self.cpu.reg.GET_ZERO()
         #assert self.cpu.reg.GET_A() == 0x80
-      
+
 
         self.cpu.reg.SET_CARRY()
         self.cpu.reg.CLEAR_ZERO()
@@ -284,19 +284,19 @@ class OpcodeTests(unittest.TestCase):
 
     def test_RLC(self):
         data =[0xCB,0x11]
-        
+
         self.create_testcontext(data)
         # test rotate bit with carry set and value 0x80
         # expecting bit left rotate from 1000 0000 to 0000 0001 which is non zero and msb is put in carry flag
         self.cpu.reg.SET_CARRY()
         self.cpu.reg.SET_C(0x80)
-        
+
         opcodes.RLC(self.mmu, self.cpu)
         self.cpu.debugger.end()
         assert self.cpu.reg.GET_CARRY()
         assert not self.cpu.reg.GET_ZERO()
         assert self.cpu.reg.GET_C() == 0x01
-        
+
         # carry is cleared, value is set to 0x80, expecting ZERO bit SET
         self.cpu.reg.CLEAR_CARRY()
         self.cpu.reg.SET_C(0x80)
@@ -316,7 +316,7 @@ class OpcodeTests(unittest.TestCase):
         assert not self.cpu.reg.GET_CARRY()
         assert not self.cpu.reg.GET_ZERO()
         assert self.cpu.reg.GET_C() == 0x80
-      
+
 
         self.cpu.reg.SET_CARRY()
         self.cpu.reg.CLEAR_ZERO()
@@ -326,8 +326,8 @@ class OpcodeTests(unittest.TestCase):
         assert not self.cpu.reg.GET_ZERO()
         assert not self.cpu.reg.GET_CARRY()
         assert self.cpu.reg.GET_C() == 0x01
-        
-        
+
+
     def test_CP(self):
         data1 = [0xFE,0xBB]
         self.create_testcontext(data1)
@@ -368,7 +368,7 @@ class OpcodeTests(unittest.TestCase):
         opcodes.LDAn(self.mmu, self.cpu)
         A = self.cpu.reg.GET_A()
         assert A == 0xce
-    
+
     def test_zero_plus_halfcarry_register(self):
         data = []
         self.create_testcontext(data)
@@ -382,7 +382,7 @@ class OpcodeTests(unittest.TestCase):
         data1 = [0xAF,0x00]
         self.create_testcontext(data1)
         self.cpu.reg.SET_AF(0x01B0)
-        
+
         opcodes.XORn(self.mmu, self.cpu)
         #self.cpu.reg.SET_ZERO()
         self.print_hex(self.cpu.reg.GET_AF())
@@ -420,7 +420,7 @@ class OpcodeTests(unittest.TestCase):
         assert register.GET_F() == 0xf0
         register.CLEAR_ZERO()
         assert register.GET_F() == 0x70
-        register.CLEAR_CARRY() 
+        register.CLEAR_CARRY()
         assert register.GET_F() == 0x60
         register.CLEAR_HALF_CARRY()
         assert register.GET_F() == 0x40
@@ -439,7 +439,6 @@ class OpcodeTests(unittest.TestCase):
         self.create_rom_testcontext(data)
         assert self.mmu.read(0x100 + 1) == 0xc3
 
-
     def test_registers(self):
         data = [0x00]
         self.create_testcontext(data)
@@ -450,7 +449,16 @@ class OpcodeTests(unittest.TestCase):
         assert self.cpu.reg.GET_B() == 0xAB
         assert self.cpu.reg.GET_BC() == 0xAB20
 
-        pass
-        
+    def test_JRZN_condition(self):
+        register = Registers()
+        register.CLEAR_ZERO()
+        register.SET_SUBSTRACT()
+        register.SET_HALF_CARRY()
+        register.CLEAR_CARRY()
+
+        self.print_hex(register.GET_AF())
+
+
+
 if __name__ == '__main__':
     unittest.main()

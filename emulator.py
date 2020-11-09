@@ -169,7 +169,7 @@ class Debugger:
 
     def __init__(self, cpu):
         self.cpu = cpu
-        self.show_registers = False
+        self.show_registers = True
         self.show_opcodes = True
         self.show_cpu_flags = False
         self.show_program_counter = True

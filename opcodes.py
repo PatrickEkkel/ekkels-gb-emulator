@@ -43,8 +43,8 @@ def DECn(mmu, cpu):
             result = True
 
     # set the necessary flags
-    half_carry = ((val & 0xF) - (0x01 & 0xF) & 0x10) == 0x10
-
+    #half_carry = ((val & 0xF) - (0x01 & 0xF) & 0x10) == 0x10
+    half_carry = ((B & 0xF) + (val & 0xf)) & 0x10
     # set the zero flag
     if val == 0x00:
         cpu.reg.SET_ZERO()
@@ -301,7 +301,7 @@ def LDn8d(mmu, cpu):
     # get Register from opcode
     pc = cpu.pc + 1
     val = mmu.read(pc)
-
+    cpu.debugger.print_iv(val)
     upper_parameter = cpu.read_upper_opcode_parameter()
 
     lower_parameter = cpu.read_lower_opcode_parameter()
@@ -463,6 +463,7 @@ def JRNZn(mmu, cpu):
     cpu.debugger.print_iv(val)
     jump_address = pc
     if not cpu.reg.GET_ZERO():
+        print('jup')
         jump_address += val
         cpu.pc = jump_address
     else:
