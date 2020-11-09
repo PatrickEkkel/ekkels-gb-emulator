@@ -76,7 +76,9 @@ class ProgramTests(unittest.TestCase):
         'loop:',]
 
         bitstream = gbasm.parse(test_program)
-        #gb = self.create_gameboy(bitstream)
+        for b in bitstream:
+            self.print_hex(b)
+        gb = self.create_gameboy(bitstream)
         assert bitstream[0] == self._get_instruction('NOP')
         assert bitstream[1] == self._get_instruction('JP nnnn')
         assert bitstream[2] == 0x4

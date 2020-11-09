@@ -173,9 +173,8 @@ class GBA_ASM:
 
             if isinstance(opcode, Label):
                 current_address = self.offset + program_counter
-                self.label_lookuptable[opcode.get_label()] = current_address
+                self.label_lookuptable[opcode.get_label()] = current_address + 2
                 program_counter += 2
-
             else:
                 program_counter += 1
 
@@ -201,6 +200,7 @@ class GBA_ASM:
                     self.encoded_program.append(int(sb, 16))
                 elif len(opcode.address) == 2:
                     fb = opcode.address[0:2]
+                    opcode.address = fb
                     self.encoded_program.append(int(fb, 16))
                 elif str(opcode.address) == '0':
                     opcode.address = 0x0
@@ -226,11 +226,10 @@ class GBA_ASM:
                  self.encoded_program.append(encoded_opcode)
                  result = address
                  if address > self.program_counter:
-                     print('yes it is ahead')
+                     print('Not implemented yet!')
                      self.encoded_program.append(int(0x00, 16))
                  else:
-                     # this results in a working value, +1 offset is a bit weird...
-                     signed_address = ((self.program_counter+1) - address - self.offset) * -1
+                     signed_address = ((self.program_counter) - address - self.offset) * -1
                      self.encoded_program.append(signed_address)
              else:
                  self.encoded_program.append(encoded_opcode)
@@ -248,11 +247,16 @@ class GBA_ASM:
             tokenizer = Tokenizer()
             opcode = tokenizer.tokenize(p)
             address = None
+
             if isinstance(opcode, Opcode):
                 if opcode.has_label():
                     self._handle_opcode_label(opcode)
-                else:
-                    self._handle_opcode(opcode)
+                    opcode_meta = self.instructions[opcode.get_mnemonic_label()]
+                    self.program_counter += opcode_meta['length']
 
-            self.program_counter += 1
+                else:
+                    opcode_meta = self.instructions[opcode.get_mnemonic_label()]
+                    self._handle_opcode(opcode)
+                    self.program_counter += opcode_meta['length']
+            #self.program_counter += 1
         return self.encoded_program
