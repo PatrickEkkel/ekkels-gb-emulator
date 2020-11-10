@@ -153,6 +153,8 @@ class ProgramTests(unittest.TestCase):
         'start:',
         'LDD (HL-) A',
         'DEC B',
+        'JRNZ start:',
+        'DEC C',
         'JRNZ start:']
         bitstream = gbasm.parse(test_program)
         for b in bitstream:

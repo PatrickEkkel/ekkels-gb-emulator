@@ -173,8 +173,8 @@ class Debugger:
         self.show_opcodes = True
         self.show_cpu_flags = False
         self.show_program_counter = True
-        self.step_instruction = True
-        self.stop_at = 0x21b
+        self.step_instruction = False
+        self.stop_at = 0x10d
         self.stop_at_opcode = None
 
     def format_hex(self, opcode):
@@ -215,10 +215,12 @@ class Debugger:
 
     def debug(self, pc, opcode):
         if self.step_instruction or self.stop_at == pc:
-            input('press enter to continue')
             self.print_register()
+            input('press enter to continue...')
+
         if self.stop_at_opcode == opcode:
-            input('press enter to continue')
+            self.print_register()
+            input('press enter to continue...')
 
         return
 
@@ -432,7 +434,7 @@ class CPU:
         self.opcodes[0xC1] = opcodes.POPBC
         #self.opcodes[0x05] = opcodes.DECn
         self.opcodes[0x3D] = opcodes.DECn
-        self.opcodes[0x0D] = opcodes.DECn
+        #self.opcodes[0x0D] = opcodes.DECn
         self.opcodes[0xc9] = opcodes.RET
         self.opcodes[0xFE] = opcodes.CPn
         self.opcodes[0xEA] = opcodes.LDnn16a

@@ -5,7 +5,7 @@ instructions = [{'m': 'XOR r'      , 'datatype': '', 'opcode': opcodes.XORn     
                 {'m': 'LD r nn'    , 'datatype': '', 'opcode': opcodes.LDn8d    , 'length': 2, 'cycles': 8       , 'register_options': {'C': 0x0E,'B': 0x06 } },
                 {'m': 'JP nnnn'    , 'datatype': '', 'opcode': opcodes.JPnn     , 'length': 3, 'cycles': 16      , 'register_options': {'x': 0xC3 } },
                 {'m': 'NOP'        , 'datatype': '', 'opcode': opcodes.NOP      , 'length': 1, 'cycles': 4       , 'register_options': {'x': 0x00 } },
-                {'m': 'DEC r'      , 'datatype': '', 'opcode': opcodes.DECn     , 'length': 1, 'cycles': 4       , 'register_options': {'B': 0x05 } },
+                {'m': 'DEC r'      , 'datatype': '', 'opcode': opcodes.DECn     , 'length': 1, 'cycles': 4       , 'register_options': {'B': 0x05, 'C': 0x0D } },
                 {'m': 'LD rr nnnn' , 'datatype': '', 'opcode': opcodes.LDnn16d  , 'length': 3, 'cycles': 12      , 'register_options': {'HL': 0x21} },
                 {'m': 'LDD (HL-) A', 'datatype': '', 'opcode': opcodes.LDDHL8A  , 'length': 1, 'cycles': 8       , 'register_options': {'x': 0x32 } },
                 {'m': 'JRNZ nnnn'  , 'datatype': 'a8', 'opcode': opcodes.JRNZn    , 'length': 2, 'cycles': [8, 12] , 'register_options': {'x': 0x20 } },

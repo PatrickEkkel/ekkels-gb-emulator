@@ -16,7 +16,7 @@ def DECn(mmu, cpu):
     lower_param = cpu.read_lower_opcode_parameter()
 
     val = 0x00
-
+    #orig_val = 0x00
     if lower_param == 0x50:
         # do decrement on register B
         if upper_param == 0x00:
@@ -44,7 +44,7 @@ def DECn(mmu, cpu):
 
     # set the necessary flags
     #half_carry = ((val & 0xF) - (0x01 & 0xF) & 0x10) == 0x10
-    half_carry = ((B & 0xF) + (val & 0xf)) & 0x10
+    half_carry = ((val & 0xF) + (val & 0xf)) & 0x10
     # set the zero flag
     if val == 0x00:
         cpu.reg.SET_ZERO()
