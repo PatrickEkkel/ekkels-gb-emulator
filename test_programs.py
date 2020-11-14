@@ -163,8 +163,6 @@ class ProgramTests(unittest.TestCase):
         gb = self.create_gameboy(bitstream)
 
         #gb.power_on()
-
-
         return True
 
     def test_program8(self):

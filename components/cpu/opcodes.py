@@ -1,5 +1,5 @@
 import bitwise_functions
-
+from ..mmu import MMU
 
 def NOP(mmu, cpu):
     cpu.debugger.print_opcode('NOP')
@@ -297,7 +297,6 @@ def PUSHBC(mmu, cpu):
 
 def LDn8d(mmu, cpu):
     cpu.debugger.print_opcode('LDn8d')
-    from emulator import MMU
     # get Register from opcode
     pc = cpu.pc + 1
     val = mmu.read(pc)
@@ -338,7 +337,6 @@ def LDn8d(mmu, cpu):
 # 0x31 and 2 bytes unsigned
 def LDnn16d(mmu, cpu):
     cpu.debugger.print_opcode('LDnn16d')
-    from emulator import MMU
     parameter = cpu.read_upper_opcode_parameter()
     cpu.pc += 1
     val = mmu.read_u16(cpu.pc)
@@ -352,7 +350,6 @@ def LDnn16d(mmu, cpu):
 
 def LDHL8A(mmu, cpu):
     cpu.debugger.print_opcode('LDHL8A')
-    from emulator import MMU
     A = cpu.reg.GET_A()
     HL = cpu.reg.GET_HL()
     mmu.write(HL, A)
@@ -361,7 +358,6 @@ def LDHL8A(mmu, cpu):
 def LDDHL8A(mmu, cpu):
     cpu.debugger.print_opcode('LDDHL8A')
     parameter = cpu.read_upper_opcode_parameter()
-    from emulator import MMU
     # get A
     A = cpu.reg.GET_A()
     AF = cpu.reg.GET_AF()
@@ -472,8 +468,6 @@ def JRNZn(mmu, cpu):
 # pushes the PC to the stack and jump to specified 16 bit operand
 def CALLnn(mmu, cpu):
     cpu.debugger.print_opcode('CALLnn')
-    from emulator import MMU
-
     # address of next instruction
     pc = cpu.pc + 1
     val = mmu.read_u16(pc)
@@ -520,7 +514,6 @@ def RLA(mmu, cpu):
 
 # CB opcodes
 def BIT7H(mmu, cpu):
-    from emulator import MMU
     cpu.debugger.print_opcode('BIT7H')
     HL = cpu.reg.GET_HL()
     H = MMU.get_high_byte(HL)

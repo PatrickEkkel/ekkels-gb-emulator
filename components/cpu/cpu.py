@@ -1,229 +1,8 @@
+from ..mmu import MMU
+from ..debugger import Debugger
+
 import instructionset
-import struct
-import opcodes
-from array import array
-
-class Stack:
-
-    def __init__(self, cpu, mmu):
-        self.mmu = mmu
-        self.cpu = cpu
-
-
-    def push_u16bit(self, value):
-        lowbyte = MMU.get_high_byte(value)
-        highbyte = MMU.get_low_byte(value)
-        self.push(lowbyte)
-        self.push(highbyte)
-
-    def push(self, value):
-        sp = self.cpu.reg.GET_SP()
-        sp -= 1
-        self.mmu.write(sp, value)
-        self.cpu.reg.SET_SP(sp)
-
-    def pop(self):
-        sp = self.cpu.reg.GET_SP()
-        return_val = self.mmu.read(sp)
-        sp += 1
-        self.cpu.reg.SET_SP(sp)
-        return return_val
-
-class MMU:
-    VRAM_START             = 0x8000
-    VRAM_END               = 0x9FFF
-
-    HRAM_START             = 0xFF80
-    HRAM_END               = 0xFFFE
-
-    BOOTROM_START          = 0x0000
-    BOOTROM_END            = 0x00FF
-
-    CARTRIDGE_ROM_START    = 0x0100
-
-    IO_REGISTER_START      = 0xFF00
-    IO_REGISTER_END        = 0xFF7F
-
-    CARTRIDGE_ROM_00_START = 0x000
-    CARTRIDGE_ROM_00_END   = 0x3FFF
-
-    CARTRIDGE_ROM_01_START = 0x4000
-    CARTRIDGE_ROM_01_END   = 0x7FFF
-
-    def __init__(self):
-        self.booted = False
-        self.rom = None
-        self.bios = None
-        self.io = self.init_memory(MMU.IO_REGISTER_START,MMU.IO_REGISTER_END)
-        self.vram = self.init_memory(MMU.VRAM_START, MMU.VRAM_END)
-        self.hram = self.init_memory(MMU.HRAM_START, MMU.HRAM_END)
-
-
-    def init_memory(self, start,end):
-        size = end - start
-        result = [0x0000] * (end + 1)
-        return result
-
-    def print_hex(self, opcode):
-        return ("0x{:x}".format(opcode))
-
-
-    def disable_bootrom(self):
-        self.booted = True
-
-    def set_rom(self, rom):
-        self.rom = rom
-
-    def set_bios(self, bios):
-        self.bios = bios
-
-    def write_u8(self,address, u8):
-        self.data[address] = u8
-
-    def get_high_byte(value):
-        return (value >> 8) & 0xFF
-
-    def get_low_byte(value):
-        return value & 0xFF
-
-    def write(self,address, value):
-        # writing to VRAM
-        if self._is_vram(address):
-            self.vram[address] = value
-        elif self._is_io(address):
-            self.io[address] = value
-        elif self._is_hram(address):
-            self.hram[address] = value
-        else:
-            print('nothing to write')
-
-
-    def _is_rom(self, address):
-        return address >= MMU.CARTRIDGE_ROM_00_START and address <= MMU.CARTRIDGE_ROM_01_END
-
-    def _is_vram(self, address):
-        return address >= MMU.VRAM_START and address <= MMU.VRAM_END
-
-    def _is_io(self, address):
-        return address >= MMU.IO_REGISTER_START and address <= MMU.IO_REGISTER_END
-
-    def _is_hram(self, address):
-        return address >= MMU.HRAM_START and address <= MMU.HRAM_END
-
-    def read(self, address):
-        local_data = None
-
-        # determine if we are above 0x00FF,
-        # this implies that we are not trying to read addresses from the bootrom
-        # everything above 0x104 to 7FFF is 'cartrdige ROM' space, switchable via MBC if available
-
-
-        #if self.bootrom_loaded:
-        #    local_data = self.data
-        #else:
-        #    local_data = self.bios.data
-
-        # is the address within vram?
-        if self._is_rom(address):
-            if self.booted:
-                return self.rom.read(address)
-            elif not self.booted and address >= MMU.BOOTROM_END:
-                return self.rom.read(address)
-            else:
-                return self.bios.read(address)
-        elif self._is_hram(address):
-            return self.hram[address]
-        elif self._is_vram(address):
-            return self.vram[address]
-        elif self._is_io(address):
-            return self.io[address]
-        else:
-            # trying to access unmapped memory
-            return 0x0000
-
-
-    def _getbyte(self,address, signed=False):
-        pack_method = 'B'
-        if signed:
-            pack_method = 'b'
-
-        if self.booted:
-            return struct.pack(pack_method, self.rom.read(address))
-        else:
-            return struct.pack(pack_method, self.bios.read(address))
-
-    def read_s8(self, address):
-        result = self.read(address)
-        if (result & 0x80):
-            result = (result + -0xFF) - 1
-        return result
-
-    def read_u8(self, address):
-        return self._getbyte(address)
-
-    def read_u16(self,address):
-        return int.from_bytes(self._getbyte(address) + self._getbyte(address + 1), 'little')
-
-
-class Debugger:
-
-    def __init__(self, cpu):
-        self.cpu = cpu
-        self.show_registers = True
-        self.show_opcodes = True
-        self.show_cpu_flags = False
-        self.show_program_counter = True
-        self.step_instruction = False
-        self.stop_at = 0x10d
-        self.stop_at_opcode = None
-
-    def format_hex(self, opcode):
-        return ("0x{:x}".format(opcode))
-
-    def print_opcode(self, opcode_description):
-        if self.cpu.debug_opcode:
-            print(opcode_description, end=' ')
-
-    def print_register(self):
-        if self.show_registers:
-            AF = self.format_hex(self.cpu.reg.GET_AF())
-            BC = self.format_hex(self.cpu.reg.GET_BC())
-            DE = self.format_hex(self.cpu.reg.GET_DE())
-            HL = self.format_hex(self.cpu.reg.GET_HL())
-            print(f'AF: {AF}')
-            print(f'BC: {BC}')
-            print(f'DE: {DE}')
-            print(f'HL: {HL}')
-    def print_iv(self, value):
-        if self.cpu.debug_opcode and self.show_opcodes:
-            hex = self.format_hex(value)
-            print(f'{hex} ',end=' ')
-
-    def end(self):
-        print('')
-
-    def print_cpu_flags(self):
-        if self.cpu.debug_opcode and self.show_cpu_flags:
-            hex = self.format_hex(self.cpu.reg.GET_F())
-            print(f'FLAGS-REG: {hex}')
-
-    def print_state(self, data):
-        hex = self.format_hex(data)
-        hex_pc = self.format_hex(self.cpu.pc)
-        if self.cpu.debug_opcode and self.show_program_counter:
-            print(f'PC: {hex_pc} CPU: {hex}', end=' ')
-
-    def debug(self, pc, opcode):
-        if self.step_instruction or self.stop_at == pc:
-            self.print_register()
-            input('press enter to continue...')
-
-        if self.stop_at_opcode == opcode:
-            self.print_register()
-            input('press enter to continue...')
-
-        return
-
+from . import opcodes
 
 class Registers:
 
@@ -389,6 +168,34 @@ class Registers:
         self.SET_DE(0x00D8)
         self.SET_HL(0x014D)
         self.SET_SP(0xFFFE)
+
+
+class Stack:
+
+    def __init__(self, cpu, mmu):
+        self.mmu = mmu
+        self.cpu = cpu
+
+
+    def push_u16bit(self, value):
+        lowbyte = MMU.get_high_byte(value)
+        highbyte = MMU.get_low_byte(value)
+        self.push(lowbyte)
+        self.push(highbyte)
+
+    def push(self, value):
+        sp = self.cpu.reg.GET_SP()
+        sp -= 1
+        self.mmu.write(sp, value)
+        self.cpu.reg.SET_SP(sp)
+
+    def pop(self):
+        sp = self.cpu.reg.GET_SP()
+        return_val = self.mmu.read(sp)
+        sp += 1
+        self.cpu.reg.SET_SP(sp)
+        return return_val
+
 
 class CPU:
     def __init__(self, mmu):

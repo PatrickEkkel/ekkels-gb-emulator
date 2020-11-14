@@ -1,5 +1,6 @@
 from bootrom import BootRom
-from emulator import CPU, MMU
+from components.cpu.cpu import CPU
+from components.mmu import MMU
 class GameBoy:
     def __init__(self, cartridge):
         self.bootrom = BootRom()
@@ -11,7 +12,7 @@ class GameBoy:
         self.CPU = CPU(self.mmu)
 
     def power_on(self,skipbios=True):
-        
+
         if skipbios:
             self.mmu.disable_bootrom()
             self.CPU.pc = 0x100
@@ -20,4 +21,3 @@ class GameBoy:
         cont = True
         while(cont):
             cont = self.CPU.step()
-        

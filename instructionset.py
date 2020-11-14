@@ -1,4 +1,4 @@
-import opcodes
+from components.cpu import  opcodes
 import bitwise_functions
 
 instructions = [{'m': 'XOR r'      , 'datatype': '', 'opcode': opcodes.XORn     , 'length': 1, 'cycles': 4       , 'register_options': {'A': 0xAF} },
