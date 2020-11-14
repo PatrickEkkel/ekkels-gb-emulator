@@ -1,7 +1,9 @@
 from bootrom import BootRom
 from components.cpu.cpu import CPU
+from components.screen import Screen
 from components.mmu import MMU
 class GameBoy:
+    
     def __init__(self, cartridge):
         self.bootrom = BootRom()
         self.cartridge = cartridge
@@ -10,6 +12,7 @@ class GameBoy:
         self.mmu.set_rom(cartridge)
 
         self.CPU = CPU(self.mmu)
+        self.Screen = Screen()
 
     def power_on(self,skipbios=True):
 
