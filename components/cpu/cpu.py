@@ -201,6 +201,7 @@ class CPU:
     def __init__(self, mmu):
         self.pc = 0x00
         self._mmu = mmu
+        self.interrupts_enabled = True
         self.debug_opcode = True
         self.stack = Stack(self, mmu)
         self.reg = Registers()

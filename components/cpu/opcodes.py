@@ -72,8 +72,14 @@ def RET(mmu, cpu):
 
 def DI(mmu, cpu):
     cpu.debugger.print_opcode('DI')
-    
+    self.interrupts_enabled = False
     return True
+
+def EI(mmu, cpu):
+    cpu.debugger.print_opcode('DI')
+    self.interrupts_enabled = True
+    return True
+
 
 def INCnn(mmu, cpu):
     cpu.debugger.print_opcode('INCnn')
