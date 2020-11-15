@@ -10,7 +10,7 @@ class Debugger:
         self.show_cpu_flags = False
         self.show_program_counter = True
         self.step_instruction = False
-        self.stop_at = 0x21c
+        self.stop_at = 0x21b
         self.stop_at_opcode = None
         self.exit_at_breakpoint = False
 

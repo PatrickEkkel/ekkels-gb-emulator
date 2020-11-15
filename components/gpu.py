@@ -1,11 +1,58 @@
 from .mmu import MMU
+from .screen import Screen
 
+class Tile:
+    def __init__(self):
+        self.rows = []
+    
+    def add(self, row):
+        self.rows.append(row)
+
+class TileRow:
+
+    def __init__(self, fb, sb):
+        self.fb = fb
+        self.sb = sb
+        self.row = []
+    def decode(self):
+        for x in range(7, -1, -1):
+            msb = self.fb >> x & 0x01
+            lsb = self.sb >> x & 0x01
+
+            if msb and lsb:
+                self.row.append(Screen.DARK_GREEN)
+            elif not msb and not lsb:
+                self.row.append(Screen.LIGHTEST_GREEN)
+            elif msb and not lsb:
+                self.row.append(Screen.DARKEST_GREEN)
+            elif lsb and not msb:
+                self.row.append(Screen.LIGHT_GREEN)
+            
+
+    
 class GPU:
-    def __init__(self, mmu):
+    def __init__(self, mmu, screen):
         self._mmu = mmu
+        self._screen = screen
 
     def format_hex(self, opcode):
         return ("0x{:x}".format(opcode))
+
+    def _decode_tile_row(self, address, offset):
+        tile_row = address + offset
+
+        fb = tile_row
+        sb = tile_row + 1
+
+        first_byte = self._mmu.read(fb)
+        second_byte = self._mmu.read(sb)
+
+        tr = TileRow(first_byte, second_byte)
+
+        tr.decode()
+        return tr
+
+
 
     # Test method to test if we get the GPU/Screen implementation right
     def render_nintento_logo(self):
@@ -33,69 +80,15 @@ class GPU:
         
         #print(self.format_hex(self._mmu.read(0x8190)))
 
-        first_byte = self._mmu.read(0x8194)
-        second_byte = self._mmu.read(0x8195)
+        #first_byte = self._mmu.read(0x8190)
+        #second_byte = self._mmu.read(0x8191)
+        tile = Tile()
+        for x in range(0,16,2):
+            tr = self._decode_tile_row(vram_address, x)
+            #print(tr)
+            tile.add(tr)
 
-        #print(self.format_hex(first_byte))
-        #print(self.format_hex(second_byte))
-
-        # try to get the first pixel.. 
-        print('first pixel')
-        
-        msb = first_byte >> 7 & 0x01 
-        lsb = second_byte >> 7 & 0x01
-        print(msb)
-        print(lsb)
-
-        print('second pixel')
-        
-        msb = first_byte >> 6 & 0x01
-        lsb = second_byte >> 6 & 0x01
-
-        print(msb)
-        print(lsb)
-
-        print('third pixel')
-        
-        msb = first_byte >> 5 & 0x01
-        lsb = second_byte >> 5 & 0x01
-
-        print(msb)
-        print(lsb)
-
-        print('fourth pixel')
-        
-        msb = first_byte >> 4 & 0x01
-        lsb = second_byte >> 4 & 0x01
-
-        print(msb)
-        print(lsb)
-
-        print('fifth pixel')
-        msb = first_byte >> 3 & 0x01
-        lsb = second_byte >> 3 & 0x01
-
-        print(msb)
-        print(lsb)
-
-        print('sixth pixel')
-        msb = first_byte >> 2 & 0x01
-        lsb = second_byte >> 2 & 0x01
-
-        print(msb)
-        print(lsb)
-
-        print('seventh pixel')
-        msb = first_byte >> 1 & 0x01
-        lsb = second_byte >> 1 & 0x01
-
-
-        print(msb)
-        print(lsb)
-
-        print('eigth pixel')
-        msb = first_byte & 0x01
-        lsb = second_byte & 0x01
-
-        print(msb)
-        print(lsb)
+        self._screen.render_tile(tile)
+        #
+        # 
+        # print(tr.row)
