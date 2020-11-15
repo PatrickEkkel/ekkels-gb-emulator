@@ -1,14 +1,18 @@
+from .mmu import MMU
 class Debugger:
 
-    def __init__(self, cpu):
+    def __init__(self, cpu, mmu):
         self.cpu = cpu
+        self.mmu = mmu
         self.show_registers = True
+        self.show_vram = True
         self.show_opcodes = True
         self.show_cpu_flags = False
         self.show_program_counter = True
         self.step_instruction = False
-        self.stop_at = 0x21b
+        self.stop_at = 0x21c
         self.stop_at_opcode = None
+        self.exit_at_breakpoint = False
 
     def format_hex(self, opcode):
         return ("0x{:x}".format(opcode))
@@ -27,6 +31,21 @@ class Debugger:
             print(f'BC: {BC}')
             print(f'DE: {DE}')
             print(f'HL: {HL}')
+    
+    def print_vram(self):
+        if self.show_vram:
+            start =  MMU.VRAM_START
+            current = start
+            end = MMU.VRAM_END
+            if self.show_vram:
+                while(current < end):
+                    current += 1
+                    value = self.mmu.read(current)
+                    if value != 0x00:
+                        address = current
+                        print('address: ' + self.format_hex(address))
+                        print('value: ' + self.format_hex(self.mmu.read(value)))
+
     def print_iv(self, value):
         if self.cpu.debug_opcode and self.show_opcodes:
             hex = self.format_hex(value)
@@ -49,10 +68,15 @@ class Debugger:
     def debug(self, pc, opcode):
         if self.step_instruction or self.stop_at == pc:
             self.print_register()
+            self.print_vram()
             input('press enter to continue...')
+
+            return True
 
         if self.stop_at_opcode == opcode:
             self.print_register()
             input('press enter to continue...')
+            return True
 
-        return
+        
+

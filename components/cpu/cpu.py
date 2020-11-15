@@ -204,7 +204,7 @@ class CPU:
         self.debug_opcode = True
         self.stack = Stack(self, mmu)
         self.reg = Registers()
-        self.debugger = Debugger(self)
+        self.debugger = Debugger(self, mmu)
         self.opcodes = instructionset.create_instructionset()
         self.cb_opcodes = [None] * 255
         #self.opcodes[0x00] = opcodes.NOP
@@ -274,7 +274,11 @@ class CPU:
             instruction = self.opcodes[opcode]
         if instruction:
             self.debugger.print_state(opcode)
-            self.debugger.debug(self.pc, opcode)
+
+            if self.debugger.debug(self.pc, opcode):
+                if self.debugger.exit_at_breakpoint:
+                    # stop execution by returning False
+                    return False
             success = instruction(self._mmu,self)
             self.debugger.print_cpu_flags()
             self.debugger.end()

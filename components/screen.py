@@ -1,4 +1,5 @@
 import pygame, sys
+from .mmu import MMU
 from pygame import gfxdraw
 from pygame.locals import *
 # 160×144 pixels and shows 4 shades of grey (white, light grey,
@@ -6,7 +7,9 @@ from pygame.locals import *
 class Screen:
 
     
-    def __init__(self):
+    def __init__(self, mmu):
+
+        self.mmu = mmu
         # set up pygame
         pygame.init()
 
@@ -34,10 +37,4 @@ class Screen:
         del pixArray
         # draw the window onto the screen
         pygame.display.update()
-
-        # run the game loop
-        #while True:
-        #    for event in pygame.event.get():
-        #        if event.type == QUIT:
-        #            pygame.quit()
-        #            sys.exit()
+ 

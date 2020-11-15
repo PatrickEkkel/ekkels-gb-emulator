@@ -1,5 +1,6 @@
 from bootrom import BootRom
 from components.cpu.cpu import CPU
+from components.gpu import GPU
 from components.screen import Screen
 from components.mmu import MMU
 class GameBoy:
@@ -12,15 +13,20 @@ class GameBoy:
         self.mmu.set_rom(cartridge)
 
         self.CPU = CPU(self.mmu)
-        self.Screen = Screen()
+        self.GPU = GPU(self.mmu)
+        self.screen = Screen(self.mmu)
+    
 
-    def power_on(self,skipbios=True):
-
+    def _init(self, skipbios):
         if skipbios:
             self.mmu.disable_bootrom()
             self.CPU.pc = 0x100
             self.CPU.reg.initialize_without_bootrom()
 
+        
+
+    def power_on(self,skipbios=True):
+        self._init(skipbios)
         cont = True
         while(cont):
             cont = self.CPU.step()
