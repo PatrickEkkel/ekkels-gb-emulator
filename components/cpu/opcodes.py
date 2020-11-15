@@ -70,6 +70,11 @@ def RET(mmu, cpu):
     cpu.pc = jump_address
     return True
 
+def DI(mmu, cpu):
+    cpu.debugger.print_opcode('DI')
+    
+    return True
+
 def INCnn(mmu, cpu):
     cpu.debugger.print_opcode('INCnn')
     parameter = cpu.read_upper_opcode_parameter()

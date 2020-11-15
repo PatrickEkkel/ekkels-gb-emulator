@@ -9,10 +9,12 @@ class Debugger:
         self.show_opcodes = True
         self.show_cpu_flags = False
         self.show_program_counter = True
-        self.step_instruction = False
-        self.stop_at = 0x21b
+        self.step_instruction = True
+        self.stop_at = None
         self.stop_at_opcode = None
+        self.stop_and_step_at = None
         self.exit_at_breakpoint = False
+
 
     def format_hex(self, opcode):
         return ("0x{:x}".format(opcode))
@@ -27,6 +29,7 @@ class Debugger:
             BC = self.format_hex(self.cpu.reg.GET_BC())
             DE = self.format_hex(self.cpu.reg.GET_DE())
             HL = self.format_hex(self.cpu.reg.GET_HL())
+            print('\n')
             print(f'AF: {AF}')
             print(f'BC: {BC}')
             print(f'DE: {DE}')
@@ -77,6 +80,14 @@ class Debugger:
             self.print_register()
             input('press enter to continue...')
             return True
+
+        if self.stop_and_step_at and pc >= self.stop_and_step_at:
+            self.print_register()
+            self.print_vram()
+            input('press enter to continue...')
+
+            return True
+
 
         
 

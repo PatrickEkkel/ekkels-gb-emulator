@@ -222,12 +222,12 @@ class GBA_ASM:
              # check if opcode needs a signed or an unsigned value
 
              # is it 8 bit signed?
-             if opcode_meta['datatype'] == 'a8':
+             if opcode_meta['datatype'] == 'r8':
                  self.encoded_program.append(encoded_opcode)
                  result = address
                  if address > self.program_counter:
                      print('Not implemented yet!')
-                     self.encoded_program.append(int(0x00, 16))
+                     self.encoded_program.append(int(0x00))
                  else:
                      signed_address = ((self.program_counter) - address - self.offset) * -1
                      self.encoded_program.append(signed_address)

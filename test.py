@@ -1,6 +1,7 @@
-import opcodes
+from components.cpu import opcodes
 from bootrom import BootRom
-from emulator import CPU, MMU,Registers
+from components.cpu.cpu import CPU,Registers
+from components.mmu import MMU
 from cartridges.testrom import TestRom
 import unittest
 
@@ -448,6 +449,15 @@ class OpcodeTests(unittest.TestCase):
         assert self.cpu.reg.GET_C() == 0x20
         assert self.cpu.reg.GET_B() == 0xAB
         assert self.cpu.reg.GET_BC() == 0xAB20
+
+    def test_XORa_with_testcase_tetris_0222(self):
+        data = [0xAF,0x00]
+        self.create_testcontext(data)
+        self.cpu.reg.SET_AF(0x1C0)
+        opcodes.XORn(self.mmu, self.cpu)
+        self.print_hex(self.cpu.reg.GET_AF())
+        assert True
+
 
     def test_JRZN_condition(self):
         register = Registers()

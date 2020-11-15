@@ -12,9 +12,9 @@ class GameBoy:
         self.mmu.set_bios(self.bootrom)
         self.mmu.set_rom(cartridge)
 
-        self.screen = Screen(self.mmu)
+        #self.screen = Screen(self.mmu)
         self.CPU = CPU(self.mmu)
-        self.GPU = GPU(self.mmu, self.screen)
+        #self.GPU = GPU(self.mmu, self.screen)
         
 
     def _init(self, skipbios):
