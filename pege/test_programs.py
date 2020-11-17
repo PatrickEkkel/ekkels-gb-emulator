@@ -170,7 +170,7 @@ class ProgramTests(unittest.TestCase):
 
         #gb.power_on()
         return True
-
+    
     # TODO, add asserts
     def test_program9(self):
         gbasm = GBA_ASM()

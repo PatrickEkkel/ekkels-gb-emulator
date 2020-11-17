@@ -9,6 +9,7 @@ https://realboyemulator.wordpress.com/2013/01/03/a-look-at-the-game-boy-bootstra
 https://gbdev.gg8.se/wiki/articles/Memory_Map
 https://robdor.com/2016/08/10/gameboy-emulator-half-carry-flag/
 https://blog.ryanlevick.com/DMG-01/public/book/graphics/tile_ram.html
+https://blog.tigris.fr/2019/09/15/writing-an-emulator-the-first-pixel/
 # test program to verify CPU emulation
 
 https://github.com/retrio/gb-test-roms/tree/master/cpu_instrs

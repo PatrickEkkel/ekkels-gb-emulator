@@ -21,6 +21,8 @@ class MMU:
     CARTRIDGE_ROM_01_START = 0x4000
     CARTRIDGE_ROM_01_END   = 0x7FFF
 
+    LY_REGISTER = 0xFF44
+
     def __init__(self):
         self.booted = False
         self.rom = None
@@ -108,6 +110,8 @@ class MMU:
             return self.vram[address]
         elif self._is_io(address):
             return self.io[address]
+        elif address == MMU.LY_REGISTER:
+            return self.LY
         else:
             # trying to access unmapped memory
             return 0x0000

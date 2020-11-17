@@ -4,6 +4,25 @@ from ..debugger import Debugger
 import instructionset
 from . import opcodes
 
+class Clock:
+
+    def __init__(self,speed):
+        self._clock = 0
+        self._current = 0
+        self._speed = speed
+
+    def tick(self):
+        if self._clock == self._speed:
+            self._clock = 0
+        self._clock += 1
+
+    def cpu_wait(self):
+        return self._current > self._clock
+
+    def update(self, cycle):
+        self._current = self._clock + cycle
+        #input('press enter to continue...')
+
 class Registers:
 
     ZERO = 0x80
@@ -198,15 +217,18 @@ class Stack:
 
 
 class CPU:
-    def __init__(self, mmu):
+    def __init__(self, mmu, clock):
         self.pc = 0x00
         self._mmu = mmu
+        self._clock = clock
+        self.disable_cpu = True
         self.interrupts_enabled = True
-        self.debug_opcode = True
+        self.debug_opcode = False
         self.stack = Stack(self, mmu)
         self.reg = Registers()
         self.debugger = Debugger(self, mmu)
-        self.opcodes = instructionset.create_instructionset()
+        self.opcodes = instructionset.create_opcode_map('opcode')
+        self.opcode_cycles = instructionset.create_opcode_map('cycles')
         self.cb_opcodes = [None] * 255
         self.opcodes[0x31] = opcodes.LDSP16d
         self.opcodes[0xC5] = opcodes.PUSHBC
@@ -248,7 +270,11 @@ class CPU:
 
 
     def read_opcode(self):
-        return self._mmu.read(self.pc)
+        # PUT CPU in execute NOP forever, very handy when working on GPU
+        if self.disable_cpu:
+            return 0x00
+        else:
+            return self._mmu.read(self.pc)
 
     def read_lower_opcode_parameter(self):
         return self._mmu.read(self.pc) << 4 & 0xFF
@@ -257,29 +283,35 @@ class CPU:
         return self._mmu.read(self.pc) >> 4 & 0xFF
 
     def step(self):
-        success = False
-        opcode = self.read_opcode()
 
-        hex = self.debugger.format_hex(opcode)
-        hex_pc = self.debugger.format_hex(self.pc)
+        if not self._clock.wait():
+            success = False
+            opcode = self.read_opcode()
 
-        if opcode == 0xcb:
-            instruction = self.cb_opcodes[opcode]
-        else:
-            instruction = self.opcodes[opcode]
-        if instruction:
-            self.debugger.print_state(opcode)
+            cycle = self.opcode_cycles[opcode]
+            hex = self.debugger.format_hex(opcode)
+            hex_pc = self.debugger.format_hex(self.pc)
 
-            if self.debugger.debug(self.pc, opcode):
-                if self.debugger.exit_at_breakpoint:
-                    # stop execution by returning False
-                    return False
-            success = instruction(self._mmu,self)
-            self.debugger.print_cpu_flags()
-            self.debugger.end()
-            if not success:
-                print(f'Opcode failed {hex} at {hex_pc}')
-        else:
-            print(f'Unknown opcode {hex} at {hex_pc}')
-        self.pc += 1
-        return success
+            if opcode == 0xcb:
+                instruction = self.cb_opcodes[opcode]
+            else:
+                instruction = self.opcodes[opcode]
+            if instruction:
+                self.debugger.print_state(opcode)
+
+                if self.debugger.debug(self.pc, opcode):
+                    if self.debugger.exit_at_breakpoint:
+                        # stop execution by returning False
+                        return False
+                success = instruction(self._mmu,self)
+                self.debugger.print_cpu_flags()
+                self.debugger.end()
+                if not success:
+                    print(f'Opcode failed {hex} at {hex_pc}')
+                else:
+                    self._clock.update(cycle)
+            else:
+                print(f'Unknown opcode {hex} at {hex_pc}')
+            self.pc += 1
+            return success
+        return True

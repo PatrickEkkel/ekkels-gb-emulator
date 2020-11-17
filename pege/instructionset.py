@@ -56,11 +56,11 @@ def create_bitstream(test_program):
     return []
 
 
-def create_instructionset():
+def create_opcode_map(element):
     result = [None] * 255
     for i in instructions:
         for opcode in i['register_options'].values():
             #print(opcode)
-            result[opcode] = i['opcode']
+            result[opcode] = i[element]
         #result[i['i']] = i['opcode']
     return result

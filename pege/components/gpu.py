@@ -4,7 +4,7 @@ from .screen import Screen
 class Tile:
     def __init__(self):
         self.rows = []
-    
+
     def add(self, row):
         self.rows.append(row)
 
@@ -27,13 +27,21 @@ class TileRow:
                 self.row.append(Screen.DARKEST_GREEN)
             elif lsb and not msb:
                 self.row.append(Screen.LIGHT_GREEN)
-            
 
-    
+
 class GPU:
-    def __init__(self, mmu, screen):
+
+    OAM_SEARCH = 0
+    PIXEL_TRANSFER = 1
+    VBLANK = 2
+    HBLANK = 3
+
+    def __init__(self, mmu, screen, clock):
         self._mmu = mmu
         self._screen = screen
+        self._clock = clock
+        self.current_mode = GPU.OAM_SEARCH
+
 
     def format_hex(self, opcode):
         return ("0x{:x}".format(opcode))
@@ -52,7 +60,13 @@ class GPU:
         tr.decode()
         return tr
 
+    def _tick(self):
+        if self._clock.start_of_cycle():
+            pass
+        self._clock.tick()
 
+    def step(self):
+        self._tick()
 
     # Test method to test if we get the GPU/Screen implementation right
     def render_nintento_logo(self):
@@ -61,7 +75,7 @@ class GPU:
         current = start
         end = MMU.VRAM_END
 
-        # add copyright sign to memory address 
+        # add copyright sign to memory address
         vram_address = 0x8190
         tile = [0x3C,0x00, 0x42, 0x00, 0xB9, 0x00,0xA5,0x00,0xB9,0x00,0xA5,0x00,0x42,0x00,0x3C,0x00]
         offset = 0
@@ -77,7 +91,7 @@ class GPU:
         #        print(self.format_hex(self._mmu.read(current)))
                 #print(self.format_hex(current))
 
-        
+
         #print(self.format_hex(self._mmu.read(0x8190)))
 
         #first_byte = self._mmu.read(0x8190)
@@ -90,5 +104,5 @@ class GPU:
 
         self._screen.render_tile(tile)
         #
-        # 
+        #
         # print(tr.row)

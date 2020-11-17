@@ -4,15 +4,15 @@ class Debugger:
     def __init__(self, cpu, mmu):
         self.cpu = cpu
         self.mmu = mmu
-        self.show_registers = True
-        self.show_vram = True
-        self.show_opcodes = True
+        self.show_registers = False
+        self.show_vram = False
+        self.show_opcodes = False
         self.show_cpu_flags = False
-        self.show_program_counter = True
-        self.step_instruction = True
+        self.show_program_counter = False
+        self.step_instruction = False
         self.stop_at = None
         self.stop_at_opcode = None
-        self.stop_and_step_at = None
+        self.stop_and_step_at = None #0x231
         self.exit_at_breakpoint = False
 
 
@@ -34,7 +34,7 @@ class Debugger:
             print(f'BC: {BC}')
             print(f'DE: {DE}')
             print(f'HL: {HL}')
-    
+
     def print_vram(self):
         if self.show_vram:
             start =  MMU.VRAM_START
@@ -55,7 +55,8 @@ class Debugger:
             print(f'{hex} ',end=' ')
 
     def end(self):
-        print('')
+        if self.cpu.debug_opcode:
+            print('')
 
     def print_cpu_flags(self):
         if self.cpu.debug_opcode and self.show_cpu_flags:
@@ -87,7 +88,3 @@ class Debugger:
             input('press enter to continue...')
 
             return True
-
-
-        
-

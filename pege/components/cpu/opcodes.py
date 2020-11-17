@@ -72,12 +72,12 @@ def RET(mmu, cpu):
 
 def DI(mmu, cpu):
     cpu.debugger.print_opcode('DI')
-    self.interrupts_enabled = False
+    cpu.interrupts_enabled = False
     return True
 
 def EI(mmu, cpu):
     cpu.debugger.print_opcode('DI')
-    self.interrupts_enabled = True
+    cpu.interrupts_enabled = True
     return True
 
 
@@ -149,7 +149,10 @@ def LDHAn(mmu, cpu):
     A = cpu.reg.GET_A()
 
     offset_address = 0xFF00 + n
+    cpu.debugger.print_iv(offset_address)
+    print('ultracunt')
     value = mmu.read(offset_address)
+    print(value)
     cpu.reg.SET_A(value)
     return True
 
@@ -407,7 +410,13 @@ def XORn(mmu, cpu):
       cpu.reg.SET_ZERO()
     else:
       cpu.reg.CLEAR_ZERO()
+
+    cpu.reg.CLEAR_CARRY()
+    cpu.reg.CLEAR_SUBSTRACT()
+    cpu.reg.CLEAR_HALF_CARRY()
+
     cpu.reg.SET_A(A)
+
     result = True
   return result
 
