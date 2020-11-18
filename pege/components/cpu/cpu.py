@@ -4,25 +4,6 @@ from ..debugger import Debugger
 import instructionset
 from . import opcodes
 
-class Clock:
-
-    def __init__(self,speed):
-        self._clock = 0
-        self._current = 0
-        self._speed = speed
-
-    def tick(self):
-        if self._clock == self._speed:
-            self._clock = 0
-        self._clock += 1
-
-    def cpu_wait(self):
-        return self._current > self._clock
-
-    def update(self, cycle):
-        self._current = self._clock + cycle
-        #input('press enter to continue...')
-
 class Registers:
 
     ZERO = 0x80

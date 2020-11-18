@@ -66,7 +66,29 @@ class GPU:
         self._clock.tick()
 
     def step(self):
+
+        if self._clock.lines_drawn >= 144:
+            self.current_mode = GPU.VBLANK
+            #print(self._clock.lines_drawn)
+            #print('VBLANK')
+        elif self._clock.lines_drawn > 152 and self._clock.lines_drawn < 155:
+            self.current_mode = GPU.OAM_SEARCH
+            #print('OAM_SEARCH')
+        else:
+
+            if self._clock.line_counter == 20 and self.current_mode == GPU.OAM_SEARCH:
+                self.current_mode = GPU.PIXEL_TRANSFER
+                #print('PIXEL_TRANSFER')
+            elif self._clock.line_counter == 63 and self.current_mode == GPU.PIXEL_TRANSFER:
+                self.current_mode = GPU.HBLANK
+                #print('HBLANK')
+            elif self._clock.line_counter == 114:
+                self.current_mode = GPU.OAM_SEARCH
+                #print('OAM_SEARCH')
+            
         self._tick()
+
+
 
     # Test method to test if we get the GPU/Screen implementation right
     def render_nintento_logo(self):
@@ -99,7 +121,6 @@ class GPU:
         tile = Tile()
         for x in range(0,16,2):
             tr = self._decode_tile_row(vram_address, x)
-            #print(tr)
             tile.add(tr)
 
         self._screen.render_tile(tile)

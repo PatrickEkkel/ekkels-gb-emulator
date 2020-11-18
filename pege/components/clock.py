@@ -46,17 +46,19 @@ class GPUCLock(Clock):
             self.line_counter += 1
 
     def _framecounter(self):
-        if self.framecounter == 58:
+        if self.framecounter == 60:
             ts = time.time()
             st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-            print(st)
-            #input('blargh!')
-            print(self.framecounter)
+            #print(self.lines_drawn)
+            #print(st)
+            #print(self.framecounter)
             self.framecounter = 0
     def _count_screen(self):
         if GPUCLock.CLOCKS_PER_SCREEN == self.screen_counter:
             self.screen_counter = 0
             self.framecounter += 1
+            #print(self.lines_drawn)
+            self.lines_drawn = 0
         else:
             self.screen_counter += 1
 
