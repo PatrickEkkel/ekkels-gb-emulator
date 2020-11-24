@@ -14,10 +14,11 @@ class GameBoy:
         self.mmu.set_bios(self.bootrom)
         self.mmu.set_rom(cartridge)
         self._clock = CPUClock(GameBoy.CPU_SPEED)
-        #self.screen = Screen(self.mmu)
+        self.screen = Screen(self.mmu)
         self.CPU = CPU(self.mmu, self._clock)
         #self.GPU = GPU(self.mmu, self.screen)
-        self.GPU = GPU(self.mmu, None, GPUCLock(GameBoy.GPU_SPEED))
+        self.GPU = GPU(self.mmu, self.screen, GPUCLock(GameBoy.GPU_SPEED))
+        self.GPU.render_nintento_logo()
 
 
 

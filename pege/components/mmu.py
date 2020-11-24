@@ -4,6 +4,9 @@ class MMU:
     VRAM_START             = 0x8000
     VRAM_END               = 0x9FFF
 
+    BACKGROUND_MAP_START   = 0x9800
+    BACKGROUND_MAP_END     = 0x9BFF
+
     HRAM_START             = 0xFF80
     HRAM_END               = 0xFFFE
 
