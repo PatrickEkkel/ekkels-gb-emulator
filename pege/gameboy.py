@@ -18,7 +18,7 @@ class GameBoy:
         self.CPU = CPU(self.mmu, self._clock)
         #self.GPU = GPU(self.mmu, self.screen)
         self.GPU = GPU(self.mmu, self.screen, GPUCLock(GameBoy.GPU_SPEED))
-        self.GPU.render_nintento_logo()
+        #self.GPU.render_nintento_logo()
 
 
 
@@ -28,8 +28,7 @@ class GameBoy:
             self.CPU.pc = 0x100
             self.CPU.reg.initialize_without_bootrom()
 
-
-
+    
     def power_on(self,skipbios=True):
         self._init(skipbios)
         cont = True

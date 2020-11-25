@@ -52,7 +52,7 @@ class Screen:
     def render_tile_row(self, tr, y):
         self.current_y = y
         pointer = 0
-        for tc in tr.row:
+        for tc in tr:
             self.current_x += 1
             self._render_pixel(self.current_x, self.current_y, tc)
 
