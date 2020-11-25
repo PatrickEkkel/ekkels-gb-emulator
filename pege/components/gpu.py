@@ -1,6 +1,7 @@
 from .mmu import MMU
 from .fetcher import Fetcher
 from .screen import Screen
+from .clock import GPUCLock
 
 class GPU:
 
@@ -15,6 +16,7 @@ class GPU:
         self._clock = clock
         self.current_mode = GPU.OAM_SEARCH
         self.LY = 0
+        self.LX = 0
         self._fetcher = Fetcher(mmu)
 
 
@@ -25,17 +27,20 @@ class GPU:
     def _tick(self):
         if self._clock.start_of_cycle():
             pass
+        if GPUCLock.CLOCKS_PER_LINE == self._clock.line_counter:
+            self.LY += 1
+        if GPUCLock.CLOCKS_PER_SCREEN == self._clock.screen_counter:
+            self.LY = 0
         self._clock.tick()
+        
+        
 
     def step(self):
-
-        if self._clock.lines_drawn >= 144:
+        if self.LY >= 144 and self.LY <= 152:
             self.current_mode = GPU.VBLANK
-            #print(self._clock.lines_drawn)
-            #print('VBLANK')
-        elif self._clock.lines_drawn > 152 and self._clock.lines_drawn < 155:
+      
+        elif self.LY > 152 and self.LY < 155:
             self.current_mode = GPU.OAM_SEARCH
-            #print('OAM_SEARCH')
         else:
 
             if self._clock.line_counter == 20 and self.current_mode == GPU.OAM_SEARCH:
@@ -60,11 +65,6 @@ class GPU:
     # Test method to test if we get the GPU/Screen implementation right
     def render_nintento_logo(self):
          # loop through VRAM to get tileset info
-        start =  MMU.VRAM_START
-        current = start
-        end = MMU.VRAM_END
-
-       
         
         self.LY = 0
         pointer = 0
