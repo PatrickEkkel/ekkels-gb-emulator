@@ -10,7 +10,9 @@ class Screen:
     DARK_GREEN = (48, 98, 48)
     LIGHT_GREEN = (139, 172, 15)
     LIGHTEST_GREEN = (155, 188, 15)
-    
+    RED = (255, 0, 0)
+
+
 
     def __init__(self, mmu):
 
@@ -18,29 +20,23 @@ class Screen:
         # set up pygame
         pygame.init()
 
-        self.multiply_factor = 12
-        self.width = 160 * self.multiply_factor
-        self.height = 144 * self.multiply_factor
+        self.current_x = 0
+        self.current_y = 0
+        self.grid = True
+        self.multiply_factor = 1
+        self.width = 256 * self.multiply_factor
+        self.height = 256 * self.multiply_factor
         # set up the window
 
         self.windowSurface = pygame.display.set_mode((self.width, self.height), 0, 32)
         pygame.display.set_caption('Ekkels gameboy emulator')
         # set up the colors
-       
+
 
         basicFont = pygame.font.SysFont(None, 48)
 
-        self.windowSurface.fill(Screen.LIGHTEST_GREEN)
-        # draw a green polygon onto the surface
+        self.windowSurface.fill(Screen.LIGHT_GREEN)
 
-        #gfxdraw.pixel(self.windowSurface, 100, 100, Screen.DARKEST_GREEN)
-        #gfxdraw.pixel(self.windowSurface, 100, 101, Screen.DARKEST_GREEN)
-        #3gfxdraw.pixel(self.windowSurface, 100, 102, Screen.DARKEST_GREEN)
-        #gfxdraw.pixel(self.windowSurface, 100, 103, Screen.DARKEST_GREEN)
-        #pixArray = pygame.PixelArray(self.windowSurface)
-        #pixArray[100][100] = Screen.DARK_GREEN
-        #del pixArray
-        # draw the window onto the screen
         pygame.display.update()
 
     def _render_pixel(self, start_x, start_y, value):
@@ -49,6 +45,21 @@ class Screen:
                 offset_x = start_x + x
                 offset_y = start_y + y
                 gfxdraw.pixel(self.windowSurface, offset_x, offset_y, value)
+
+    def new_scanline(self):
+        self.current_x = 0
+
+    def render_tile_row(self, tr, y):
+        self.current_y = y
+        pointer = 0
+        for tc in tr.row:
+            self.current_x += 1
+            self._render_pixel(self.current_x, self.current_y, tc)
+
+
+
+    def update(self):
+        pygame.display.update()
 
     def render_tile(self, tile):
         start_x = 100
@@ -63,8 +74,6 @@ class Screen:
                 x += self.multiply_factor
                 self._render_pixel(x, y, tc)
                 #gfxdraw.pixel(self.windowSurface, x, y, tc)
-            
+
 
         pygame.display.update()
-        
- 
