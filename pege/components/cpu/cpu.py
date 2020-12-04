@@ -202,14 +202,15 @@ class CPU:
         self.pc = 0x00
         self._mmu = mmu
         self._clock = clock
-        self.disable_cpu = True
+        self.disable_cpu = False
         self.interrupts_enabled = True
-        self.debug_opcode = False
+        self.debug_opcode = True
         self.stack = Stack(self, mmu)
         self.reg = Registers()
         self.debugger = Debugger(self, mmu)
         self.opcodes = instructionset.create_opcode_map('opcode')
         self.opcode_cycles = instructionset.create_opcode_map('cycles')
+        self.opcode_meta = instructionset.create_opcode_metamap()
         self.cb_opcodes = [None] * 255
         self.opcodes[0x31] = opcodes.LDSP16d
         self.opcodes[0xC5] = opcodes.PUSHBC
@@ -226,7 +227,7 @@ class CPU:
         self.opcodes[0x1E] = opcodes.LDn8d
         self.opcodes[0x2E] = opcodes.LDn8d
         self.opcodes[0x06] = opcodes.LDn8d
-        self.opcodes[0x3E] = opcodes.LDn8d
+        #self.opcodes[0x3E] = opcodes.LDn8d
         self.opcodes[0xE2] = opcodes.LDCA
         self.opcodes[0x17] = opcodes.RLA
         self.opcodes[0xC] = opcodes.INCn
@@ -234,7 +235,7 @@ class CPU:
         self.opcodes[0x23] = opcodes.INCnn
         self.opcodes[0x13] = opcodes.INCnn
         self.opcodes[0x77] = opcodes.LDHL8A
-        self.opcodes[0xE0] = opcodes.LDHnA
+        #self.opcodes[0xE0] = opcodes.LDHnA
         #self.opcodes[0xF0] = opcodes.LDHAn
         self.opcodes[0x1A] = opcodes.LDAn
         self.opcodes[0xCD] = opcodes.CALLnn
@@ -246,8 +247,6 @@ class CPU:
         self.cb_opcodes[0xcb] = opcodes.CB
         self.cb_opcodes[0x7c] = opcodes.BIT7H
         self.cb_opcodes[0x11] = opcodes.RLC
-
-
 
 
     def read_opcode(self):
@@ -264,12 +263,11 @@ class CPU:
         return self._mmu.read(self.pc) >> 4 & 0xFF
 
     def step(self):
-
         if not self._clock.wait():
             success = False
             opcode = self.read_opcode()
 
-            cycle = self.opcode_cycles[opcode]
+            #cycle = self.opcode_cycles[opcode]
             hex = self.debugger.format_hex(opcode)
             hex_pc = self.debugger.format_hex(self.pc)
 
@@ -284,15 +282,25 @@ class CPU:
                     if self.debugger.exit_at_breakpoint:
                         # stop execution by returning False
                         return False
-                success = instruction(self._mmu,self)
+                opcode_meta = self.opcode_meta[opcode]
+                cycle = instruction(self._mmu,self, opcode_meta)
                 self.debugger.print_cpu_flags()
                 self.debugger.end()
-                if not success:
+                if cycle == -1:
                     print(f'Opcode failed {hex} at {hex_pc}')
+                    success = False
                 else:
-                    self._clock.update(cycle)
+                    if cycle:
+                        self._clock.update(cycle)
+                        success = True
+                    else:
+                        print(f'Old style opcode detected. {hex}')
+                        success = False
             else:
                 print(f'Unknown opcode {hex} at {hex_pc}')
             self.pc += 1
             return success
+        else:
+            self._clock.tick()
+        #self._clock.tick()
         return True

@@ -78,14 +78,18 @@ class Opcode(Token):
         return result
 
     def get_mnemonic_label(self):
-        if self.register and self.address:
-            return f'{self.mnemonic} {self._print_register()} {self._print_address()}'
-        elif self.register:
-            return f'{self.mnemonic} {self._print_register()}'
-        elif self.address:
-            return f'{self.mnemonic} {self._print_address()}'
+        # make exceptions for LDH
+        if self.mnemonic == 'LDH':
+            return f'LDH {self._print_address()} A'
         else:
-            return f'{self.mnemonic}'
+            if self.register and self.address:
+                return f'{self.mnemonic} {self._print_register()} {self._print_address()}'
+            elif self.register:
+                return f'{self.mnemonic} {self._print_register()}'
+            elif self.address:
+                return f'{self.mnemonic} {self._print_address()}'
+            else:
+                return f'{self.mnemonic}'
 
     def __str__(self):
         return self.get_mnemonic_label()
@@ -114,7 +118,10 @@ class Tokenizer:
             elif self._get_mnemonic() == 'LDD':
                 result = Opcode()
                 result.mnemonic = line
-
+            elif self._get_mnemonic() == 'LDH':
+                result = Opcode()
+                result.mnemonic = self._get_mnemonic()
+                result.address = self._get_address()
             else:
                 result = Opcode()
                 result.mnemonic = self._get_mnemonic()
@@ -144,12 +151,17 @@ class Tokenizer:
             return None
 
     def _get_address(self):
-        if len(self.tokens) > 2:
-            return self.tokens[2]
-        elif len(self.tokens) > 1 and len(self.tokens[1]) == 4:
+
+        # Make exception for LDH
+        if self.tokens[0] == 'LDH':
             return self.tokens[1]
         else:
-            return None
+            if len(self.tokens) > 2:
+                return self.tokens[2]
+            elif len(self.tokens) > 1 and len(self.tokens[1]) == 4:
+                return self.tokens[1]
+            else:
+                return None
 
 
 class GBA_ASM:
@@ -226,7 +238,6 @@ class GBA_ASM:
                  self.encoded_program.append(encoded_opcode)
                  result = address
                  if address > self.program_counter:
-                     print('Not implemented yet!')
                      self.encoded_program.append(int(0x00))
                  else:
                      signed_address = ((self.program_counter) - address - self.offset) * -1

@@ -170,7 +170,7 @@ class ProgramTests(unittest.TestCase):
 
         #gb.power_on()
         return True
-    
+
     # TODO, add asserts
     def test_program9(self):
         gbasm = GBA_ASM()
@@ -192,6 +192,15 @@ class ProgramTests(unittest.TestCase):
         bitstream = gbasm.parse(test_program)
 
         assert bitstream[0] == self._get_instruction('LD r nn', register='C')
+        assert bitstream[1] == 0x10
+
+    def test_LDHAn_parse(self):
+        gbasm = GBA_ASM()
+        test_program = ['LDH 10 A']
+        bitstream = gbasm.parse(test_program)
+        #for b in bitstream:
+        #    self.print_hex(b)
+        assert bitstream[0] == self._get_instruction('LDH nn A')
         assert bitstream[1] == 0x10
 
 if __name__ == '__main__':

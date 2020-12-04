@@ -33,12 +33,15 @@ class GPUCLock(Clock):
         self.line_counter = 0
         self.screen_counter = 0
         self.framecounter = 0
-        #self.lines_drawn = 0
+        self.lines_drawn = 0
+        # substract 1
+        GPUCLock.CLOCKS_PER_LINE = GPUCLock.CLOCKS_PER_LINE
 
     def wait(self):
         return self._current > self._clock
 
     def _count_line(self):
+        # zero based so subtract 1
         if GPUCLock.CLOCKS_PER_LINE == self.line_counter:
             self.line_counter = 0
             #self.lines_drawn += 1
@@ -50,12 +53,12 @@ class GPUCLock(Clock):
             ts = time.time()
             st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
             self.framecounter = 0
+
     def _count_screen(self):
         if GPUCLock.CLOCKS_PER_SCREEN == self.screen_counter:
             self.screen_counter = 0
             self.framecounter += 1
-            #print(self.lines_drawn)
-            #self.lines_drawn = 0
+            self.lines_drawn = 0
         else:
             self.screen_counter += 1
 
@@ -63,6 +66,7 @@ class GPUCLock(Clock):
         if self._clock == self._speed:
             self._clock = 0
         self._clock += 1
-        self._count_line()
+
         self._count_screen()
+        self._count_line()
         self._framecounter()

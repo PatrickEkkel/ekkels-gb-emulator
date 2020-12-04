@@ -1,15 +1,37 @@
 import bitwise_functions
 from ..mmu import MMU
 
-def NOP(mmu, cpu):
-    cpu.debugger.print_opcode('NOP')
+class Opcode:
+    def __init__(self, meta):
+        self.mnemonic = meta['m']
+        self.cycles = meta['cycles']
+        self.jump_instruction = meta['jump_instruction']
 
-    return True
+    def get_cycles(self,jump=False):
+        if self.jump_instruction:
+            if jump:
+                return self.cycles[1]
+            else:
+                return self.cycles[0]
+        else:
+            return self.cycles
+
+    def __str__(self):
+        return self.mnemonic
+
+def NOP(mmu, cpu, meta):
+    opcode = Opcode(meta)
+    cpu.debugger.print_opcode(opcode)
+    return opcode.get_cycles()
+
+    #cpu.debugger.print_opcode(meta['m'])
+    #return meta['cycles']
 # 0x05,0x3D,0x0D length: 1 byte
 # decrements the value of register n by 1
 # flags zhn-
-def DECn(mmu, cpu):
-    cpu.debugger.print_opcode('DECn')
+def DECn(mmu, cpu, meta):
+    opcode = Opcode(meta)
+    cpu.debugger.print_opcode(opcode)
 
     result = False
     upper_param = cpu.read_upper_opcode_parameter()
@@ -58,7 +80,10 @@ def DECn(mmu, cpu):
     # set substract flag
     cpu.reg.SET_SUBSTRACT()
 
-    return result
+    if result:
+        return opcode.get_cycles()
+    else:
+        return -1
 
 def RET(mmu, cpu):
     cpu.debugger.print_opcode('RET')
@@ -70,10 +95,11 @@ def RET(mmu, cpu):
     cpu.pc = jump_address
     return True
 
-def DI(mmu, cpu):
-    cpu.debugger.print_opcode('DI')
+def DI(mmu, cpu, meta):
+    opcode = Opcode(meta)
+    cpu.debugger.print_opcode(opcode)
     cpu.interrupts_enabled = False
-    return True
+    return opcode.get_cycles()
 
 def EI(mmu, cpu):
     cpu.debugger.print_opcode('DI')
@@ -150,9 +176,7 @@ def LDHAn(mmu, cpu):
 
     offset_address = 0xFF00 + n
     cpu.debugger.print_iv(offset_address)
-    print('ultracunt')
     value = mmu.read(offset_address)
-    print(value)
     cpu.reg.SET_A(value)
     return True
 
@@ -160,12 +184,13 @@ def LDHAn(mmu, cpu):
 # length: 2 bytes
 # 0xE0 and 1 byte unsigned
 # write contents of register A to memory address FF00 + n
-def LDHnA(mmu, cpu):
+def LDHnA(mmu, cpu, meta):
+    opcode = Opcode(meta)
     # get 8 bit unsigned parameter
     cpu.pc += 1
     val = mmu.read(cpu.pc)
     # print disassembly info
-    cpu.debugger.print_opcode('LDHnA')
+    cpu.debugger.print_opcode(opcode)
     cpu.debugger.print_iv(val)
 
     # read A register
@@ -174,7 +199,7 @@ def LDHnA(mmu, cpu):
     offset_address = 0xFF00 + val
 
     mmu.write(offset_address, A)
-    return True
+    return meta.get_cycles()
 # length: 1 byte
 # 0x1A
 # Read the Value of register DE from memory and put the contents of adress DE in A
@@ -309,8 +334,9 @@ def PUSHBC(mmu, cpu):
     cpu.stack.push(C)
     return True
 
-def LDn8d(mmu, cpu):
-    cpu.debugger.print_opcode('LDn8d')
+def LDn8d(mmu, cpu, meta):
+    opcode = Opcode(meta)
+    cpu.debugger.print_opcode(opcode)
     # get Register from opcode
     pc = cpu.pc + 1
     val = mmu.read(pc)
@@ -344,13 +370,17 @@ def LDn8d(mmu, cpu):
             A = cpu.reg.GET_A()
             result = True
 
-    return result
+    if result:
+        return opcode.get_cycles()
+    else:
+        return -1
 
 
 # length: 3 bytes
 # 0x31 and 2 bytes unsigned
-def LDnn16d(mmu, cpu):
-    cpu.debugger.print_opcode('LDnn16d')
+def LDnn16d(mmu, cpu, meta):
+    opcode = Opcode(meta)
+    cpu.debugger.print_opcode(opcode)
     parameter = cpu.read_upper_opcode_parameter()
     cpu.pc += 1
     val = mmu.read_u16(cpu.pc)
@@ -360,7 +390,7 @@ def LDnn16d(mmu, cpu):
     elif parameter == 0x01:
         cpu.reg.SET_DE(val)
     cpu.pc += 1
-    return True
+    return opcode.get_cycles()
 
 def LDHL8A(mmu, cpu):
     cpu.debugger.print_opcode('LDHL8A')
@@ -369,8 +399,9 @@ def LDHL8A(mmu, cpu):
     mmu.write(HL, A)
     return True
 
-def LDDHL8A(mmu, cpu):
-    cpu.debugger.print_opcode('LDDHL8A')
+def LDDHL8A(mmu, cpu, meta):
+    opcode = Opcode(meta)
+    cpu.debugger.print_opcode(opcode)
     parameter = cpu.read_upper_opcode_parameter()
     # get A
     A = cpu.reg.GET_A()
@@ -385,7 +416,11 @@ def LDDHL8A(mmu, cpu):
         HL += 1
         result = True
     cpu.reg.SET_HL(HL)
-    return True
+
+    if result:
+        return opcode.get_cycles()
+    else:
+        return -1
 
 # length: 3 bytes
 # 0x31 (1 byte) (2 bytes) unsigned
@@ -399,8 +434,9 @@ def LDSP16d(mmu, cpu):
 
 # length: 1 bytes
 # 0xAF
-def XORn(mmu, cpu):
-  cpu.debugger.print_opcode('XORn')
+def XORn(mmu, cpu, meta):
+  opcode = Opcode(meta)
+  cpu.debugger.print_opcode(opcode)
   lower_param = cpu.read_lower_opcode_parameter()
   result = False
   if lower_param == 0xF0:
@@ -418,7 +454,7 @@ def XORn(mmu, cpu):
     cpu.reg.SET_A(A)
 
     result = True
-  return result
+  return opcode.get_cycles()
 
 # special prefix for a different set of opcodes
 def CB(mmu, cpu):
@@ -461,17 +497,19 @@ def JRZn(mmu, cpu):
         cpu.pc += 1
     return True
 
-def JPnn(mmu, cpu):
-    cpu.debugger.print_opcode('JPnn')
+def JPnn(mmu, cpu, meta):
+    opcode = Opcode(meta)
+    cpu.debugger.print_opcode(opcode)
+    #cpu.debugger.print_opcode('JPnn')
     cpu.pc += 1
     nn = mmu.read_u16(cpu.pc)
     cpu.debugger.print_iv(nn)
     cpu.pc = nn - 1
+    return opcode.cycles
 
-    return True
-
-def JRNZn(mmu, cpu):
-    cpu.debugger.print_opcode('JRNZn')
+def JRNZn(mmu, cpu, meta):
+    opcode = Opcode(meta)
+    cpu.debugger.print_opcode(opcode)
     pc = cpu.pc + 1
     val = mmu.read_s8(pc)
     cpu.debugger.print_iv(val)
@@ -481,7 +519,7 @@ def JRNZn(mmu, cpu):
         cpu.pc = jump_address
     else:
         cpu.pc += 1
-    return True
+    return opcode.get_cycles()
 
 # length: 3 bytes
 # 0xCD
