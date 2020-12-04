@@ -202,7 +202,7 @@ class CPU:
         self.pc = 0x00
         self._mmu = mmu
         self._clock = clock
-        self.disable_cpu = False
+        self.disable_cpu = True
         self.interrupts_enabled = True
         self.debug_opcode = True
         self.stack = Stack(self, mmu)
