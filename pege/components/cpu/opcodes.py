@@ -163,12 +163,13 @@ def INCn(mmu, cpu):
 # 0xF0 and 1 byte unsigned
 # write contents of address FF00 + n into register A
 
-def LDHAn(mmu, cpu):
+def LDHAn(mmu, cpu, meta):
     # get 8 bit unsigned parameter
+    opcode = Opcode(meta)
     cpu.pc += 1
     n = mmu.read(cpu.pc)
     # print disassembly info
-    cpu.debugger.print_opcode('LDHnA')
+    cpu.debugger.print_opcode(opcode)
     cpu.debugger.print_iv(n)
 
     # read A register
@@ -178,7 +179,7 @@ def LDHAn(mmu, cpu):
     cpu.debugger.print_iv(offset_address)
     value = mmu.read(offset_address)
     cpu.reg.SET_A(value)
-    return True
+    return opcode.get_cycles()
 
 
 # length: 2 bytes
@@ -243,8 +244,9 @@ def LDnn(mmu, cpu):
 
     return result
 
-def CPn(mmu, cpu):
-    cpu.debugger.print_opcode('CPn')
+def CPn(mmu, cpu, meta):
+    opcode = Opcode(meta)
+    cpu.debugger.print_opcode(opcode)
 
     cpu.pc += 1
     n = mmu.read(cpu.pc)
@@ -271,7 +273,7 @@ def CPn(mmu, cpu):
         cpu.reg.CLEAR_HALF_CARRY()
 
 
-    return True
+    return opcode.get_cycles()
 
 
 # TODO: test needed

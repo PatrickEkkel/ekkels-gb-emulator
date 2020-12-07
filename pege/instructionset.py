@@ -12,7 +12,8 @@ instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XORn  
                 {'m': 'LDD (HL-) A', 'datatype': '',    'opcode': opcodes.LDDHL8A  , 'length': 1,   'cycles': 8,         'jump_instruction': False   , 'register_options': {'x': 0x32 } },
                 {'m': 'JRNZ nnnn'  , 'datatype': 'r8',  'opcode': opcodes.JRNZn    , 'length': 2,   'cycles': [8, 12],   'jump_instruction': True    , 'register_options': {'x': 0x20 } },
                 {'m': 'DI'         , 'datatype': ''  ,  'opcode': opcodes.DI       , 'length': 1,   'cycles': 4,         'jump_instruction': False   , 'register_options': {'x': 0xF3 } },
-                {'m': 'EI'         , 'datatype': ''  ,  'opcode': opcodes.EI       , 'length': 1,   'cycles': 4,         'jump_instruction': False   , 'register_options': {'x': 0xFB}}
+                {'m': 'CP'         , 'datatype': 'd8',  'opcode': opcodes.CPn      , 'length': 2,   'cycles': 8,         'jump_instruction': False   , 'register_options': {'x': 0xFE } },
+                {'m': 'EI'         , 'datatype': ''  ,  'opcode': opcodes.EI       , 'length': 1,   'cycles': 4,         'jump_instruction': False   , 'register_options': {'x': 0xFB } }
                ]
 
 

@@ -204,7 +204,7 @@ class CPU:
         self._clock = clock
         self.disable_cpu = True
         self.interrupts_enabled = True
-        self.debug_opcode = True
+        self.debug_opcode = False
         self.stack = Stack(self, mmu)
         self.reg = Registers()
         self.debugger = Debugger(self, mmu)
@@ -227,7 +227,6 @@ class CPU:
         self.opcodes[0x1E] = opcodes.LDn8d
         self.opcodes[0x2E] = opcodes.LDn8d
         self.opcodes[0x06] = opcodes.LDn8d
-        #self.opcodes[0x3E] = opcodes.LDn8d
         self.opcodes[0xE2] = opcodes.LDCA
         self.opcodes[0x17] = opcodes.RLA
         self.opcodes[0xC] = opcodes.INCn
@@ -235,14 +234,11 @@ class CPU:
         self.opcodes[0x23] = opcodes.INCnn
         self.opcodes[0x13] = opcodes.INCnn
         self.opcodes[0x77] = opcodes.LDHL8A
-        #self.opcodes[0xE0] = opcodes.LDHnA
-        #self.opcodes[0xF0] = opcodes.LDHAn
         self.opcodes[0x1A] = opcodes.LDAn
         self.opcodes[0xCD] = opcodes.CALLnn
         self.opcodes[0xC1] = opcodes.POPBC
         self.opcodes[0x3D] = opcodes.DECn
         self.opcodes[0xc9] = opcodes.RET
-        self.opcodes[0xFE] = opcodes.CPn
         self.opcodes[0xEA] = opcodes.LDnn16a
         self.cb_opcodes[0xcb] = opcodes.CB
         self.cb_opcodes[0x7c] = opcodes.BIT7H
@@ -302,5 +298,4 @@ class CPU:
             return success
         else:
             self._clock.tick()
-        #self._clock.tick()
         return True

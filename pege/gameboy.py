@@ -1,12 +1,11 @@
 from bootrom import BootRom
 from components.cpu.cpu import CPU
 from components.ppu import PPU
-from components.clock import CPUClock,GPUCLock
+from components.clock import CPUClock
 from components.screen import Screen
 from components.mmu import MMU
 class GameBoy:
-    CPU_SPEED = 4194304 # 4.1Mhz
-    GPU_SPEED = 1048576 # 1.04Mhz
+    CPU_SPEED = 4194304 # 4.1Mhz # 1.04Mhz
     def __init__(self, cartridge):
         self.bootrom = BootRom()
         self.cartridge = cartridge
@@ -14,8 +13,9 @@ class GameBoy:
         self.mmu.set_bios(self.bootrom)
         self.mmu.set_rom(cartridge)
         self.screen = Screen(self.mmu)
-        self.CPU = CPU(self.mmu,  CPUClock(GameBoy.CPU_SPEED))
-        self.PPU = PPU(self.mmu, self.screen, GPUCLock(GameBoy.GPU_SPEED))
+        self._clock = CPUClock(GameBoy.CPU_SPEED)
+        self.CPU = CPU(self.mmu,  self._clock)
+        self.PPU = PPU(self.mmu, self.screen, self._clock)
 
 
 
@@ -32,4 +32,4 @@ class GameBoy:
         cont = True
         while(cont):
             cont = self.CPU.step()
-            #self.PPU.step()
+            self.PPU.step()
