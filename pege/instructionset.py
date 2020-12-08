@@ -1,6 +1,9 @@
 from components.cpu import  opcodes
 import bitwise_functions
 
+opcode_descriptions = {'LDH r nn': 'LDH A,(n) = put memory address $FF00+n into A'}
+
+
 instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XORn     , 'length': 1,   'cycles': 4,         'jump_instruction': False   , 'register_options': {'A': 0xAF} },
                 {'m': 'LD r nn'    , 'datatype': '',    'opcode': opcodes.LDn8d    , 'length': 2,   'cycles': 8,         'jump_instruction': False   , 'register_options': {'A': 0x3E, 'B': 0x06, 'C': 0x0E } },
                 {'m': 'LDH nn A'   , 'datatype': 'a8',  'opcode': opcodes.LDHAn    , 'length': 2,   'cycles': 12,        'jump_instruction': False   , 'register_options': {'x': 0xE0 } },

@@ -1,18 +1,20 @@
 from .mmu import MMU
+from instructionset import opcode_descriptions
 class Debugger:
 
     def __init__(self, cpu, mmu):
         self.cpu = cpu
         self.mmu = mmu
-        self.show_registers = False
+        self.show_registers = True
         self.show_vram = False
-        self.show_opcodes = False
+        self.show_opcodes = True
         self.show_cpu_flags = False
-        self.show_program_counter = False
+        self.show_program_counter = True
         self.step_instruction = False
+        self.show_description = False
         self.stop_at = None
         self.stop_at_opcode = None
-        self.stop_and_step_at = None #0x231
+        self.stop_and_step_at = None # 0x235
         self.exit_at_breakpoint = False
 
 
@@ -20,8 +22,14 @@ class Debugger:
         return ("0x{:x}".format(opcode))
 
     def print_opcode(self, opcode_description):
-        if self.cpu.debug_opcode:
+        if self.show_opcodes:
             print(opcode_description, end=' ')
+
+    def show_opcode_description(self,mnemonic):
+        if self.show_description:
+            opcode_description = opcode_descriptions.get(mnemonic)
+            if opcode_description:
+                print(opcode_description)
 
     def print_register(self):
         if self.show_registers:
@@ -50,23 +58,23 @@ class Debugger:
                         print('value: ' + self.format_hex(self.mmu.read(value)))
 
     def print_iv(self, value):
-        if self.cpu.debug_opcode and self.show_opcodes:
+        if self.show_opcodes and self.show_opcodes:
             hex = self.format_hex(value)
             print(f'{hex} ',end=' ')
 
     def end(self):
-        if self.cpu.debug_opcode:
+        if self.show_opcodes:
             print('')
 
     def print_cpu_flags(self):
-        if self.cpu.debug_opcode and self.show_cpu_flags:
+        if self.show_opcodes and self.show_cpu_flags:
             hex = self.format_hex(self.cpu.reg.GET_F())
             print(f'FLAGS-REG: {hex}')
 
     def print_state(self, data):
         hex = self.format_hex(data)
         hex_pc = self.format_hex(self.cpu.pc)
-        if self.cpu.debug_opcode and self.show_program_counter:
+        if self.show_opcodes and self.show_program_counter:
             print(f'PC: {hex_pc} CPU: {hex}', end=' ')
 
     def debug(self, pc, opcode):

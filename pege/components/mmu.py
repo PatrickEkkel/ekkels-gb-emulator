@@ -6,7 +6,7 @@ class MMU:
 
     TILERAM_START          = 0x8000
     TILERAM_END            = 0x97FF
-    
+
     BACKGROUND_MAP_START   = 0x9800
     BACKGROUND_MAP_END     = 0x9BFF
 
@@ -27,7 +27,6 @@ class MMU:
     CARTRIDGE_ROM_01_START = 0x4000
     CARTRIDGE_ROM_01_END   = 0x7FFF
 
-    LY_REGISTER = 0xFF44
 
     def __init__(self):
         self.booted = False
@@ -116,8 +115,6 @@ class MMU:
             return self.vram[address]
         elif self._is_io(address):
             return self.io[address]
-        elif address == MMU.LY_REGISTER:
-            return self.LY
         else:
             # trying to access unmapped memory
             return 0x0000
@@ -138,9 +135,6 @@ class MMU:
         if (result & 0x80):
             result = (result + -0xFF) - 1
         return result
-
-    def read_u8(self, address):
-        return self._getbyte(address)
 
     def read_u16(self,address):
         return int.from_bytes(self._getbyte(address) + self._getbyte(address + 1), 'little')

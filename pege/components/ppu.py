@@ -10,7 +10,6 @@ class FIFO:
         self._screen = _screen
         self._ppu = _ppu
         self.shift_counter = 0
-        #self.ticks = 0
 
     def push_block(self, pixels):
         pixels.reverse()
@@ -21,14 +20,9 @@ class FIFO:
         self.pixels = []
 
     def shift(self):
-        #self.shift_counter += 1
-        #print('pixels: ' + str(len(self.pixels)))
-        #print('push')
         pixel = self.pixels.pop()
-        #input('shift')
-        #print("shift counter: " + str(self.shift_counter))
-        self._screen.render_pixel(self._ppu.LY, pixel)
-        
+        self._screen.render_pixel(self._ppu.get_LY(), pixel)
+
     def is_filled(self):
         return len(self.pixels) > 8
 
@@ -42,12 +36,13 @@ class PPU:
     VBLANK = 2
     HBLANK = 3
 
+    LY_REGISTER = 0xFF44
+
     def __init__(self, _mmu, _screen, _clock):
         self._mmu = _mmu
         self._screen = _screen
         self._clock = _clock
         self.current_mode = PPU.OAM_SEARCH
-        self.LY = 0
         self._fetcher = Fetcher(_mmu, self)
         self._pixel_fifo = FIFO(_screen, self)
         self.ticks = 0
@@ -58,53 +53,67 @@ class PPU:
     def format_hex(self, opcode):
         return ("0x{:x}".format(opcode))
 
-
     def _oam_search(self):
         pass
-    
+
     def _do_hblank(self):
         self.current_mode = PPU.HBLANK
         self._screen.new_scanline()
-        self.LY += 1
-        self._fetcher.update_row(self.LY)
+        self._increment_ly()
+        ly = self.get_LY()
+        self._fetcher.update_row(self.get_LY())
         self._pixel_fifo.clear()
-        self._screen.update()
         self.x = 0
         self.tc = 0
         self.tile_index = 0
 
     def _do_vblank(self):
         self.current_mode = PPU.VBLANK
-        self.LY = 0
+        self._increment_ly()
+
+
+    def _refresh_screen(self):
+        self.set_LY(0)
         self._fetcher.reset_fetcher()
-        
-        
+        self._screen.update()
+
     def _update_tile_index(self):
         self.tc += 1
         if self.tc == 8:
             self.tc = 0
             self.tile_index += 1
             self._fetcher.update_column(self.tile_index)
-            
+
+    def _increment_ly(self):
+        ly =  self.get_LY()
+        ly += 1
+        self.set_LY(ly)
+
+    def set_LY(self, value):
+        self._mmu.write(PPU.LY_REGISTER, value)
+
+    def get_LY(self):
+        return self._mmu.read(PPU.LY_REGISTER)
+
     def _pixel_transfer(self):
         self._fetcher.step()
         if self.x == 160:
-            self._do_hblank()    
+            self._do_hblank()
         else:
             if self._pixel_fifo.is_filled():
                 self._pixel_fifo.shift()
                 self.x += 1
                 self._update_tile_index()
-                
+
             if self._fetcher.state == Fetcher.PUSH_PIXELS:
                 if self._pixel_fifo.is_ready():
                     pixels = self._fetcher._decode(self._fetcher.data_0, self._fetcher.data_1)
                     self._pixel_fifo.push_block(pixels)
                     self._fetcher.state = Fetcher.READ_TILE
-            
+
     def _hblank(self):
         pass
-        
+
     def _vblank(self):
         pass
 
@@ -121,37 +130,14 @@ class PPU:
 
         if self.ticks == 456:
             self.ticks = 0
-            if self.LY == 144:
+            #if self.get_LY() == 144:
+            if self.get_LY() >= 144 and self.get_LY() < 153:
                 self._do_vblank()
+            elif self.get_LY() == 153:
+                self._refresh_screen()
             elif self.current_mode == PPU.HBLANK:
                 self.current_mode = PPU.OAM_SEARCH
             else:
                 self.current_mode = PPU.OAM_SEARCH
 
         self.ticks += 1
-    
-    #def create_tile(self, vram_address):
-    #    tilerows = []
-    #    for x in range(0, 16, 2):
-    #        tr = self._fetchers_decode_tile_row(vram_address, x)
-    #        tilerows.append(tr)
-    #    return tilerows
-
-    # Test method to test if we get the PPU/Screen implementation right
-    #def render_nintento_logo(self):
-         # loop through VRAM to get tileset info
-
-    #    self.LY = 0
-    #    pointer = 0
-    #    for scy in range(0, self._screen.height):
-
-    #        width = int(self._screen.width / 8)
-    #        self._fetcher.update_offset(scy)
-
-    #        for scx in range(0, width):
-    #            print(scx)
-    #            tr = self._fetcher.get_pixels(scx, scy)
-    #            self._screen.render_tile_row(tr, scy)
-
-    #        self._screen.new_scanline()
-    #        self._screen.update()

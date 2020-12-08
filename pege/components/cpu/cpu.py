@@ -2,6 +2,7 @@ from ..mmu import MMU
 from ..debugger import Debugger
 
 import instructionset
+from instructionset import opcode_descriptions
 from . import opcodes
 
 class Registers:
@@ -202,9 +203,9 @@ class CPU:
         self.pc = 0x00
         self._mmu = mmu
         self._clock = clock
-        self.disable_cpu = True
+        self.disable_cpu = False
         self.interrupts_enabled = True
-        self.debug_opcode = False
+        #self.debug_opcode = False
         self.stack = Stack(self, mmu)
         self.reg = Registers()
         self.debugger = Debugger(self, mmu)
@@ -279,6 +280,7 @@ class CPU:
                         # stop execution by returning False
                         return False
                 opcode_meta = self.opcode_meta[opcode]
+                self.debugger.show_opcode_description(opcode_meta['m'])
                 cycle = instruction(self._mmu,self, opcode_meta)
                 self.debugger.print_cpu_flags()
                 self.debugger.end()
