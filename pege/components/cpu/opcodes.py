@@ -2,10 +2,14 @@ import bitwise_functions
 from ..mmu import MMU
 
 class Opcode:
-    def __init__(self, meta):
+    def __init__(self, meta, address=None):
         self.mnemonic = meta['m']
+        self.address = address
         self.cycles = meta['cycles']
         self.jump_instruction = meta['jump_instruction']
+
+    def _format_hex(self, opcode):
+        return ("0x{:x}".format(opcode))
 
     def get_cycles(self,jump=False):
         if self.jump_instruction:
@@ -17,15 +21,18 @@ class Opcode:
             return self.cycles
 
     def __str__(self):
-        return self.mnemonic
+        if self.address:
+            address = self._format_hex(self.address)
+            return f'{self.mnemonic} {address}'
+        else:
+            return f'{self.mnemonic}'
 
 def NOP(mmu, cpu, meta):
     opcode = Opcode(meta)
     cpu.debugger.print_opcode(opcode)
     return opcode.get_cycles()
 
-    #cpu.debugger.print_opcode(meta['m'])
-    #return meta['cycles']
+
 # 0x05,0x3D,0x0D length: 1 byte
 # decrements the value of register n by 1
 # flags zhn-
@@ -170,7 +177,7 @@ def LDHAn(mmu, cpu, meta):
     n = mmu.read(cpu.pc)
     # print disassembly info
     cpu.debugger.print_opcode(opcode)
-    cpu.debugger.print_iv(n)
+    #cpu.debugger.print_iv(n)
 
     # read A register
     A = cpu.reg.GET_A()
@@ -245,12 +252,12 @@ def LDnn(mmu, cpu):
     return result
 
 def CPn(mmu, cpu, meta):
-    opcode = Opcode(meta)
-    cpu.debugger.print_opcode(opcode)
-
     cpu.pc += 1
     n = mmu.read(cpu.pc)
-    cpu.debugger.print_iv(n)
+
+    opcode = Opcode(meta,address=n)
+    cpu.debugger.print_opcode(opcode)
+    #cpu.debugger.print_iv(n)
     A = cpu.reg.GET_A()
     cpu.reg.SET_SUBSTRACT()
     result = A - n

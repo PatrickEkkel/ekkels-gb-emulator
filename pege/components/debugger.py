@@ -57,10 +57,10 @@ class Debugger:
                         print('address: ' + self.format_hex(address))
                         print('value: ' + self.format_hex(self.mmu.read(value)))
 
-    def print_iv(self, value):
+    def print_iv(self,value):
         if self.show_opcodes and self.show_opcodes:
             hex = self.format_hex(value)
-            print(f'{hex} ',end=' ')
+            print(f' {hex} ',end=' ')
 
     def end(self):
         if self.show_opcodes:
