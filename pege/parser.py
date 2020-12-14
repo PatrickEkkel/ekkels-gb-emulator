@@ -3,6 +3,7 @@ from instructionset import create_mnemonic_dictionary
 REGISTERS_8B = ['A', 'B', 'C', 'D', 'E', 'F']
 REGISTERS_16B = ['HL']
 
+SPECIAL_OPCODES = ['LDI','LDH']
 def encode_8bit_value(value):
     if isinstance(value, str):
         value = int(value, 16)
@@ -130,6 +131,9 @@ class Tokenizer:
             if self._is_label():
                 result = Label(self._get_label())
             elif self._get_mnemonic() == 'LDD':
+                result = Opcode()
+                result.mnemonic = line
+            elif self._get_mnemonic() == 'LDI':
                 result = Opcode()
                 result.mnemonic = line
             elif self._get_mnemonic() == 'LDH':

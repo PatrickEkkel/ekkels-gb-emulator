@@ -387,10 +387,9 @@ def LDn8d(mmu, cpu, meta):
 
 def LDHLnn(mmu, cpu, meta):
     opcode = Opcode(meta)
-    context = OpcodeContext(cpu, mmu, meta, cpu.pc)
+    context = OpcodeContext(cpu, mmu, meta)
     cpu.debugger.print_opcode(opcode)
     context.readreg().readval().selectreg().store()
-    #input('nope')
     cpu.pc += 1
     return opcode.get_cycles()
 
@@ -416,6 +415,17 @@ def LDHL8A(mmu, cpu):
     HL = cpu.reg.GET_HL()
     mmu.write(HL, A)
     return True
+
+def LDIHL8A(mmu, cpu, meta):
+    context = OpcodeContext(cpu, mmu, meta)
+    context.set_selected_register('HL')
+    opcode = Opcode(meta)
+    cpu.debugger.print_opcode(opcode)
+    print(cpu.debugger.format_hex(cpu.reg.GET_HL()))
+    context.loadval_from_reg().loadaddr().storereg_to_addr('A').increg().storeaddr_to_reg()
+    print(cpu.debugger.format_hex(cpu.reg.GET_HL()))
+    input('yes')
+    return opcode.get_cycles()
 
 def LDDHL8A(mmu, cpu, meta):
     opcode = Opcode(meta)

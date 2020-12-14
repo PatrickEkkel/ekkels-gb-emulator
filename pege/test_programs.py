@@ -186,13 +186,19 @@ class ProgramTests(unittest.TestCase):
         gb = self.create_gameboy(bitstream)
         assert gb.CPU.reg.GET_HL() == 0x32
 
+    def test_LDIHL8A_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LDI (HL+) A']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream)
+        #print(gb.CPU.reg.GET_HL())
+        assert gb.CPU.reg.GET_HL() == 0x01
 
     def test_LDHLnn_parse(self):
         gbasm = GBA_ASM()
         test_program = ['LD HL 32', 'LD A C']
         #test_program = ['LD A C']
         bitstream = gbasm.parse(test_program)
-
 
         #for b in bitstream:
         #    self.print_hex(b)
