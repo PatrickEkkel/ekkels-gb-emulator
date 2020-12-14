@@ -205,6 +205,8 @@ class CPU:
         self._clock = clock
         self.disable_cpu = False
         self.interrupts_enabled = True
+        self.test_mode = False
+        self.stop_at = None
         #self.debug_opcode = False
         self.stack = Stack(self, mmu)
         self.reg = Registers()
@@ -240,7 +242,7 @@ class CPU:
         self.opcodes[0xC1] = opcodes.POPBC
         self.opcodes[0x3D] = opcodes.DECn
         self.opcodes[0xc9] = opcodes.RET
-        self.opcodes[0xEA] = opcodes.LDnn16a
+        #self.opcodes[0xEA] = opcodes.LDnn16a
         self.cb_opcodes[0xcb] = opcodes.CB
         self.cb_opcodes[0x7c] = opcodes.BIT7H
         self.cb_opcodes[0x11] = opcodes.RLC
@@ -260,6 +262,9 @@ class CPU:
         return self._mmu.read(self.pc) >> 4 & 0xFF
 
     def step(self):
+        if self.test_mode and self.pc == self.stop_at:
+            return False
+
         if not self._clock.wait():
             success = False
             opcode = self.read_opcode()
@@ -280,7 +285,7 @@ class CPU:
                         # stop execution by returning False
                         return False
                 opcode_meta = self.opcode_meta[opcode]
-                self.debugger.show_opcode_description(opcode_meta['m'])
+                #self.debugger.show_opcode_description(opcode_meta['m'])
                 cycle = instruction(self._mmu,self, opcode_meta)
                 self.debugger.print_cpu_flags()
                 self.debugger.end()

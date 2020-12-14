@@ -1,5 +1,7 @@
 from instructionset import create_mnemonic_dictionary
 
+REGISTERS_8B = ['A', 'B', 'C', 'D', 'E', 'F']
+REGISTERS_16B = ['HL']
 
 def encode_8bit_value(value):
     if isinstance(value, str):
@@ -45,12 +47,17 @@ class Label(Token):
 
 class Opcode(Token):
 
+    REGISTER_TRANSFER = 'rt'
     def __init__(self):
         self.mnemonic = ''
         self.label =  None
         self.register = None
         self.address = None
+        self.addressing_mode = None
 
+    def determine_adressing_mode(self):
+        if self.address in REGISTERS_8B and self.register in REGISTERS_8B:
+            self.addressing_mode = Opcode.REGISTER_TRANSFER
 
     def has_label(self):
         return self.label is not None
@@ -66,16 +73,23 @@ class Opcode(Token):
 
     def _print_address(self):
         result = ''
-        if isinstance(self.address, int):
-            # if address if of type int, it means it is a converted label 16 bit
-            result = 'nnnn'
-        elif len(self.address) == 4:
-            result = 'nnnn'
-        elif len(self.address) == 2:
-            result = 'nn'
-        elif len(self.address) == 1:
-            result = 'nn'
-        return result
+        # check if the the value is address or register
+        if self.address in REGISTERS_8B:
+            return 'r'
+        elif self.address in REGISTERS_16B:
+            return 'rr'
+        else:
+            pass
+            if isinstance(self.address, int):
+                # if address if of type int, it means it is a converted label 16 bit
+                result = 'nnnn'
+            elif len(self.address) == 4:
+                result = 'nnnn'
+            elif len(self.address) == 2:
+                result = 'nn'
+            elif len(self.address) == 1:
+                result = 'nn'
+            return result
 
     def get_mnemonic_label(self):
         # make exceptions for LDH
@@ -128,8 +142,8 @@ class Tokenizer:
                 result.label = self._get_label()
                 result.register = self._get_register()
                 result.address = self._get_address()
+                result.determine_adressing_mode()
                 # determine, 8 bit or 16 bit value
-
                 if result.address:
                     if len(result.address) == 4:
                         result.address = encode_16bit_value(result.address)
@@ -197,11 +211,16 @@ class GBA_ASM:
             raise ParserError(f' unknown opcode {opcode.get_mnemonic_label()}')
 
         else:
-            if opcode.register:
+            # if we need to load two registers for example LD A B, concatinate
+            # the operands
+
+            if opcode.addressing_mode == Opcode.REGISTER_TRANSFER:
+                key = f'{opcode.register} {opcode.address}'
+                self.encoded_program.append(opcode_meta['register_options'][key])
+            elif opcode.register:
                 self.encoded_program.append(opcode_meta['register_options'][opcode.register])
             else:
                 self.encoded_program.append(opcode_meta['register_options']['x'])
-
             if opcode.address:
                 # does not support 8 bit adresses yet
                 if len(opcode.address) == 4:

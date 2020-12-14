@@ -28,8 +28,9 @@ class ProgramTests(unittest.TestCase):
         game = TestRom(romdata)
         game.print_cartridge_info()
         #print(game)
-        gb = GameBoy(game)
+        gb = GameBoy(game,testmode=True)
         gb.power_on(skipbios=True)
+        return gb
 
 
     def test_JRNZ_label_parser(self):
@@ -41,20 +42,6 @@ class ProgramTests(unittest.TestCase):
 
         assert encoded_program[0] == 0x20
         assert encoded_program[1] == 0x00
-
-    # TODO: Test is not correct, JP goes to wrong location!
-    #def test_predefined_label(self):
-    #    gbasm = GBA_ASM()
-    #    test_program = ['JP start:','start:']
-
-    #    bitstream = gbasm.parse(test_program)
-    #    for b in bitstream:
-    #        self.print_hex(b)
-
-    #    assert bitstream[0] == 0xC3
-    #    assert bitstream[1] == 0x03
-
-        #self.create_gameboy(bitstream)
 
     def test_JRNZ_label_tokenizer(self):
         tokenizer = Tokenizer()
@@ -166,9 +153,6 @@ class ProgramTests(unittest.TestCase):
         for b in bitstream:
             self.print_hex(b)
 
-        #gb = self.create_gameboy(bitstream)
-
-        #gb.power_on()
         return True
 
     # TODO, add asserts
@@ -193,6 +177,29 @@ class ProgramTests(unittest.TestCase):
 
         assert bitstream[0] == self._get_instruction('LD r nn', register='C')
         assert bitstream[1] == 0x10
+
+
+    def test_LDHLnn_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD HL 32']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream)
+        assert gb.CPU.reg.GET_HL() == 0x32
+
+
+    def test_LDHLnn_parse(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD HL 32', 'LD A C']
+        #test_program = ['LD A C']
+        bitstream = gbasm.parse(test_program)
+
+
+        #for b in bitstream:
+        #    self.print_hex(b)
+
+        assert bitstream[0] == self._get_instruction('LD rr nn', register='HL')
+        assert bitstream[1] == 0x32
+        assert bitstream[2] == self._get_instruction('LD r r', register='A C')
 
     def test_LDHAn_parse(self):
         gbasm = GBA_ASM()

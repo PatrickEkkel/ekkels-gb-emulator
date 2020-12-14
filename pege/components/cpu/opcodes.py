@@ -1,4 +1,5 @@
 import bitwise_functions
+from components.cpu.opcode_dsl import OpcodeContext
 from ..mmu import MMU
 
 class Opcode:
@@ -283,11 +284,10 @@ def CPn(mmu, cpu, meta):
     return opcode.get_cycles()
 
 
-# TODO: test needed
 # length: 3 bytes
 # Put value A into nn
 # 0xEA 16 bit immediate value
-def LDnn16a(mmu, cpu):
+def LDnn16a(mmu, cpu, meta):
     cpu.debugger.print_opcode('LDnn16a')
     A = cpu.reg.GET_A()
     cpu.pc += 1
@@ -385,6 +385,15 @@ def LDn8d(mmu, cpu, meta):
         return -1
 
 
+def LDHLnn(mmu, cpu, meta):
+    opcode = Opcode(meta)
+    context = OpcodeContext(cpu, mmu, meta, cpu.pc)
+    cpu.debugger.print_opcode(opcode)
+    context.readreg().readval().selectreg().store()
+    #input('nope')
+    cpu.pc += 1
+    return opcode.get_cycles()
+
 # length: 3 bytes
 # 0x31 and 2 bytes unsigned
 def LDnn16d(mmu, cpu, meta):
@@ -433,7 +442,7 @@ def LDDHL8A(mmu, cpu, meta):
 
 # length: 3 bytes
 # 0x31 (1 byte) (2 bytes) unsigned
-def LDSP16d(mmu, cpu):
+def LDSP16d(mmu, cpu, meta):
     cpu.debugger.print_opcode('LDSP16d')
     cpu.pc += 1
     SP = mmu.read_u16(cpu.pc)
