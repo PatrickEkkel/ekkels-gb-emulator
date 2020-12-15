@@ -17,9 +17,9 @@ class GameBoy:
 
         self.CPU = CPU(self.mmu,  self._clock)
         if testmode:
-            # just stop at 0x200, so we can test most small programs
+            # just stop at 0x150, so we can test most small programs
             self.CPU.test_mode = True
-            self.CPU.stop_at = 0x200
+            self.CPU.stop_at = 0x150
         self.PPU = PPU(self.mmu, self.screen, self._clock)
 
     def _init(self, skipbios):
@@ -27,10 +27,13 @@ class GameBoy:
             self.mmu.disable_bootrom()
             self.CPU.pc = 0x100
             self.CPU.reg.initialize_without_bootrom()
-
-    def power_on(self,skipbios=True):
-        self._init(skipbios)
+    def _run(self):
         cont = True
         while(cont):
-            cont = self.CPU.step()
-            self.PPU.step()
+                cont = self.CPU.step()
+                self.PPU.step()
+
+    def power_on(self,skipbios=True, standby=False):
+        self._init(skipbios)
+        if not standby:
+            self._run()            

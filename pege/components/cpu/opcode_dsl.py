@@ -1,107 +1,88 @@
 
 
-class OpcodeContext:
+class OpcodeState:
 
-    def __init__(self, cpu, mmu, meta):
-        self._mmu = mmu
+    def __init__(self, cpu):
         self._cpu = cpu
-        self._meta = meta
-        self._operands = [None, None]
-        self._pointer = 0
-        self._pc = cpu.pc
-        self._selected_register = None
-        self._selected_address_value = None
-        self._selected_reg_value = None
+        self.selected_register_key = None
+        self.selected_register_value = None
+        self.selected_address_key = None
+        self.selected_address_value = None
 
-    def set_selected_register(self, register):
-        self._selected_register = register
-    # read the next opcode as register
-    def readreg(self):
-        opcode = self._mmu.read(self._pc)
-        self._pc += 1
-        opcodes = self._meta['register_options']
-        for k, v in opcodes.items():
-            if v == opcode:
-                self._store_operand(k)
-                return self
-
-        return self
-
-    def store(self,value=None):
-        value = self._load_operand()
-        self._storereg(self._selected_register, value)
-        return self
-
-    def increg(self,register=None):
-        self._selected_reg_value += 1
-        return self
-
-    def storereg_to_addr(self, reg=None):
-        value = self._loadreg(reg)
-        print(self._cpu.debugger.format_hex(value))
-        self._mmu.write(self._selected_reg_value, value)
-        return self
-    def storeaddr_to_reg(self, reg=None):
-        if reg is None and self._selected_register:
-            register = self._selected_register
-        else:
-            register = reg
-        self._storereg(register, self._selected_reg_value)
-        return self
-
-    def loadaddr(self):
-        self._selected_address_value = self._mmu.read(self._selected_reg_value)
-        return self
-    def loadval_from_reg(self):
-        #value = self._load_operand()
-        if self._selected_register:
-            register = self._selected_register
-        self._selected_reg_value = self._loadreg(register)
-        return self
-
-    def _storereg(self, register, value):
+    def storereg(self, register, value):
         if register == 'HL':
             self._cpu.reg.SET_HL(value)
         elif register == 'A':
-            print(self._cpu.debugger.format_hex(value))
             self._cpu.reg.SET_A(value)
         else:
             input('not implemented')
 
-    def _loadreg(self, register):
+    def loadreg(self, register):
         if register == 'HL':
             return self._cpu.reg.GET_HL()
         elif register == 'A':
             return self._cpu.reg.GET_A()
         else:
             input('not implemented')
-
-    def selectreg(self,reg=None):
-        if reg == None:
-            self._selected_register = self._load_operand()
-        else:
-            self._store_operand(reg)
-            self._selected_register = reg
+    
+    # retrieve the value from the selected_register_key and put it in the buffer
+    def load_register_value(self):
+        if self.selected_register_key:
+            register = self.selected_register_key
+        self.selected_register_value = self.loadreg(register)
         return self
 
 
-    def readval(self):
-        value = self._mmu.read(self._pc)
-        self._store_operand(value)
+        
+class OpcodeContext:
+
+    def __init__(self, cpu, mmu, meta):
+        self._mmu = mmu
+        self._cpu = cpu
+        self._meta = meta
+        self._pc = cpu.pc
+        self.opcode_state = OpcodeState(cpu)
+
+    
+    def select_reg(self, register):
+        self.opcode_state.selected_register_key = register
         return self
 
-    def _load_operand(self):
-         result = self._operands[self._pointer]
-         if self._pointer == 1:
-             self._pointer = 0
-         else:
-             self._pointer += 1
+    # increment the current selected value by one
+    def increg(self,register=None):
+        self.opcode_state.selected_register_value += 1
+        return self
+    # write the current contents of the register value buffer to the selected register
+    def storereg(self):
+        self.opcode_state.storereg(self.opcode_state.selected_register_key, self.opcode_state.selected_register_value)
+        return self
+    # write the value of the passed regsiter (reg) in the buffer to the memory address that is stored in the selected register
+    def storereg_to_addr(self, reg=None):
+        value = self.opcode_state.loadreg(reg)
+        self._mmu.write(self.opcode_state.selected_register_value, value)
+        return self
+    
+    # write the current address value that is stored in the buffer to (reg)
+    def storeaddr_to_reg(self,reg=None):
+        value = self.opcode_state.selected_address_value
+        self.opcode_state.storereg(reg,value)
+        return self
+    
+    # load the value from the memory address that is currently in the loaded register value buffer
+    def loadaddr_from_reg(self):
+        self.opcode_state.selected_address_key = self.opcode_state.selected_register_value
+        self.opcode_state.selected_address_value = self._mmu.read(self.opcode_state.selected_register_value)
+        return self
 
-         return result
+    def loadval_from_reg(self):
+        self.opcode_state.load_register_value()
+        return self
+  
+    # read the current position of the program counter as an address value for the current selected register
+    def loadaddr_from_opcode(self):
+        self._pc += 1
+        self.opcode_state.selected_address_key = self._pc
+        self.opcode_state.selected_address_value = self._mmu.read(self._pc)
+        return self
 
-    def _store_operand(self, value):
-        self._operands[self._pointer] = value
-        if  self._pointer == 1:
-            self._pointer = 0
-        else:
-            self._pointer += 1
+  

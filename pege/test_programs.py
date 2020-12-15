@@ -17,7 +17,7 @@ class ProgramTests(unittest.TestCase):
 
         return instructions[mnemonic]['register_options'][register]
 
-    def create_gameboy(self, program):
+    def create_gameboy(self, program,run=True):
 
         romdata = [0x0000] * 65535
         pc = 0x0100
@@ -29,7 +29,8 @@ class ProgramTests(unittest.TestCase):
         game.print_cartridge_info()
         #print(game)
         gb = GameBoy(game,testmode=True)
-        gb.power_on(skipbios=True)
+        if run:
+            gb.power_on(skipbios=True)
         return gb
 
 
@@ -190,10 +191,14 @@ class ProgramTests(unittest.TestCase):
         gbasm = GBA_ASM()
         test_program = ['LDI (HL+) A']
         bitstream = gbasm.parse(test_program)
-        gb = self.create_gameboy(bitstream)
-        #print(gb.CPU.reg.GET_HL())
-        assert gb.CPU.reg.GET_HL() == 0x01
-
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.mmu.write(0x8000,0x100)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_HL(0x8000)
+        gb._run()
+        assert gb.CPU.reg.GET_HL() == 0x8001
+        assert gb.CPU.reg.GET_A() == 0x100
+        
     def test_LDHLnn_parse(self):
         gbasm = GBA_ASM()
         test_program = ['LD HL 32', 'LD A C']

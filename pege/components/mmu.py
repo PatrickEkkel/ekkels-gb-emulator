@@ -35,6 +35,7 @@ class MMU:
         self.io = self.init_memory(MMU.IO_REGISTER_START,MMU.IO_REGISTER_END)
         self.vram = self.init_memory(MMU.VRAM_START, MMU.VRAM_END)
         self.hram = self.init_memory(MMU.HRAM_START, MMU.HRAM_END)
+        self.unmapped = self.init_memory(0x0,0xFFFF)
 
 
     def init_memory(self, start,end):
@@ -73,6 +74,8 @@ class MMU:
         elif self._is_hram(address):
             self.hram[address] = value
         else:
+            # just dump all illigal writes in this array, so we can use it for testing
+            self.unmapped[address] = value
             print('nothing to write')
 
 
@@ -117,7 +120,9 @@ class MMU:
             return self.io[address]
         else:
             # trying to access unmapped memory
-            return 0x0000
+            # just return the garbage array
+            return self.unmapped[address]
+            #return 0x0000
 
 
     def _getbyte(self,address, signed=False):

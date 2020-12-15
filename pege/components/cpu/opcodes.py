@@ -384,12 +384,15 @@ def LDn8d(mmu, cpu, meta):
     else:
         return -1
 
-
+# TODO: this opcode is in progress
 def LDHLnn(mmu, cpu, meta):
+    input('work to do here!! ')
     opcode = Opcode(meta)
     context = OpcodeContext(cpu, mmu, meta)
     cpu.debugger.print_opcode(opcode)
-    context.readreg().readval().selectreg().store()
+    context.loadaddr_from_opcode()
+    context.select_reg('HL').loadaddr_from_opcode()
+    #context.readreg().loadaddr_from_opcode().selectreg().store()
     cpu.pc += 1
     return opcode.get_cycles()
 
@@ -418,13 +421,9 @@ def LDHL8A(mmu, cpu):
 
 def LDIHL8A(mmu, cpu, meta):
     context = OpcodeContext(cpu, mmu, meta)
-    context.set_selected_register('HL')
     opcode = Opcode(meta)
     cpu.debugger.print_opcode(opcode)
-    print(cpu.debugger.format_hex(cpu.reg.GET_HL()))
-    context.loadval_from_reg().loadaddr().storereg_to_addr('A').increg().storeaddr_to_reg()
-    print(cpu.debugger.format_hex(cpu.reg.GET_HL()))
-    input('yes')
+    context.select_reg('HL').loadval_from_reg().loadaddr_from_reg().storeaddr_to_reg('A').increg().storereg()
     return opcode.get_cycles()
 
 def LDDHL8A(mmu, cpu, meta):
