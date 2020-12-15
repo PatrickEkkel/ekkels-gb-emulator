@@ -326,10 +326,7 @@ def LDn8d(mmu, cpu, meta, context):
 
 # TODO: this opcode is in progress
 def LDHLnn(mmu, cpu, meta, context):
-    input('work to do here!! ')
-    #context.loadaddr_from_opcode()
-    #context.select_reg('HL').loadaddr_from_opcode()
-    #context.readreg().loadaddr_from_opcode().selectreg().store()
+    context.loadaddr_from_opcode().storeaddr_to_reg('HL')
     cpu.pc += 1
     
 # length: 3 bytes

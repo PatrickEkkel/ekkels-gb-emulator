@@ -108,9 +108,9 @@ class OpcodeContext:
   
     # read the current position of the program counter as an address value for the current selected register
     def loadaddr_from_opcode(self):
-        self.cpu.pc += 1
-        self.opcode_state.selected_address_key = self._pc
-        self.opcode_state.selected_address_value = self._mmu.read(self._pc)
+        self._cpu.pc += 1
+        self.opcode_state.selected_address_key = self._cpu.pc
+        self.opcode_state.selected_address_value = self._mmu.read(self._cpu.pc)
         return self
 
   
