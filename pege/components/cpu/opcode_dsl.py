@@ -1,4 +1,32 @@
 
+class Opcode:
+    def __init__(self, meta, address=None):
+        self.mnemonic = meta['m']
+        self.address = address
+        self.cycles = meta['cycles']
+        self.jump_instruction = meta['jump_instruction']
+
+
+    def _format_hex(self, opcode):
+        return ("0x{:x}".format(opcode))
+
+    def get_cycles(self,jump=False):
+        if self.jump_instruction:
+            if jump:
+                return self.cycles[1]
+            else:
+                return self.cycles[0]
+        else:
+            return self.cycles
+
+
+    def __str__(self):
+        if self.address:
+            address = self._format_hex(self.address)
+            return f'{self.mnemonic} {address}'
+        else:
+            return f'{self.mnemonic}'
+
 
 class OpcodeState:
 
@@ -40,8 +68,8 @@ class OpcodeContext:
         self._mmu = mmu
         self._cpu = cpu
         self._meta = meta
-        self._pc = cpu.pc
         self.opcode_state = OpcodeState(cpu)
+        self.opcode = Opcode(self._meta)
 
     
     def select_reg(self, register):
@@ -80,7 +108,7 @@ class OpcodeContext:
   
     # read the current position of the program counter as an address value for the current selected register
     def loadaddr_from_opcode(self):
-        self._pc += 1
+        self.cpu.pc += 1
         self.opcode_state.selected_address_key = self._pc
         self.opcode_state.selected_address_value = self._mmu.read(self._pc)
         return self
