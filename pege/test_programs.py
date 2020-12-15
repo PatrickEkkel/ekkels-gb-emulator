@@ -187,6 +187,23 @@ class ProgramTests(unittest.TestCase):
         gb = self.create_gameboy(bitstream)
         assert gb.CPU.reg.GET_HL() == 0x32
 
+    def test_LDSP16d_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD SP 1111']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream)
+        assert gb.CPU.reg.GET_SP() == 0x1111
+        assert bitstream[0] == 0x31
+        assert bitstream[1] == 0x11
+        assert bitstream[2] == 0x11
+
+    def test_LDCA_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD (C) A']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream)
+        
+        
     def test_LDIHL8A_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['LDI (HL+) A']

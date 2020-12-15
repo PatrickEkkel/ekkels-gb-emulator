@@ -216,7 +216,7 @@ class CPU:
         self.opcode_cycles = instructionset.create_opcode_map('cycles')
         self.opcode_meta = instructionset.create_opcode_metamap()
         self.cb_opcodes = [None] * 255
-        self.opcodes[0x31] = opcodes.LDSP16d
+        #self.opcodes[0x31] = opcodes.LDSP16d
         self.opcodes[0xC5] = opcodes.PUSHBC
         self.opcodes[0x11] = opcodes.LDnn16d
         self.opcodes[0x32] = opcodes.LDDHL8A
@@ -231,7 +231,7 @@ class CPU:
         self.opcodes[0x1E] = opcodes.LDn8d
         self.opcodes[0x2E] = opcodes.LDn8d
         self.opcodes[0x06] = opcodes.LDn8d
-        self.opcodes[0xE2] = opcodes.LDCA
+        #self.opcodes[0xE2] = opcodes.LDCA
         self.opcodes[0x17] = opcodes.RLA
         self.opcodes[0xC] = opcodes.INCn
         self.opcodes[0x04] = opcodes.INCn

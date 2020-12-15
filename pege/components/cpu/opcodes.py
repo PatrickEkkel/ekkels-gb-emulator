@@ -188,14 +188,12 @@ def LDAn(mmu, cpu):
 # length 1 byte
 # 0xE2
 # write contents of register A to memory address FF00 + C
-def LDCA(mmu, cpu):
-    cpu.debugger.print_opcode('LDCA')
-    C = cpu.reg.GET_C()
+def LDCA(mmu, cpu, meta, context):
+    C =  cpu.reg.GET_C()
     A = cpu.reg.GET_A()
     offset_address = 0xFF00 + C
     mmu.write(offset_address, A)
-    return True
-
+    
 def LDnn(mmu, cpu):
     cpu.debugger.print_opcode('LDnn')
     parameter = cpu.read_upper_opcode_parameter()
@@ -341,7 +339,9 @@ def LDnn16d(mmu, cpu, meta, context):
     cpu.pc += 1
     val = mmu.read_u16(cpu.pc)
     cpu.debugger.print_iv(val)
-    if parameter == 0x02:
+    if parameter == 0x03:
+        cpu.reg.SET_SP(val)
+    elif parameter == 0x02:
         cpu.reg.SET_HL(val)
     elif parameter == 0x01:
         cpu.reg.SET_DE(val)
@@ -373,15 +373,6 @@ def LDDHL8A(mmu, cpu, meta, context):
         result = True
     cpu.reg.SET_HL(HL)
 
-# length: 3 bytes
-# 0x31 (1 byte) (2 bytes) unsigned
-def LDSP16d(mmu, cpu, meta):
-    cpu.debugger.print_opcode('LDSP16d')
-    cpu.pc += 1
-    SP = mmu.read_u16(cpu.pc)
-    cpu.reg.SET_SP(SP)
-    cpu.pc += 1
-    return True
 
 # length: 1 bytes
 # 0xAF

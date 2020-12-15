@@ -1,5 +1,6 @@
 from instructionset import create_mnemonic_dictionary
 
+OFFSET_REGISTERS = ['(C)']
 REGISTERS_8B = ['A', 'B', 'C', 'D', 'E', 'F']
 REGISTERS_16B = ['HL']
 
@@ -69,7 +70,8 @@ class Opcode(Token):
             result = 'r'
         elif len(self.register) == 2:
             result = 'rr'
-
+        elif len(self.register) == 3:
+            result = '(r)'
         return result
 
     def _print_address(self):
@@ -160,10 +162,13 @@ class Tokenizer:
         return self.tokens[0]
 
     def _get_register(self):
-
         if len(self.tokens) > 1 and self.tokens[1] == 'HL':
             return self.tokens[1]
+        elif len(self.tokens) > 1 and self.tokens[1] == 'SP':
+            return self.tokens[1]
         elif len(self.tokens) > 1 and len(self.tokens[1]) == 1:
+            return self.tokens[1]
+        elif len(self.tokens) > 1 and len(self.tokens[1]) == 3:
             return self.tokens[1]
         else:
             return None
