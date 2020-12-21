@@ -172,6 +172,18 @@ class ProgramTests(unittest.TestCase):
         assert bitstream[0] == self._get_instruction('LD r nn', register='C')
         assert bitstream[1] == 0x10
 
+    def test_LD_A_B_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD A B']
+        bitstream = gbasm.parse(test_program)
+        for b in bitstream:
+            self.print_hex(b)
+
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_B(0x10)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0x10
 
     def test_LDHLnn_opcode(self):
         gbasm = GBA_ASM()
@@ -195,8 +207,40 @@ class ProgramTests(unittest.TestCase):
         test_program = ['LD (C) A']
         bitstream = gbasm.parse(test_program)
         gb = self.create_gameboy(bitstream)
-        
-        
+
+    def test_INCn_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['INC C']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_C(0x01)
+        gb._run()
+        assert gb.CPU.reg.GET_C() == 0x02
+
+
+    def test_CALLnn_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['CALL func:', 'INC C','func:','INC B']
+        bitstream = gbasm.parse(test_program)
+        for b in bitstream:
+            self.print_hex(b)
+
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_B(0x01)
+        gb.CPU.reg.SET_C(0x00)
+        gb._run()
+        assert gb.CPU.reg.GET_B() == 0x02
+        assert gb.CPU.reg.GET_C() == 0x00
+
+        assert bitstream[0] == 0xCD
+        assert bitstream[1] == 0x04
+        assert bitstream[2] == 0x01
+        assert bitstream[3] == 0x0C
+        assert bitstream[4] == 0x04
+
+
     def test_LDIHL8A_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['LDI (HL+) A']
@@ -208,7 +252,7 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_HL() == 0x8001
         assert gb.CPU.reg.GET_A() == 0x100
-        
+
     # TODO: finish up
     #def test_LDHLnn_parse(self):
     #    gbasm = GBA_ASM()

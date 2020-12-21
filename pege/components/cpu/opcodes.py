@@ -7,11 +7,17 @@ def NOP(mmu, cpu, meta, context):
     #cpu.debugger.print_opcode(opcode)
     #return opcode.get_cycles()
 
+def DEC_rr(mmu, cpu, meta, context):
+    upper_param = cpu.read_upper_opcode_parameter()
+    operand_mapping = {0x00: 'BC'}
+    context.dec(operand_mapping[upper_param])
+
+
 
 # 0x05,0x3D,0x0D length: 1 byte
 # decrements the value of register n by 1
 # flags zhn-
-def DECn(mmu, cpu, meta, context):
+def DEC_r(mmu, cpu, meta, context):
     result = False
     upper_param = cpu.read_upper_opcode_parameter()
     lower_param = cpu.read_lower_opcode_parameter()
@@ -71,7 +77,7 @@ def RET(mmu, cpu):
 
 def DI(mmu, cpu, meta, context):
     cpu.interrupts_enabled = False
-    
+
 def EI(mmu, cpu):
     cpu.debugger.print_opcode('DI')
     cpu.interrupts_enabled = True
@@ -97,10 +103,7 @@ def INCnn(mmu, cpu):
 
     return result
 
-
-
-
-def INCn(mmu, cpu):
+def INCn(mmu, cpu, meta, context):
     cpu.debugger.print_opcode('INCn')
     cpu.reg.CLEAR_SUBSTRACT()
     upper_param = cpu.read_upper_opcode_parameter()
@@ -139,7 +142,7 @@ def LDHAn(mmu, cpu, meta, context):
     cpu.pc += 1
     n = mmu.read(cpu.pc)
     # print disassembly info
-    
+
     # read A register
     A = cpu.reg.GET_A()
 
@@ -193,7 +196,7 @@ def LDCA(mmu, cpu, meta, context):
     A = cpu.reg.GET_A()
     offset_address = 0xFF00 + C
     mmu.write(offset_address, A)
-    
+
 def LDnn(mmu, cpu):
     cpu.debugger.print_opcode('LDnn')
     parameter = cpu.read_upper_opcode_parameter()
@@ -242,7 +245,7 @@ def LDnn16a(mmu, cpu, meta, context):
     address = mmu.read_u16(cpu.pc)
     mmu.write(address, A)
     cpu.pc += 1
-    
+
 def LDnA(mmu, cpu):
      cpu.debugger.print_opcode('LDnA')
      upper_param = cpu.read_upper_opcode_parameter()
@@ -324,11 +327,20 @@ def LDn8d(mmu, cpu, meta, context):
             A = cpu.reg.GET_A()
             result = True
 
+def LD_n_n(mmu, cpu, meta, context):
+    upper_param = cpu.read_upper_opcode_parameter()
+    lower_param = cpu.read_lower_opcode_parameter()
+
+    register_operand = {0x07: 'A',0x80: 'B'}
+    r2 = register_operand[lower_param]
+    r1 = register_operand[upper_param]
+
+    context.load(r2).store(r1)
+
 # TODO: this opcode is in progress
 def LDHLnn(mmu, cpu, meta, context):
     context.loadaddr_from_opcode().storeaddr_to_reg('HL')
-    cpu.pc += 1
-    
+
 # length: 3 bytes
 # 0x31 and 2 bytes unsigned
 def LDnn16d(mmu, cpu, meta, context):
@@ -342,6 +354,9 @@ def LDnn16d(mmu, cpu, meta, context):
         cpu.reg.SET_HL(val)
     elif parameter == 0x01:
         cpu.reg.SET_DE(val)
+    elif parameter == 0x00:
+        cpu.reg.SET_BC(val)
+
     cpu.pc += 1
 
 def LDHL8A(mmu, cpu):
@@ -353,7 +368,7 @@ def LDHL8A(mmu, cpu):
 
 def LDIHL8A(mmu, cpu, meta, context):
     context.select_reg('HL').loadval_from_reg().loadaddr_from_reg().storeaddr_to_reg('A').increg().storereg()
-   
+
 def LDDHL8A(mmu, cpu, meta, context):
     parameter = cpu.read_upper_opcode_parameter()
     # get A
@@ -391,7 +406,7 @@ def XORn(mmu, cpu, meta, context):
     cpu.reg.SET_A(A)
 
     result = True
-  
+
 # special prefix for a different set of opcodes
 def CB(mmu, cpu):
     cpu.debugger.print_opcode('CB')
@@ -449,11 +464,11 @@ def JRNZn(mmu, cpu, meta, context):
         cpu.pc = jump_address
     else:
         cpu.pc += 1
-        
+
 # length: 3 bytes
 # 0xCD
 # pushes the PC to the stack and jump to specified 16 bit operand
-def CALLnn(mmu, cpu):
+def CALLnn(mmu, cpu, meta, context):
     cpu.debugger.print_opcode('CALLnn')
     # address of next instruction
     pc = cpu.pc + 1
