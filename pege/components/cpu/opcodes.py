@@ -268,24 +268,15 @@ def LDnA(mmu, cpu):
 
      return result
 
-def POPBC(mmu, cpu):
-    cpu.debugger.print_opcode('POPBC')
-    val_l = cpu.stack.pop()
-    val_r = cpu.stack.pop()
+def POPBC(mmu, cpu, meta, context):
+    context.pop().store('C').pop().store('B')
 
-    cpu.reg.SET_BC(bitwise_functions.merge_8bit_values(val_l, val_r))
-    BC = cpu.reg.GET_BC()
-    return True
-
-def PUSHBC(mmu, cpu):
-    cpu.debugger.print_opcode('PUSHBC')
-
-    B = cpu.reg.GET_B()
-    C = cpu.reg.GET_C()
-
-    cpu.stack.push(B)
-    cpu.stack.push(C)
-    return True
+def PUSHBC(mmu, cpu, meta, context):
+    context.load('B').push().load('C').push()
+    #B = cpu.reg.GET_B()
+    #C = cpu.reg.GET_C()
+    #cpu.stack.push(B)
+    #cpu.stack.push(C)
 
 def LDn8d(mmu, cpu, meta, context):
     # get Register from opcode
@@ -330,9 +321,14 @@ def LD_n_n(mmu, cpu, meta, context):
     upper_param = cpu.read_upper_opcode_parameter()
     lower_param = cpu.read_lower_opcode_parameter()
 
-    register_operand = {0x07: 'A',0x80: 'B'}
-    r2 = register_operand[lower_param]
-    r1 = register_operand[upper_param]
+    #print('show params')
+    #input(cpu.debugger.format_hex(upper_param))
+    #input(cpu.debugger.format_hex(lower_param))
+
+    register_operand_1 = { 0x07: 'A',0x04: 'C' }
+    register_operand_2 = { 0x80: 'B',0xF0: 'A' }
+    r2 = register_operand_2[lower_param]
+    r1 = register_operand_1[upper_param]
 
     context.load(r2).store(r1)
 
@@ -363,9 +359,18 @@ def LDnn16d(mmu, cpu, meta, context):
 def LDHL8A(mmu, cpu, meta, context):
     context.load('HL').store('A',AddressingMode.dr16)
 
+def LDI_HL_A(mmu, cpu, meta, context):
+    r1 = 'HL'
+    r2 = 'A'
+    context.load('HL').store('A', addressing_mode=AddressingMode.dr16).load('HL').inc().store()
 
-def LDIHL8A(mmu, cpu, meta, context):
-    context.load('HL',addressing_mode=AddressingMode.ir16).store('A').load('HL').inc().store()
+def LDI_A_HL(mmu, cpu, meta, context):
+    r1 = 'HL'
+    r2 = 'A'
+    context.load('HL', addressing_mode=AddressingMode.ir16).store('A').load('HL').inc().store()
+
+#def LDIHL8A(mmu, cpu, meta, context):
+
 
 def LDDHL8A(mmu, cpu, meta, context):
     parameter = cpu.read_upper_opcode_parameter()
@@ -482,8 +487,7 @@ def CALLnn(mmu, cpu, meta, context):
     return True
 
 
-def RLA(mmu, cpu):
-    cpu.debugger.print_opcode('RLA')
+def RLA(mmu, cpu, meta, context):
     # get the value from the C register
     A = cpu.reg.GET_A()
     previous_carry = cpu.reg.GET_CARRY()

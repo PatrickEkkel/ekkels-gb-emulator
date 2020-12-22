@@ -172,6 +172,20 @@ class ProgramTests(unittest.TestCase):
         assert bitstream[0] == self._get_instruction('LD r nn', register='C')
         assert bitstream[1] == 0x10
 
+
+    def test_LD_C_A_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD C A']
+        bitstream = gbasm.parse(test_program)
+        for b in bitstream:
+            self.print_hex(b)
+
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0x10)
+        gb._run()
+        assert gb.CPU.reg.GET_C() == 0x10
+
     def test_LD_A_B_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['LD A B']
@@ -229,6 +243,29 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_A() == 0xFF
 
+    def test_push_bc_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['PUSH BC']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_BC(0xAFAF)
+        #input(gb.CPU.debugger.format_hex(gb.CPU.reg.GET_SP()))
+
+        gb._run()
+        assert gb.mmu.read(0xFFFE) == 0xAF
+        assert gb.mmu.read(0xFFFD) == 0xAF
+        #input(gb.CPU.debugger.format_hex(gb.CPU.reg.GET_SP()))
+
+    def test_push_pop_bc_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD BC AFBF', 'PUSH BC', 'LD BC 0000','POP BC']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb._run()
+        assert gb.CPU.reg.GET_BC() == 0xAFBF
+
     def test_ld_hl_a(self):
         gbasm = GBA_ASM()
         test_program = ['LD (HL) A']
@@ -276,9 +313,24 @@ class ProgramTests(unittest.TestCase):
         assert bitstream[4] == 0x04
 
 
-    def test_LDIHL8A_opcode(self):
+    # Put A into memory address HL. Increment HL.
+    def test_LDI_HL_A_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['LDI (HL+) A']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0x10)
+        gb.mmu.write(0x8000,0xFFFF)
+        gb.CPU.reg.SET_HL(0x8000)
+        gb._run()
+        assert gb.CPU.reg.GET_HL() == 0x8001
+        assert gb.mmu.read(0x8000) == 0x10
+
+    # Put value at address HL into A. Increment HL.
+    def test_LDI_A_HL_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LDI A (HL+)']
         bitstream = gbasm.parse(test_program)
         gb = self.create_gameboy(bitstream,run=False)
         gb.mmu.write(0x8000,0x100)

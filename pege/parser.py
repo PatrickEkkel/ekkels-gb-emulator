@@ -176,6 +176,8 @@ class Tokenizer:
             return self.tokens[1]
         elif len(self.tokens) > 1 and self.tokens[1] == 'SP':
             return self.tokens[1]
+        elif len(self.tokens) > 1 and self.tokens[1] == 'BC':
+            return self.tokens[1]
         elif len(self.tokens) > 1 and len(self.tokens[1]) == 1:
             return self.tokens[1]
         elif len(self.tokens) > 1 and len(self.tokens[1]) == 3:

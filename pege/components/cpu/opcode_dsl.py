@@ -36,10 +36,9 @@ class OpcodeState:
         self.selected_register_value = None
         self.selected_address_key = None
         self.selected_address_value = None
-        self.adressing_mode = AddressingMode.IMPLIED
+        self.addressing_mode = AddressingMode.IMPLIED
 
     def storereg(self, register, value):
-        print(register)
         if register == 'HL':
             self._cpu.reg.SET_HL(value)
         elif register == 'A':
@@ -199,10 +198,18 @@ class OpcodeContext:
 
         return context
 
+    def push(self):
+        self._cpu.stack.push(self._get_select_reg_value())
+        return self
+
+    def pop(self):
+        self._set_reg_value(self._cpu.stack.pop())
+        return self
+
     def store(self, register=None, addressing_mode=None):
         if addressing_mode != None:
             self._set_adressingmode(addressing_mode)
-            
+
         if register == None:
             register = self._get_selected_reg()
         if self.opcode_state.addressing_mode == AddressingMode.IMPLIED:
