@@ -1,6 +1,6 @@
 from instructionset import create_mnemonic_dictionary
 
-OFFSET_REGISTERS = ['(C)']
+OFFSET_REGISTERS = ['(C)','(HL)','(DE)']
 REGISTERS_8B = ['A', 'B', 'C', 'D', 'E', 'F']
 REGISTERS_16B = ['HL']
 
@@ -50,6 +50,7 @@ class Label(Token):
 class Opcode(Token):
 
     REGISTER_TRANSFER = 'rt'
+    OFFSET_REGISTER_TRANSFER = 'ort'
     def __init__(self):
         self.mnemonic = ''
         self.label =  None
@@ -60,6 +61,10 @@ class Opcode(Token):
     def determine_adressing_mode(self):
         if self.address in REGISTERS_8B and self.register in REGISTERS_8B:
             self.addressing_mode = Opcode.REGISTER_TRANSFER
+        elif self.register in OFFSET_REGISTERS and self.address in REGISTERS_8B:
+            self.addressing_mode = Opcode.OFFSET_REGISTER_TRANSFER
+        elif self.register in REGISTERS_8B and self.address in OFFSET_REGISTERS:
+            self.addressing_mode = Opcode.OFFSET_REGISTER_TRANSFER
 
     def has_label(self):
         return self.label is not None
@@ -72,6 +77,8 @@ class Opcode(Token):
             result = 'rr'
         elif len(self.register) == 3:
             result = '(r)'
+        elif len(self.register) == 4:
+            result = '(rr)'
         return result
 
     def _print_address(self):
@@ -81,6 +88,8 @@ class Opcode(Token):
             return 'r'
         elif self.address in REGISTERS_16B:
             return 'rr'
+        elif self.address in OFFSET_REGISTERS:
+            return '(rr)'
         else:
             pass
             if isinstance(self.address, int):
@@ -148,9 +157,10 @@ class Tokenizer:
                 result.label = self._get_label()
                 result.register = self._get_register()
                 result.address = self._get_address()
+                #input(result.register)
                 result.determine_adressing_mode()
                 # determine, 8 bit or 16 bit value
-                if result.address:
+                if result.address and result.address not in OFFSET_REGISTERS:
                     if len(result.address) == 4:
                         result.address = encode_16bit_value(result.address)
                     elif len(result.address) == 2:
@@ -170,11 +180,12 @@ class Tokenizer:
             return self.tokens[1]
         elif len(self.tokens) > 1 and len(self.tokens[1]) == 3:
             return self.tokens[1]
+        elif  len(self.tokens) > 1 and len(self.tokens[1]) == 4:
+            return self.tokens[1]
         else:
             return None
 
     def _get_address(self):
-
         # Make exception for LDH
         if self.tokens[0] == 'LDH':
             return self.tokens[1]
@@ -223,16 +234,17 @@ class GBA_ASM:
             # if we need to load two registers for example LD A B, concatinate
             # the operands
 
-            if opcode.addressing_mode == Opcode.REGISTER_TRANSFER:
+            if opcode.addressing_mode == Opcode.REGISTER_TRANSFER or opcode.addressing_mode == Opcode.OFFSET_REGISTER_TRANSFER:
                 key = f'{opcode.register} {opcode.address}'
                 self.encoded_program.append(opcode_meta['register_options'][key])
+
             elif opcode.register:
                 self.encoded_program.append(opcode_meta['register_options'][opcode.register])
             else:
                 self.encoded_program.append(opcode_meta['register_options']['x'])
             if opcode.address:
                 # does not support 8 bit adresses yet
-                if len(opcode.address) == 4:
+                if len(opcode.address) == 4 and opcode.addressing_mode != Opcode.OFFSET_REGISTER_TRANSFER:
                     opcode.address = encode_16bit_value(opcode.address)
                     fb = opcode.address[2:4]
                     sb = opcode.address[0:2]

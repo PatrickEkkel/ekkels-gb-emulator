@@ -84,7 +84,9 @@ class AddressingMode:
     d8 = 10
     # Indirect 16 bit register adressing mode, read 16 value from register and use it as pointer to loaded value
     ir16 = 11
-    IMPLIED = 12
+    # direct read 16 register, put the address in the register without dereferencing
+    dr16 = 12
+    IMPLIED = 13
 
 class OpcodeContext:
 
@@ -102,14 +104,17 @@ class OpcodeContext:
     def _decreg(self, register=None):
         self.opcode_state.selected_register_value -= 1
         return self
+
     # increment the current selected value by one
     def _increg(self,register=None):
         self.opcode_state.selected_register_value += 1
         return self
+
     # write the current contents of the register value buffer to the selected register
     def _storereg(self):
         self.opcode_state.storereg(self.opcode_state.selected_register_key, self.opcode_state.selected_register_value)
         return self
+
     # write the value of the passed regsiter (reg) in the buffer to the memory address that is stored in the selected register
     def _storereg_to_addr(self, reg=None):
         value = self.opcode_state.loadreg(reg)
@@ -194,7 +199,10 @@ class OpcodeContext:
 
         return context
 
-    def store(self, register=None):
+    def store(self, register=None, addressing_mode=None):
+        if addressing_mode != None:
+            self._set_adressingmode(addressing_mode)
+            
         if register == None:
             register = self._get_selected_reg()
         if self.opcode_state.addressing_mode == AddressingMode.IMPLIED:
@@ -203,4 +211,6 @@ class OpcodeContext:
             self._select_reg(register)._storeaddr_to_reg(register)
         elif self.opcode_state.addressing_mode == AddressingMode.ir16:
             self._select_reg(register)._storeaddr_to_reg(register)
+        elif self.opcode_state.addressing_mode == AddressingMode.dr16:
+            self._select_reg(register)._storereg_to_addr(register)
         return self

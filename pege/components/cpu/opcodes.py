@@ -165,11 +165,11 @@ def LDHnA(mmu, cpu, meta):
 
     mmu.write(offset_address, A)
     return meta.get_cycles()
+
 # length: 1 byte
 # 0x1A
 # Read the Value of register DE from memory and put the contents of adress DE in A
-def LDAn(mmu, cpu):
-    cpu.debugger.print_opcode('LDAn')
+def LDAn(mmu, cpu, meta, context):
 
     parameter = cpu.read_upper_opcode_parameter()
     result = False
@@ -177,7 +177,6 @@ def LDAn(mmu, cpu):
         DE = cpu.reg.GET_DE()
         val = mmu.read(DE)
         cpu.reg.SET_A(val)
-        A = cpu.reg.GET_A()
         result = True
 
     return result
@@ -361,17 +360,12 @@ def LDnn16d(mmu, cpu, meta, context):
 
     cpu.pc += 1
 
-def LDHL8A(mmu, cpu):
-    cpu.debugger.print_opcode('LDHL8A')
-    A = cpu.reg.GET_A()
-    HL = cpu.reg.GET_HL()
-    mmu.write(HL, A)
-    return True
+def LDHL8A(mmu, cpu, meta, context):
+    context.load('HL').store('A',AddressingMode.dr16)
+
 
 def LDIHL8A(mmu, cpu, meta, context):
-    #context.load('HL').store('A', addressing_mode=AdressingMode.d8).inc().store()
     context.load('HL',addressing_mode=AddressingMode.ir16).store('A').load('HL').inc().store()
-    #context._select_reg('HL')._loadval_from_reg()._loadaddr_from_reg()._storeaddr_to_reg('A')._increg()._storereg()
 
 def LDDHL8A(mmu, cpu, meta, context):
     parameter = cpu.read_upper_opcode_parameter()
@@ -412,8 +406,7 @@ def XORn(mmu, cpu, meta, context):
     result = True
 
 # special prefix for a different set of opcodes
-def CB(mmu, cpu):
-    cpu.debugger.print_opcode('CB')
+def CB(mmu, cpu, meta, context):
     cpu.pc += 1
     opcode = cpu.read_opcode()
     instruction = cpu.cb_opcodes[opcode]

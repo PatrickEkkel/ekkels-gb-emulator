@@ -215,9 +215,11 @@ class CPU:
         self.opcodes = instructionset.create_opcode_map('opcode')
         self.opcode_cycles = instructionset.create_opcode_map('cycles')
         self.opcode_meta = instructionset.create_opcode_metamap()
-        self.cb_opcodes = [None] * 255
+        self.cb_opcode_meta = instructionset.create_cb_opcode_metamap()
+
+        self.cb_opcodes = instructionset.create_cb_opcode_map('opcode')
         self.opcodes[0xC5] = opcodes.PUSHBC
-        self.opcodes[0x11] = opcodes.LDnn16d
+
         self.opcodes[0x32] = opcodes.LDDHL8A
         self.opcodes[0x22] = opcodes.LDDHL8A
         self.opcodes[0x20] = opcodes.JRNZn
@@ -233,12 +235,11 @@ class CPU:
         self.opcodes[0x17] = opcodes.RLA
         self.opcodes[0x23] = opcodes.INCnn
         self.opcodes[0x13] = opcodes.INCnn
-        self.opcodes[0x77] = opcodes.LDHL8A
+
         self.opcodes[0x1A] = opcodes.LDAn
         self.opcodes[0xC1] = opcodes.POPBC
         self.opcodes[0x3D] = opcodes.DEC_r
-        #self.opcodes[0xc9] = opcodes.RET
-        self.cb_opcodes[0xcb] = opcodes.CB
+
         self.cb_opcodes[0x7c] = opcodes.BIT7H
         self.cb_opcodes[0x11] = opcodes.RLC
 
@@ -267,11 +268,13 @@ class CPU:
             #cycle = self.opcode_cycles[opcode]
             hex = self.debugger.format_hex(opcode)
             hex_pc = self.debugger.format_hex(self.pc)
-
+            opcode_meta = None
             if opcode == 0xcb:
                 instruction = self.cb_opcodes[opcode]
+                opcode_meta = self.cb_opcode_meta[opcode]
             else:
                 instruction = self.opcodes[opcode]
+                opcode_meta = self.opcode_meta[opcode]
             if instruction:
                 self.debugger.print_state(opcode)
 
@@ -279,7 +282,7 @@ class CPU:
                     if self.debugger.exit_at_breakpoint:
                         # stop execution by returning False
                         return False
-                opcode_meta = self.opcode_meta[opcode]
+
                 #self.debugger.show_opcode_description(opcode_meta['m'])
                 context = OpcodeContext(self, self._mmu, opcode_meta)
                 self.debugger.print_opcode(context.opcode)

@@ -229,6 +229,29 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_A() == 0xFF
 
+    def test_ld_hl_a(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD (HL) A']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_HL(0x8000)
+        gb.CPU.reg.SET_A(0xFF)
+        gb._run()
+        assert gb.mmu.read(0x8000) == 0xFF
+
+    def test_ld_a_de(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD A (DE)']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_DE(0x8000)
+        gb.mmu.write(0x8000,0xFA)
+        gb._run()
+
+        assert gb.CPU.reg.GET_A() == 0xFA
+
 
     def test_CALLnn_opcode(self):
         gbasm = GBA_ASM()
