@@ -1,5 +1,5 @@
 import bitwise_functions
-from components.cpu.opcode_dsl import OpcodeContext, Opcode
+from components.cpu.opcode_dsl import OpcodeContext, BitwiseOperators, AddressingMode,  Opcode
 from ..mmu import MMU
 
 def NOP(mmu, cpu, meta, context):
@@ -65,23 +65,19 @@ def DEC_r(mmu, cpu, meta, context):
     # set substract flag
     cpu.reg.SET_SUBSTRACT()
 
-def RET(mmu, cpu):
-    cpu.debugger.print_opcode('RET')
+def RET(mmu, cpu, meta, context):
     val1 = cpu.stack.pop()
     val2 = cpu.stack.pop()
 
     jump_address =  bitwise_functions.merge_8bit_values(val2, val1)
     cpu.debugger.print_iv(jump_address)
     cpu.pc = jump_address
-    return True
 
 def DI(mmu, cpu, meta, context):
     cpu.interrupts_enabled = False
 
-def EI(mmu, cpu):
-    cpu.debugger.print_opcode('DI')
+def EI(mmu, cpu, meta, context):
     cpu.interrupts_enabled = True
-    return True
 
 
 def INCnn(mmu, cpu):
@@ -104,7 +100,6 @@ def INCnn(mmu, cpu):
     return result
 
 def INCn(mmu, cpu, meta, context):
-    cpu.debugger.print_opcode('INCn')
     cpu.reg.CLEAR_SUBSTRACT()
     upper_param = cpu.read_upper_opcode_parameter()
     lower_param = cpu.read_lower_opcode_parameter()
@@ -327,6 +322,11 @@ def LDn8d(mmu, cpu, meta, context):
             A = cpu.reg.GET_A()
             result = True
 
+def OR_r(mmu, cpu, meta, context):
+    upper_param = cpu.read_upper_opcode_parameter()
+    lower_param = cpu.read_lower_opcode_parameter()
+    context.load('A').bitwise('C', BitwiseOperators.OR).store('A')
+
 def LD_n_n(mmu, cpu, meta, context):
     upper_param = cpu.read_upper_opcode_parameter()
     lower_param = cpu.read_lower_opcode_parameter()
@@ -339,7 +339,9 @@ def LD_n_n(mmu, cpu, meta, context):
 
 # TODO: this opcode is in progress
 def LDHLnn(mmu, cpu, meta, context):
-    context.loadaddr_from_opcode().storeaddr_to_reg('HL')
+
+    context.load(addressing_mode=AddressingMode.d8).store('HL')
+
 
 # length: 3 bytes
 # 0x31 and 2 bytes unsigned
@@ -367,7 +369,9 @@ def LDHL8A(mmu, cpu):
     return True
 
 def LDIHL8A(mmu, cpu, meta, context):
-    context.select_reg('HL').loadval_from_reg().loadaddr_from_reg().storeaddr_to_reg('A').increg().storereg()
+    #context.load('HL').store('A', addressing_mode=AdressingMode.d8).inc().store()
+    context.load('HL',addressing_mode=AddressingMode.ir16).store('A').load('HL').inc().store()
+    #context._select_reg('HL')._loadval_from_reg()._loadaddr_from_reg()._storeaddr_to_reg('A')._increg()._storereg()
 
 def LDDHL8A(mmu, cpu, meta, context):
     parameter = cpu.read_upper_opcode_parameter()

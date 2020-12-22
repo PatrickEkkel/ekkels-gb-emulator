@@ -237,7 +237,7 @@ class CPU:
         self.opcodes[0x1A] = opcodes.LDAn
         self.opcodes[0xC1] = opcodes.POPBC
         self.opcodes[0x3D] = opcodes.DEC_r
-        self.opcodes[0xc9] = opcodes.RET
+        #self.opcodes[0xc9] = opcodes.RET
         self.cb_opcodes[0xcb] = opcodes.CB
         self.cb_opcodes[0x7c] = opcodes.BIT7H
         self.cb_opcodes[0x11] = opcodes.RLC

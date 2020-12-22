@@ -218,9 +218,21 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_C() == 0x02
 
+    def test_or_c_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['OR C']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_C(0xFF)
+        gb.CPU.reg.SET_A(0x03)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0xFF
+
 
     def test_CALLnn_opcode(self):
         gbasm = GBA_ASM()
+
         test_program = ['CALL func:', 'INC C','func:','INC B']
         bitstream = gbasm.parse(test_program)
         for b in bitstream:
