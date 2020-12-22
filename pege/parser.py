@@ -2,7 +2,7 @@ from instructionset import create_mnemonic_dictionary
 
 OFFSET_REGISTERS = ['(C)','(HL)','(DE)']
 REGISTERS_8B = ['A', 'B', 'C', 'D', 'E', 'F']
-REGISTERS_16B = ['HL']
+REGISTERS_16B = ['HL', 'DE', 'SP', 'BC']
 
 SPECIAL_OPCODES = ['LDI','LDH']
 def encode_8bit_value(value):
@@ -172,11 +172,7 @@ class Tokenizer:
         return self.tokens[0]
 
     def _get_register(self):
-        if len(self.tokens) > 1 and self.tokens[1] == 'HL':
-            return self.tokens[1]
-        elif len(self.tokens) > 1 and self.tokens[1] == 'SP':
-            return self.tokens[1]
-        elif len(self.tokens) > 1 and self.tokens[1] == 'BC':
+        if len(self.tokens) > 1 and self.tokens[1] in REGISTERS_16B:
             return self.tokens[1]
         elif len(self.tokens) > 1 and len(self.tokens[1]) == 1:
             return self.tokens[1]

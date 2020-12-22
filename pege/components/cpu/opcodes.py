@@ -80,7 +80,7 @@ def EI(mmu, cpu, meta, context):
     cpu.interrupts_enabled = True
 
 
-def INCnn(mmu, cpu):
+def INCnn(mmu, cpu, meta, context):
     cpu.debugger.print_opcode('INCnn')
     parameter = cpu.read_upper_opcode_parameter()
     result = False
@@ -190,20 +190,6 @@ def LDCA(mmu, cpu, meta, context):
     A = cpu.reg.GET_A()
     offset_address = 0xFF00 + C
     mmu.write(offset_address, A)
-
-def LDnn(mmu, cpu):
-    cpu.debugger.print_opcode('LDnn')
-    parameter = cpu.read_upper_opcode_parameter()
-    cpu.debugger.print_iv(parameter)
-    result = False
-    if parameter == 0x7:
-        E = cpu.reg.GET_E()
-        A = cpu.reg.GET_A()
-        A = E
-        cpu.reg.SET_A(A)
-        result = True
-
-    return result
 
 def CPn(mmu, cpu, meta, context):
     cpu.pc += 1
@@ -325,8 +311,8 @@ def LD_n_n(mmu, cpu, meta, context):
     #input(cpu.debugger.format_hex(upper_param))
     #input(cpu.debugger.format_hex(lower_param))
 
-    register_operand_1 = { 0x07: 'A',0x04: 'C' }
-    register_operand_2 = { 0x80: 'B',0xF0: 'A' }
+    register_operand_1 = { 0x07: 'A',0x04: 'C'}
+    register_operand_2 = { 0x80: 'B',0xF0: 'A',0xb0: 'E' }
     r2 = register_operand_2[lower_param]
     r1 = register_operand_1[upper_param]
 

@@ -60,6 +60,8 @@ class OpcodeState:
             return self._cpu.reg.GET_B()
         elif register == 'C':
             return self._cpu.reg.GET_C()
+        elif register == 'E':
+            return self._cpu.reg.GET_E()
         elif register == 'BC':
             return self._cpu.reg.GET_BC()
         else:

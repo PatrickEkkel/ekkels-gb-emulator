@@ -24,7 +24,7 @@ instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XORn  
                 {'m': 'EI'         , 'datatype': ''  ,  'opcode': opcodes.EI       , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'x': 0xFB   } },
                 {'m': 'LD rr nn'   , 'datatype': 'd8',  'opcode': opcodes.LDHLnn   , 'length': 2, 'cycles': 12,      'jump_instruction': False, 'register_options': {'HL': 0x36  } },
                 {'m': 'LD (r) r'   , 'datatype': ''  ,  'opcode': opcodes.LDCA     , 'length': 2, 'cycles': 8,       'jump_instruction': False, 'register_options': {'(C) A':  0xE2  } },
-                {'m': 'LD r r'     , 'datatype': 'd8',  'opcode': opcodes.LD_n_n   , 'length': 1, 'cycles': 12,      'jump_instruction': False, 'register_options': {'A C': 0x79,'A B': 0x78,'C A': 0x4F } },
+                {'m': 'LD r r'     , 'datatype': 'd8',  'opcode': opcodes.LD_n_n   , 'length': 1, 'cycles': 12,      'jump_instruction': False, 'register_options': {'A C': 0x79,'A B': 0x78,'C A': 0x4F, 'A E': 0x7B }},
                 {'m': 'LD nnnn A'  , 'datatype': 'a16', 'opcode': opcodes.LDnn16a  , 'length': 3, 'cycles': 16,      'jump_instruction': False, 'register_options': {'x': 0xEA } },
                 {'m': 'INC r'      , 'datatype': ''   , 'opcode': opcodes.INCn     , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'C': 0xC, 'B': 0x04 } },
                 {'m': 'CALL nnnn'  , 'datatype': 'a16', 'opcode': opcodes.CALLnn   , 'length': 3, 'cycles': 24,      'jump_instruction': False, 'register_options': {'x': 0xCD } },
@@ -32,9 +32,10 @@ instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XORn  
                 {'m': 'LD (rr) r'  , 'datatype': ''   , 'opcode': opcodes.LDHL8A   , 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'(HL) A': 0x77}},
                 {'m': 'RET'        , 'datatype': ''   , 'opcode': opcodes.RET      , 'length': 1, 'cycles': 16,      'jump_instruction': False, 'register_options': {'x': 0xC9 } },
                 {'m': 'LD r (rr)'  , 'datatype': ''   , 'opcode': opcodes.LDAn     , 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'A (DE)': 0x1A}},
-                {'m': 'PUSH rr'    , 'datatype': ''   , 'opcode': opcodes.PUSHBC   , 'length': 1, 'cycles': 16,      'jump_instruction': False, 'register_options': {'BC': 0xC5} },
-                {'m': 'RLA'        , 'datatype': ''   , 'opcode': opcodes.RLA      , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'x': 0x17 } },
-                {'m': 'POP rr'     , 'datatype': ''   , 'opcode': opcodes.POPBC     , 'length': 1, 'cycles': 12,      'jump_instruction': False, 'register_options': {'BC': 0xC1} }
+                {'m': 'PUSH rr'    , 'datatype': ''   , 'opcode': opcodes.PUSHBC   , 'length': 1, 'cycles': 16,      'jump_instruction': False, 'register_options': {'BC': 0xC5 } },
+                {'m': 'RLA'        , 'datatype': ''   , 'opcode': opcodes.RLA      , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'x': 0x17  } },
+                {'m': 'POP rr'     , 'datatype': ''   , 'opcode': opcodes.POPBC    , 'length': 1, 'cycles': 12,      'jump_instruction': False, 'register_options': {'BC': 0xC1 } },
+                {'m': 'INC rr'     , 'datatype': ''   , 'opcode': opcodes.INCnn     , 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'HL': 0x23, 'DE': 0x13} }
                ]
 
 def get_instruction_by_mnemonic(mnemonic):
