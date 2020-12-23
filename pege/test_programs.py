@@ -173,6 +173,32 @@ class ProgramTests(unittest.TestCase):
         assert bitstream[1] == 0x10
 
 
+    def test_LD_D_A_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD D A']
+        bitstream = gbasm.parse(test_program)
+        for b in bitstream:
+            self.print_hex(b)
+
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0x10)
+        gb._run()
+        assert gb.CPU.reg.GET_D() == 0x10
+
+    def test_LD_H_A_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD H A']
+        bitstream = gbasm.parse(test_program)
+        for b in bitstream:
+            self.print_hex(b)
+
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0x10)
+        gb._run()
+        assert gb.CPU.reg.GET_H() == 0x10
+
     def test_LD_C_A_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['LD C A']
@@ -255,6 +281,16 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_A() == 0xFF
 
+    def test_dec_bc_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['DEC BC']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_BC(0xFFFF)
+        gb._run()
+        assert gb.CPU.reg.GET_BC() == 0xFFFE
+
     def test_push_bc_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['PUSH BC']
@@ -301,6 +337,20 @@ class ProgramTests(unittest.TestCase):
 
         assert gb.CPU.reg.GET_A() == 0xFA
 
+    #def test_JRZ_nn(self):
+    #    gbasm = GBA_ASM()
+    #    test_program = ['JRZ jumphere:','NOP','INC C','NOP','jumphere:','INC C','labeltje:','INC C','JRZ labeltje:']
+    #    bitstream = gbasm.parse(test_program)
+
+    #    for b in bitstream:
+    #        self.print_hex(b)
+    #    gb = self.create_gameboy(bitstream,run=False)
+    #    gb.power_on(skipbios=True,standby=True)
+    #    gb.CPU.reg.SET_C(0x1000)
+    #    gb.CPU.reg.SET_ZERO()
+    #    gb._run()
+    #    assert True
+        #assert gb.CPU.reg.GET_C() == 0x1002
 
     def test_CALLnn_opcode(self):
         gbasm = GBA_ASM()

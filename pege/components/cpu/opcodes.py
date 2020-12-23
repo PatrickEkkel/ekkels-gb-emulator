@@ -10,7 +10,8 @@ def NOP(mmu, cpu, meta, context):
 def DEC_rr(mmu, cpu, meta, context):
     upper_param = cpu.read_upper_opcode_parameter()
     operand_mapping = {0x00: 'BC'}
-    context.dec(operand_mapping[upper_param])
+    r1 = operand_mapping[upper_param]
+    context.load(r1).dec().store(r1)
 
 
 
@@ -31,7 +32,7 @@ def DEC_r(mmu, cpu, meta, context):
             B -= 0x01
             val = B
             cpu.reg.SET_B(B)
-            result = True
+
     if lower_param == 0xD0:
         # do decrement on register C
         if upper_param == 0x00:
@@ -39,7 +40,7 @@ def DEC_r(mmu, cpu, meta, context):
             C -= 0x01
             val = C
             cpu.reg.SET_C(C)
-            result = True
+
 
         # do decrement on register A
         elif upper_param == 0x03:
@@ -47,7 +48,6 @@ def DEC_r(mmu, cpu, meta, context):
             A -= 0x01
             val = A
             cpu.reg.SET_A(A)
-            result = True
 
     # set the necessary flags
     #half_carry = ((val & 0xF) - (0x01 & 0xF) & 0x10) == 0x10
@@ -311,8 +311,8 @@ def LD_n_n(mmu, cpu, meta, context):
     #input(cpu.debugger.format_hex(upper_param))
     #input(cpu.debugger.format_hex(lower_param))
 
-    register_operand_1 = { 0x07: 'A',0x04: 'C'}
-    register_operand_2 = { 0x80: 'B',0xF0: 'A',0xb0: 'E' }
+    register_operand_1 = { 0x07: 'A',0x04: 'C',0x05: 'D',0x06: 'H'}
+    register_operand_2 = { 0x80: 'B',0xF0: 'A',0xb0: 'E',0x70: 'A'}
     r2 = register_operand_2[lower_param]
     r1 = register_operand_1[upper_param]
 
@@ -413,18 +413,15 @@ def CB(mmu, cpu, meta, context):
 
     return result
 
-def JRn(mmu, cpu):
-    cpu.debugger.print_opcode('JRn')
+def JRn(mmu, cpu, meta, context):
     pc = cpu.pc
     cpu.pc += 1
     jump_address = mmu.read_s8(cpu.pc)
     cpu.debugger.print_iv(jump_address)
     cpu.pc += jump_address
-    return True
 
 
-def JRZn(mmu, cpu):
-    cpu.debugger.print_opcode('JRZn')
+def JRZn(mmu, cpu, meta, context):
     cpu.pc += 1
     val = mmu.read_s8(cpu.pc)
     cpu.debugger.print_iv(val)
@@ -432,9 +429,6 @@ def JRZn(mmu, cpu):
     if cpu.reg.GET_ZERO():
         jump_address = cpu.pc + val
         cpu.pc = jump_address
-    else:
-        cpu.pc += 1
-    return True
 
 def JPnn(mmu, cpu, meta, context):
     cpu.pc += 1
@@ -457,7 +451,6 @@ def JRNZn(mmu, cpu, meta, context):
 # 0xCD
 # pushes the PC to the stack and jump to specified 16 bit operand
 def CALLnn(mmu, cpu, meta, context):
-    cpu.debugger.print_opcode('CALLnn')
     # address of next instruction
     pc = cpu.pc + 1
     val = mmu.read_u16(pc)

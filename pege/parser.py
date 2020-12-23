@@ -1,7 +1,7 @@
 from instructionset import create_mnemonic_dictionary
 
 OFFSET_REGISTERS = ['(C)','(HL)','(DE)']
-REGISTERS_8B = ['A', 'B', 'C', 'D', 'E', 'F']
+REGISTERS_8B = ['A', 'B', 'C', 'D', 'E', 'F','H']
 REGISTERS_16B = ['HL', 'DE', 'SP', 'BC']
 
 SPECIAL_OPCODES = ['LDI','LDH']
@@ -216,6 +216,7 @@ class GBA_ASM:
             opcode = tokenizer.tokenize(p)
 
             if isinstance(opcode, Label):
+                #input('jup found label')
                 current_address = self.offset + program_counter
                 self.label_lookuptable[opcode.get_label()] = current_address + 2
                 program_counter += 2
@@ -276,9 +277,14 @@ class GBA_ASM:
                  self.encoded_program.append(encoded_opcode)
                  result = address
                  if address > self.program_counter:
+                     signed_address = address
+                     # TODO: this is not working correctly
                      self.encoded_program.append(int(0x00))
                  else:
                      signed_address = ((self.program_counter) - address - self.offset) * -1
+                     signed_address = address
+                     #print('jump address goes back')
+                     #input(signed_address)
                      self.encoded_program.append(signed_address)
              else:
                  self.encoded_program.append(encoded_opcode)

@@ -1,6 +1,5 @@
 from components.mmu import MMU
 
-
 def write_vram(vram_address, tile, mmu):
         offset = 0
         for i in tile:

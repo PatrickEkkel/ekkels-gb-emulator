@@ -5,7 +5,7 @@ from array import array
 from config import logger
 
 class Cartridge:
-    
+
     def __init__(self, path):
         self.data = array('B')
         if path:
@@ -14,6 +14,9 @@ class Cartridge:
                 self.data.fromfile(bootrom, size)
                 logger.debug('Gameboy cartridge loaded')
             self._create_mbc()
+        else:
+            self.data = [0x0000] * 32768
+
 
     def dump_header(self):
         header_size = 0x14F - 0x100
@@ -24,7 +27,7 @@ class Cartridge:
             if ic >= 0x100 and ic <= 0x14F:
                 result[ic-0x100] = byte
             ic += 1
-        
+
         return result
 
 
@@ -36,7 +39,7 @@ class Cartridge:
 
     def get_cartridgetype(self):
         return self.data[0x0147]
-    
+
     def get_ramsize(self):
         return self.data[0x0149]
 
@@ -47,4 +50,3 @@ class Cartridge:
     def print_cartridge_info(self):
         print('Cartridge type: ' + str(self.get_cartridgetype()))
         print('RAM size: type: ' + str(self.get_ramsize()))
-
