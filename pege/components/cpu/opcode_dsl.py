@@ -85,6 +85,9 @@ class BitwiseOperators:
     OR = 1
     AND = 2
     XOR = 3
+    # CPL is short for complement register, which is a bitwise NOT
+    CPL = 4
+    NOT = 4
 
 class AddressingMode:
     # Direct 8 bit adressing mode pc+1
@@ -166,6 +169,12 @@ class OpcodeContext:
     def _set_reg_value(self, value):
         self.opcode_state.selected_register_value = value
 
+
+    def _check_substract(self):
+        pass
+    def _check_half_carry(self):
+        pass
+
     def _check_zero(self):
         value = self._get_select_reg_value()
         if value == 0x00:
@@ -180,6 +189,11 @@ class OpcodeContext:
             value_b = self._get_select_reg_value()
             self._set_reg_value(value_a | value_b)
             self._check_zero()
+        elif operation == BitwiseOperators.CPL:
+            value = self._get_select_reg_value()
+            self._set_reg_value(value ^ 0xFF)
+            self._cpu.reg.SET_SUBSTRACT()
+            self._cpu.reg.SET_HALF_CARRY()
         else:
             print('bitwise')
             input('not implemented')

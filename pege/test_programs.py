@@ -186,6 +186,20 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_D() == 0x10
 
+
+    def test_CPL_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['CPL']
+        bitstream = gbasm.parse(test_program)
+
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0xEF)
+        gb._run()
+        print(gb.CPU.debugger.format_hex(gb.CPU.reg.GET_A()))
+        assert gb.CPU.reg.GET_A() == 0x10
+
+
     def test_LD_H_A_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['LD H A']

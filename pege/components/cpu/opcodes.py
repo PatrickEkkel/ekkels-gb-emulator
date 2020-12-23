@@ -318,9 +318,10 @@ def LD_n_n(mmu, cpu, meta, context):
 
     context.load(r2).store(r1)
 
-# TODO: this opcode is in progress
-def LDHLnn(mmu, cpu, meta, context):
+def CPL(mmu, cpu, meta, context):
+    context.load('A').bitwise('A', BitwiseOperators.CPL).store('A')
 
+def LDHLnn(mmu, cpu, meta, context):
     context.load(addressing_mode=AddressingMode.d8).store('HL')
 
 
