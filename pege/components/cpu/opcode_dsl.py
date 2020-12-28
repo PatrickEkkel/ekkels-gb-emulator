@@ -1,4 +1,3 @@
-
 class Opcode:
     def __init__(self, meta, address=None):
         self.mnemonic = meta['m']
@@ -49,6 +48,8 @@ class OpcodeState:
             self._cpu.reg.SET_B(value)
         elif register == 'C':
             self._cpu.reg.SET_C(value)
+        elif register == 'E':
+            self._cpu.reg.SET_E(value)
         elif register == 'D':
             self._cpu.reg.SET_D(value)
         elif register == 'H':
@@ -169,11 +170,19 @@ class OpcodeContext:
     def _set_reg_value(self, value):
         self.opcode_state.selected_register_value = value
 
+    def _check_carry(self):
+        pass
 
     def _check_substract(self):
         pass
+
     def _check_half_carry(self):
-        pass
+        value = self._get_select_reg_value()
+        half_carry = ((value & 0xF) + (value & 0xf)) & 0x10
+        if half_carry:
+            self._cpu.reg.SET_HALF_CARRY()
+        else:
+            self._cpu.reg.CLEAR_HALF_CARRY()
 
     def _check_zero(self):
         value = self._get_select_reg_value()
@@ -205,6 +214,43 @@ class OpcodeContext:
             register = self._get_selected_reg()
 
         return self._select_reg(register)._decreg()
+
+    def flags(self, zero, substract, halfcarry, carry):
+        I = '-'
+        E = 0
+        S = 1
+        Z = 2
+        N = 3
+        H = 4
+        C = 5
+
+        if zero == Z:
+            self._check_zero()
+        elif zero == S:
+            self._cpu.reg.SET_ZERO()
+        elif zero == E:
+            self._cpu.reg.CLEAR_ZERO()
+
+        if substract == N:
+            self._check_substract()
+        elif substract == S:
+            self._cpu.reg.SET_SUBSTRACT()
+        elif substract == E:
+            self._cpu.reg.CLEAR_SUBSTRACT()
+
+        if halfcarry == H:
+            self._check_half_carry()
+        elif halfcarry == S:
+            self._cpu.reg.SET_HALF_CARRY()
+
+        if carry == C:
+            self._check_carry()
+        elif carry == S:
+            self._cpu.reg.SET_CARRY()
+        elif carry == E:
+            self._cpu.reg.SET_HALF_CARRY()
+        return self
+
 
     def inc(self, register=None):
         if register == None:

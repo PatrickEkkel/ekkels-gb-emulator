@@ -15,7 +15,7 @@ class Cartridge:
                 logger.debug('Gameboy cartridge loaded')
             self._create_mbc()
         else:
-            self.data = [0x0000] * 32768
+            self.data = [0xFFFF] * 32768
 
 
     def dump_header(self):

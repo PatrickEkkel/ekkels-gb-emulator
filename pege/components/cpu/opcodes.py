@@ -1,6 +1,14 @@
 import bitwise_functions
-from components.cpu.opcode_dsl import OpcodeContext, BitwiseOperators, AddressingMode,  Opcode
+from components.cpu.opcode_dsl import OpcodeContext, BitwiseOperators, AddressingMode, Opcode
 from ..mmu import MMU
+
+I = '-'
+E = 0
+S = 1
+Z = 2
+N = 3
+H = 4
+C = 5
 
 def NOP(mmu, cpu, meta, context):
     opcode = Opcode(meta)
@@ -23,47 +31,13 @@ def DEC_r(mmu, cpu, meta, context):
     upper_param = cpu.read_upper_opcode_parameter()
     lower_param = cpu.read_lower_opcode_parameter()
 
-    val = 0x00
-    #orig_val = 0x00
-    if lower_param == 0x50:
-        # do decrement on register B
-        if upper_param == 0x00:
-            B = cpu.reg.GET_B()
-            B -= 0x01
-            val = B
-            cpu.reg.SET_B(B)
+    #input(cpu.debugger.format_hex(upper_param))
+    opcode = cpu.read_opcode()
 
-    if lower_param == 0xD0:
-        # do decrement on register C
-        if upper_param == 0x00:
-            C = cpu.reg.GET_C()
-            C -= 0x01
-            val = C
-            cpu.reg.SET_C(C)
-
-
-        # do decrement on register A
-        elif upper_param == 0x03:
-            A = cpu.reg.GET_A()
-            A -= 0x01
-            val = A
-            cpu.reg.SET_A(A)
-
-    # set the necessary flags
-    #half_carry = ((val & 0xF) - (0x01 & 0xF) & 0x10) == 0x10
-    half_carry = ((val & 0xF) + (val & 0xf)) & 0x10
-    # set the zero flag
-    if val == 0x00:
-        cpu.reg.SET_ZERO()
-    else:
-        cpu.reg.CLEAR_ZERO()
-
-    if half_carry:
-        cpu.reg.SET_HALF_CARRY()
-    else:
-        cpu.reg.CLEAR_HALF_CARRY()
-    # set substract flag
-    cpu.reg.SET_SUBSTRACT()
+    registers = {0x05: 'B',0x0D: 'C',0x3D: 'A',0x1D: 'E'}
+    r1 = registers[opcode]
+    context.load(r1).dec().store(r1).flags(Z, 1, H, C)
+    val = context._get_select_reg_value()
 
 def RET(mmu, cpu, meta, context):
     val1 = cpu.stack.pop()
