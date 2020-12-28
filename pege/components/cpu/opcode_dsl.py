@@ -69,6 +69,8 @@ class OpcodeState:
             return self._cpu.reg.GET_C()
         elif register == 'E':
             return self._cpu.reg.GET_E()
+        elif register == 'H':
+            return self._cpu.reg.GET_H()
         elif register == 'BC':
             return self._cpu.reg.GET_BC()
         else:
@@ -207,6 +209,15 @@ class OpcodeContext:
             print('bitwise')
             input('not implemented')
 
+        return self
+
+    def sub(self, register=None):
+        value_a = self._get_select_reg_value()
+        self._select_reg(register)._loadval_from_reg()
+        value_b = self._get_select_reg_value()
+        #input(value_b)
+        #input(value_a)
+        self._set_reg_value(value_a - value_b)
         return self
 
     def dec(self, register=None):

@@ -74,33 +74,13 @@ def INCnn(mmu, cpu, meta, context):
     return result
 
 def INCn(mmu, cpu, meta, context):
-    cpu.reg.CLEAR_SUBSTRACT()
-    upper_param = cpu.read_upper_opcode_parameter()
-    lower_param = cpu.read_lower_opcode_parameter()
-    result = False
-    selected_register = None
 
-    if lower_param == 0x40:
-        if upper_param == 0x00:
-            B = cpu.reg.GET_B()
-            selected_register = B
-            B = B + 1
-            cpu.reg.SET_B(B)
-            result = True
-    if lower_param == 0xC0:
-        if upper_param == 0x00:
-            C = cpu.reg.GET_C()
-            selected_register = C
-            C = C + 1
-            # get the third bit by shifting 2 positions to the right and do a and against 0000 0001
-            cpu.reg.SET_C(C)
-            result = True
+    opcode = cpu.read_opcode()
 
+    registers = {0xC: 'C', 0x04: 'B',0x24: 'H'}
+    r1 = registers[opcode]
+    context.load(r1).inc().store(r1).flags(Z,0,H,'-')
 
-    if selected_register >> 2 & 0x1 == 0x1:
-        cpu.reg.SET_HALF_CARRY()
-
-    return result
 
 # length: 2 bytes
 # 0xF0 and 1 byte unsigned
@@ -277,6 +257,14 @@ def OR_r(mmu, cpu, meta, context):
     lower_param = cpu.read_lower_opcode_parameter()
     context.load('A').bitwise('C', BitwiseOperators.OR).store('A')
 
+def SUB_r(mmu, cpu, meta, context):
+    opcode = cpu.read_opcode()
+    registers = {0x90: 'B'}
+
+    r1 = registers[opcode]
+    r2 = 'A'
+    context.load(r2).sub(r1).store(r2).flags(Z,1,H,C)
+
 def LD_n_n(mmu, cpu, meta, context):
     upper_param = cpu.read_upper_opcode_parameter()
     lower_param = cpu.read_lower_opcode_parameter()
@@ -285,10 +273,11 @@ def LD_n_n(mmu, cpu, meta, context):
     #input(cpu.debugger.format_hex(upper_param))
     #input(cpu.debugger.format_hex(lower_param))
 
-    register_operand_1 = { 0x07: 'A',0x04: 'C',0x05: 'D',0x06: 'H'}
-    register_operand_2 = { 0x80: 'B',0xF0: 'A',0xb0: 'E',0x70: 'A'}
-    r2 = register_operand_2[lower_param]
+    register_operand_1 = { 0x07: 'A',0x04: 'C',0x05: 'D',0x06: 'H', 0x07: 'A'}
+    register_operand_2 = { 0x80: 'B',0xF0: 'A',0xb0: 'E',0x70: 'A', 0xC0: 'H'}
     r1 = register_operand_1[upper_param]
+    r2 = register_operand_2[lower_param]
+
 
     context.load(r2).store(r1)
 

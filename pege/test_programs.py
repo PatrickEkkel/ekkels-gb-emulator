@@ -238,6 +238,31 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_A() == 0x10
 
+    def test_SUB_B_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['SUB B']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0x0A)
+        gb.CPU.reg.SET_B(0x05)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0x05
+        assert gb.CPU.reg.GET_SUBSTRACT() == True
+
+    def test_LD_A_H_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD A H']
+        bitstream = gbasm.parse(test_program)
+        #for b in bitstream:
+        #    self.print_hex(b)
+
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_H(0xAF)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0xAF
+
     def test_LD_A_B_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['LD A B']
@@ -402,6 +427,41 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_HL() == 0x8001
         assert gb.mmu.read(0x8000) == 0x10
+
+    def test_INC_B_opcode(self):
+        gbasm = GBA_ASM()
+        test_program  = ['INC B']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_B(0x02)
+        gb.CPU.reg.SET_SUBSTRACT()
+        gb._run()
+        assert gb.CPU.reg.GET_B() == 0x03
+        assert gb.CPU.reg.GET_SUBSTRACT() == False
+
+    def test_INC_C_opcode(self):
+        gbasm = GBA_ASM()
+        test_program  = ['INC C']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_C(0x02)
+        gb.CPU.reg.SET_SUBSTRACT()
+        gb._run()
+        assert gb.CPU.reg.GET_C() == 0x03
+        assert gb.CPU.reg.GET_SUBSTRACT() == False
+
+    def test_INC_H_opcode(self):
+        gbasm = GBA_ASM()
+        test_program  = ['INC H']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_H(0x02)
+        gb._run()
+        assert gb.CPU.reg.GET_H() == 0x03
+        assert gb.CPU.reg.GET_SUBSTRACT() == False
 
     def test_INC_HL_opcode(self):
         gbasm = GBA_ASM()
