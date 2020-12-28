@@ -12,8 +12,6 @@ C = 5
 
 def NOP(mmu, cpu, meta, context):
     opcode = Opcode(meta)
-    #cpu.debugger.print_opcode(opcode)
-    #return opcode.get_cycles()
 
 def DEC_rr(mmu, cpu, meta, context):
     upper_param = cpu.read_upper_opcode_parameter()
@@ -21,23 +19,15 @@ def DEC_rr(mmu, cpu, meta, context):
     r1 = operand_mapping[upper_param]
     context.load(r1).dec().store(r1)
 
-
-
 # 0x05,0x3D,0x0D length: 1 byte
 # decrements the value of register n by 1
 # flags zhn-
 def DEC_r(mmu, cpu, meta, context):
-    result = False
-    upper_param = cpu.read_upper_opcode_parameter()
-    lower_param = cpu.read_lower_opcode_parameter()
-
-    #input(cpu.debugger.format_hex(upper_param))
     opcode = cpu.read_opcode()
 
-    registers = {0x05: 'B',0x0D: 'C',0x3D: 'A',0x1D: 'E'}
+    registers = {0x05: 'B',0x0D: 'C',0x3D: 'A',0x1D: 'E',0x15: 'D'}
     r1 = registers[opcode]
-    context.load(r1).dec().store(r1).flags(Z, 1, H, C)
-    val = context._get_select_reg_value()
+    context.load(r1).dec().store(r1).flags(Z, 1, H, '-')
 
 def RET(mmu, cpu, meta, context):
     val1 = cpu.stack.pop()
@@ -148,7 +138,6 @@ def LDCA(mmu, cpu, meta, context):
 def CPn(mmu, cpu, meta, context):
     cpu.pc += 1
     n = mmu.read(cpu.pc)
-
     A = cpu.reg.GET_A()
     cpu.reg.SET_SUBSTRACT()
     result = A - n

@@ -501,6 +501,19 @@ class ProgramTests(unittest.TestCase):
         assert gb.CPU.reg.GET_SUBSTRACT() == True
         assert gb.CPU.reg.GET_ZERO() == True
 
+    def test_DEC_D_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['DEC D']
+
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_D(0xFF)
+        gb._run()
+        assert gb.CPU.reg.GET_D() == 0xFE
+        assert gb.CPU.reg.GET_HALF_CARRY() == True
+        assert gb.CPU.reg.GET_SUBSTRACT() == True
+
     def test_DEC_B_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['DEC B']

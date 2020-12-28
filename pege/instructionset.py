@@ -11,7 +11,7 @@ instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XORn  
                 {'m': 'LDH nn A'   , 'datatype': 'a8',  'opcode': opcodes.LDHAn    , 'length': 2, 'cycles': 12,      'jump_instruction': False, 'register_options': {'x': 0xE0 }   },
                 {'m': 'JP nnnn'    , 'datatype': '',    'opcode': opcodes.JPnn     , 'length': 3, 'cycles': [16, 16],'jump_instruction': True , 'register_options': {'x': 0xC3 }   },
                 {'m': 'NOP'        , 'datatype': '',    'opcode': opcodes.NOP      , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'x': 0x00 }   },
-                {'m': 'DEC r'      , 'datatype': '',    'opcode': opcodes.DEC_r    , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'B': 0x05, 'C': 0x0D, 'A': 0x3D, 'E': 0x1D } },
+                {'m': 'DEC r'      , 'datatype': '',    'opcode': opcodes.DEC_r    , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'B': 0x05, 'C': 0x0D, 'A': 0x3D, 'E': 0x1D, 'D': 0x15 } },
                 {'m': 'DEC rr'     , 'datatype': '',    'opcode': opcodes.DEC_rr   , 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'BC': 0x0B } },
                 {'m': 'LD rr nnnn' , 'datatype': '',    'opcode': opcodes.LDnn16d  , 'length': 3, 'cycles': 12,      'jump_instruction': False, 'register_options': {'HL': 0x21,'SP':0x31, 'BC': 0x01,'DE': 0x11     } },
                 {'m': 'LDH r nn'   , 'datatype': 'a8',  'opcode': opcodes.LDHAn    , 'length': 2, 'cycles': 12,      'jump_instruction': False, 'register_options': {'A': 0xF0   } },
