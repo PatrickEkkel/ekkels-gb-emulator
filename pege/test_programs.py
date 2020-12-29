@@ -538,6 +538,21 @@ class ProgramTests(unittest.TestCase):
 
         assert gb.CPU.reg.GET_DE() == 0x1001
 
+    def test_AND_nn_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['AND 0F']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0x10)
+        gb.CPU.reg.SET_CARRY()
+
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0x00
+        assert gb.CPU.reg.GET_ZERO() == True
+        assert gb.CPU.reg.GET_HALF_CARRY() == True
+        assert gb.CPU.reg.GET_SUBSTRACT() == False
+        assert gb.CPU.reg.GET_CARRY() == False
     # Put value at address HL into A. Increment HL.
     def test_LDI_A_HL_opcode(self):
         gbasm = GBA_ASM()

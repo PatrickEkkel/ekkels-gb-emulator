@@ -169,6 +169,10 @@ def LDnn16a(mmu, cpu, meta, context):
     mmu.write(address, A)
     cpu.pc += 1
 
+def AND_nn(mmu, cpu, meta, context):
+    r1 = 'A'
+    context.load(addressing_mode=AddressingMode.d8).bitwise(r1, operation=BitwiseOperators.AND).store('A').flags(Z,0,1,0)
+
 def LDnA(mmu, cpu):
      cpu.debugger.print_opcode('LDnA')
      upper_param = cpu.read_upper_opcode_parameter()

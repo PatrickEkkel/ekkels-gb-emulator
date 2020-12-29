@@ -178,7 +178,7 @@ class Tokenizer:
             return self.tokens[1]
         elif len(self.tokens) > 1 and len(self.tokens[1]) == 3:
             return self.tokens[1]
-        elif  len(self.tokens) > 1 and len(self.tokens[1]) == 4:
+        elif  len(self.tokens) > 1 and len(self.tokens[1]) == 4 and (self.tokens[1] in REGISTERS_16B or self.tokens[1] in REGISTERS_8B  or self.tokens[1] in OFFSET_REGISTERS):
             return self.tokens[1]
         else:
             return None
@@ -191,6 +191,8 @@ class Tokenizer:
             if len(self.tokens) > 2:
                 return self.tokens[2]
             elif len(self.tokens) > 1 and len(self.tokens[1]) == 4:
+                return self.tokens[1]
+            elif len(self.tokens) > 1 and len(self.tokens[1]) == 2 and (self.tokens[1] not in REGISTERS_16B and self.tokens[1] not in REGISTERS_8B and self.tokens[1] not in OFFSET_REGISTERS):
                 return self.tokens[1]
             else:
                 return None

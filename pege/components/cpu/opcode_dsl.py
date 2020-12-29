@@ -170,7 +170,11 @@ class OpcodeContext:
     def _get_selected_reg(self):
         return self.opcode_state.selected_register_key
     def _get_select_reg_value(self):
-        return self.opcode_state.selected_register_value
+        if self.opcode_state.addressing_mode == AddressingMode.d8:
+            return self.opcode_state.selected_address_value
+        elif self.opcode_state.addressing_mode == AddressingMode.IMPLIED:
+            return self.opcode_state.selected_register_value
+
     def _set_reg_value(self, value):
         self.opcode_state.selected_register_value = value
 
@@ -202,6 +206,12 @@ class OpcodeContext:
             value_b = self._get_select_reg_value()
             self._set_reg_value(value_a | value_b)
             self._check_zero()
+        elif operation == BitwiseOperators.AND:
+            value_a = self._get_select_reg_value()
+            self._select_reg(register)._loadval_from_reg()
+            value_b = self._get_select_reg_value()
+            self._set_reg_value(value_a & value_b)
+            #self._check_zero()
         elif operation == BitwiseOperators.CPL:
             value = self._get_select_reg_value()
             self._set_reg_value(value ^ 0xFF)
@@ -255,13 +265,16 @@ class OpcodeContext:
             self._check_half_carry()
         elif halfcarry == S:
             self._cpu.reg.SET_HALF_CARRY()
+        elif half_carry == E:
+            self._cpu.reg.CLEAR_HALF_CARRY()
 
         if carry == C:
             self._check_carry()
         elif carry == S:
             self._cpu.reg.SET_CARRY()
         elif carry == E:
-            self._cpu.reg.SET_HALF_CARRY()
+            self._cpu.reg.CLEAR_CARRY()
+
         return self
 
 
