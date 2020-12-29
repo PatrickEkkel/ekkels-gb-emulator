@@ -246,9 +246,11 @@ def LDn8d(mmu, cpu, meta, context):
             result = True
 
 def OR_r(mmu, cpu, meta, context):
-    upper_param = cpu.read_upper_opcode_parameter()
-    lower_param = cpu.read_lower_opcode_parameter()
-    context.load('A').bitwise('C', BitwiseOperators.OR).store('A')
+    opcode = cpu.read_opcode()
+    register_operand_1 = {0xB0: 'B',0xB1: 'C'}
+    r1 = register_operand_1[opcode]
+
+    context.load('A').bitwise(r1, BitwiseOperators.OR).store('A')
 
 def SUB_r(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
@@ -259,19 +261,15 @@ def SUB_r(mmu, cpu, meta, context):
     context.load(r2).sub(r1).store(r2).flags(Z,1,H,C)
 
 def LD_n_n(mmu, cpu, meta, context):
-    upper_param = cpu.read_upper_opcode_parameter()
-    lower_param = cpu.read_lower_opcode_parameter()
+    opcode = cpu.read_opcode()
+    #input('upper param: ' + cpu.debugger.format_hex(upper_param))
+    #input('lower param: ' + cpu.debugger.format_hex(lower_param))
+    #input('blargh')
 
-    #print('show params')
-    #input(cpu.debugger.format_hex(upper_param))
-    #input(cpu.debugger.format_hex(lower_param))
-
-    register_operand_1 = { 0x07: 'A',0x04: 'C',0x05: 'D',0x06: 'H', 0x07: 'A'}
-    register_operand_2 = { 0x80: 'B',0xF0: 'A',0xb0: 'E',0x70: 'A', 0xC0: 'H'}
-    r1 = register_operand_1[upper_param]
-    r2 = register_operand_2[lower_param]
-
-
+    register_operand_1 = {0x47: 'B', 0x4F: 'C', 0x67: 'H', 0x57: 'D', 0x7C: 'A',0x7B: 'A', 0x78: 'A' }
+    register_operand_2 = {0x47: 'A', 0x4F: 'A', 0x67: 'A', 0x57: 'A', 0x7C: 'H',0x7B: 'E', 0x78: 'B' }
+    r1 = register_operand_1[opcode]
+    r2 = register_operand_2[opcode]
     context.load(r2).store(r1)
 
 def CPL(mmu, cpu, meta, context):
@@ -334,24 +332,12 @@ def LDDHL8A(mmu, cpu, meta, context):
 
 # length: 1 bytes
 # 0xAF
-def XORn(mmu, cpu, meta, context):
-  lower_param = cpu.read_lower_opcode_parameter()
-  result = False
-  if lower_param == 0xF0:
-    A = cpu.reg.GET_A()
-    A = A ^ A
-    if A == 0x0:
-      cpu.reg.SET_ZERO()
-    else:
-      cpu.reg.CLEAR_ZERO()
-
-    cpu.reg.CLEAR_CARRY()
-    cpu.reg.CLEAR_SUBSTRACT()
-    cpu.reg.CLEAR_HALF_CARRY()
-
-    cpu.reg.SET_A(A)
-
-    result = True
+def XOR_r(mmu, cpu, meta, context):
+  opcode = cpu.read_opcode() 
+  register_operand_1 = {0xAF: 'A',0xA9: 'C'}
+  r1 = 'A'
+  r2 = register_operand_1[opcode]
+  context.load(r1).bitwise(r2,BitwiseOperators.XOR).store(r1).flags(Z,0,0,0)
 
 # special prefix for a different set of opcodes
 def CB(mmu, cpu, meta, context):

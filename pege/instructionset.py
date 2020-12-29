@@ -6,7 +6,7 @@ opcode_descriptions = {'LDH r nn': 'LDH A,(n) = put memory address $FF00+n into 
 cb_instructions =  [{'m': 'CB', 'datatype': '', 'opcode': opcodes.CB, 'length': 1, 'cycles': 4, 'jump_instruction': False, 'register_options': {'x': 0xCB } },
  ]
 
-instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XORn     , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'A': 0xAF}    },
+instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XOR_r    , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'A': 0xAF, 'C': 0xA9}    },
                 {'m': 'LD r nn'    , 'datatype': '',    'opcode': opcodes.LDn8d    , 'length': 2, 'cycles': 8,       'jump_instruction': False, 'register_options': {'A': 0x3E, 'B': 0x06, 'C': 0x0E, 'L': 0x2E,'E': 0x1E } },
                 {'m': 'LDH nn A'   , 'datatype': 'a8',  'opcode': opcodes.LDHAn    , 'length': 2, 'cycles': 12,      'jump_instruction': False, 'register_options': {'x': 0xE0 }   },
                 {'m': 'JP nnnn'    , 'datatype': '',    'opcode': opcodes.JPnn     , 'length': 3, 'cycles': [16, 16],'jump_instruction': True , 'register_options': {'x': 0xC3 }   },
@@ -26,12 +26,12 @@ instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XORn  
                 {'m': 'EI'         , 'datatype': ''  ,  'opcode': opcodes.EI       , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'x': 0xFB   } },
                 {'m': 'LD rr nn'   , 'datatype': 'd8',  'opcode': opcodes.LDHLnn   , 'length': 2, 'cycles': 12,      'jump_instruction': False, 'register_options': {'HL': 0x36  } },
                 {'m': 'LD (r) r'   , 'datatype': ''  ,  'opcode': opcodes.LDCA     , 'length': 2, 'cycles': 8,       'jump_instruction': False, 'register_options': {'(C) A':  0xE2  } },
-                {'m': 'LD r r'     , 'datatype': 'd8',  'opcode': opcodes.LD_n_n   , 'length': 1, 'cycles': 12,      'jump_instruction': False, 'register_options': {'A C': 0x79,'A B': 0x78,'C A': 0x4F, 'A E': 0x7B, 'H A': 0x67,'D A': 0x57,'A H': 0x7C }},
+                {'m': 'LD r r'     , 'datatype': 'd8',  'opcode': opcodes.LD_n_n   , 'length': 1, 'cycles': 12,      'jump_instruction': False, 'register_options': {'A C': 0x79,'A B': 0x78,'C A': 0x4F, 'A E': 0x7B, 'H A': 0x67,'D A': 0x57,'A H': 0x7C, 'B A': 0x47 }},
                 {'m': 'LD nnnn A'  , 'datatype': 'a16', 'opcode': opcodes.LDnn16a  , 'length': 3, 'cycles': 16,      'jump_instruction': False, 'register_options': {'x': 0xEA } },
                 {'m': 'INC r'      , 'datatype': ''   , 'opcode': opcodes.INCn     , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'C': 0xC, 'B': 0x04, 'H': 0x24 } },
                 {'m': 'SUB r'      , 'datatype': ''   , 'opcode': opcodes.SUB_r    , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'B': 0x90 } },
                 {'m': 'CALL nnnn'  , 'datatype': 'a16', 'opcode': opcodes.CALLnn   , 'length': 3, 'cycles': 24,      'jump_instruction': False, 'register_options': {'x': 0xCD } },
-                {'m': 'OR r'       , 'datatype': ''   , 'opcode': opcodes.OR_r     , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'C': 0xB1 } },
+                {'m': 'OR r'       , 'datatype': ''   , 'opcode': opcodes.OR_r     , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'C': 0xB1,'B': 0xB0 } },
                 {'m': 'LD (rr) r'  , 'datatype': ''   , 'opcode': opcodes.LDHL8A   , 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'(HL) A': 0x77}},
                 {'m': 'RET'        , 'datatype': ''   , 'opcode': opcodes.RET      , 'length': 1, 'cycles': 16,      'jump_instruction': False, 'register_options': {'x': 0xC9 } },
                 {'m': 'LD r (rr)'  , 'datatype': ''   , 'opcode': opcodes.LDAn     , 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'A (DE)': 0x1A}},

@@ -213,6 +213,19 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_H() == 0x10
 
+    def test_LD_B_A_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD B A']
+        bitstream = gbasm.parse(test_program)
+        for b in bitstream:
+            self.print_hex(b)
+
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0x10)
+        gb._run()
+        assert gb.CPU.reg.GET_B() == 0x10
+        
     def test_LD_C_A_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['LD C A']
@@ -283,6 +296,35 @@ class ProgramTests(unittest.TestCase):
         gb = self.create_gameboy(bitstream)
         assert gb.CPU.reg.GET_HL() == 0x32
 
+    def test_XOR_A_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['XOR A']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0xDD)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0x00
+        assert gb.CPU.reg.GET_CARRY() == False
+        assert gb.CPU.reg.GET_SUBSTRACT() == False
+        assert gb.CPU.reg.GET_HALF_CARRY() == False
+        assert gb.CPU.reg.GET_ZERO() == True
+
+    def test_XOR_C_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['XOR C']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0xFF)
+        gb.CPU.reg.SET_C(0x22)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0xDD
+        assert gb.CPU.reg.GET_CARRY() == False
+        assert gb.CPU.reg.GET_SUBSTRACT() == False
+        assert gb.CPU.reg.GET_HALF_CARRY() == False
+        assert gb.CPU.reg.GET_ZERO() == False
+        
     def test_LDSP16d_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['LD SP 1111']
@@ -309,7 +351,18 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_C() == 0x02
 
-    def test_or_c_opcode(self):
+    def test_OR_B_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['OR B']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_B(0xFF)
+        gb.CPU.reg.SET_A(0x03)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0xFF
+
+    def test_OR_C_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['OR C']
         bitstream = gbasm.parse(test_program)

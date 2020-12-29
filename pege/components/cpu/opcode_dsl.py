@@ -217,6 +217,12 @@ class OpcodeContext:
             self._set_reg_value(value ^ 0xFF)
             self._cpu.reg.SET_SUBSTRACT()
             self._cpu.reg.SET_HALF_CARRY()
+        elif operation == BitwiseOperators.XOR:
+            value_a = self._get_select_reg_value()
+            self._select_reg(register)._loadval_from_reg()
+            value_b = self._get_select_reg_value()
+            self._set_reg_value(value_a ^ value_b)
+         
         else:
             print('bitwise')
             input('not implemented')
@@ -265,7 +271,7 @@ class OpcodeContext:
             self._check_half_carry()
         elif halfcarry == S:
             self._cpu.reg.SET_HALF_CARRY()
-        elif half_carry == E:
+        elif halfcarry == E:
             self._cpu.reg.CLEAR_HALF_CARRY()
 
         if carry == C:
