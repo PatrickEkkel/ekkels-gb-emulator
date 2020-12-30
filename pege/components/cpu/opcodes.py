@@ -228,38 +228,11 @@ def PUSH_rr(mmu, cpu, meta, context):
     context.load(r1).push().load(r2).push()
     
 def LD_r_nn(mmu, cpu, meta, context):
-    # get Register from opcode
-    pc = cpu.pc + 1
-    val = mmu.read(pc)
-    cpu.debugger.print_iv(val)
-    upper_parameter = cpu.read_upper_opcode_parameter()
+    opcode = cpu.read_opcode()
+    register_operand_1 = {0x1E: 'E', 0x06: 'B', 0x0E: 'C', 0x3E: 'A',0x2E:'L', 0x16: 'D'}
+    r1 = register_operand_1[opcode]
+    context.load(addressing_mode=AddressingMode.d8).store(r1)
 
-    lower_parameter = cpu.read_lower_opcode_parameter()
-
-    result = False
-    cpu.pc = pc
-    if lower_parameter == 0x60:
-        if upper_parameter == 0x0:
-            cpu.reg.SET_B(val)
-            B = cpu.reg.GET_B()
-            result = True
-    elif lower_parameter == 0xE0:
-        if upper_parameter == 0x00:
-            cpu.reg.SET_C(val)
-            C = cpu.reg.GET_C()
-            result = True
-        elif upper_parameter == 0x01:
-            cpu.reg.SET_E(val)
-            E = cpu.reg.GET_L()
-            result = True
-        elif upper_parameter == 0x02:
-            cpu.reg.SET_L(val)
-            L = cpu.reg.GET_L()
-            result = True
-        elif upper_parameter == 0x03:
-            cpu.reg.SET_A(val)
-            A = cpu.reg.GET_A()
-            result = True
 
 def OR_r(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
