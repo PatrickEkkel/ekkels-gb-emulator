@@ -220,14 +220,8 @@ class CPU:
         self.cb_opcodes = instructionset.create_cb_opcode_map('opcode')
         self.opcodes[0x20] = opcodes.JRNZn
         self.opcodes[0x28] = opcodes.JRZn
-        #self.opcodes[0x18] = opcodes.JRn
-        #self.opcodes[0x67] = opcodes.LDnA
-        #self.opcodes[0x57] = opcodes.LDnA
-        #self.opcodes[0x1E] = opcodes.LDn8d
-        #self.opcodes[0x2E] = opcodes.LDn8d
-        self.opcodes[0x06] = opcodes.LDn8d
+        self.opcodes[0x06] = opcodes.LD_r_nn
         self.opcodes[0x1A] = opcodes.LDAn
-        #self.opcodes[0x3D] = opcodes.DEC_r
         self.cb_opcodes[0x7c] = opcodes.BIT7H
         self.cb_opcodes[0x11] = opcodes.RLC
 

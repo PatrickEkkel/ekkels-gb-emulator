@@ -169,9 +169,16 @@ def LDnn16a(mmu, cpu, meta, context):
     mmu.write(address, A)
     cpu.pc += 1
 
+def AND_r(mmu, cpu, meta, context):
+    opcode = cpu.read_opcode()
+    register_operand_1 = {0xA1: 'C'}
+    r1 = 'A'
+    r2 = register_operand_1[opcode]
+    context.load(r2).bitwise(r1,operation=BitwiseOperators.AND).store(r1).flags(Z,0,1,0)
+
 def AND_nn(mmu, cpu, meta, context):
     r1 = 'A'
-    context.load(addressing_mode=AddressingMode.d8).bitwise(r1, operation=BitwiseOperators.AND).store('A').flags(Z,0,1,0)
+    context.load(addressing_mode=AddressingMode.d8).bitwise(r1, operation=BitwiseOperators.AND).store(r1).flags(Z,0,1,0)
 
 def LDnA(mmu, cpu):
      cpu.debugger.print_opcode('LDnA')
@@ -201,17 +208,26 @@ def LDnA(mmu, cpu):
 
      return result
 
-def POPBC(mmu, cpu, meta, context):
-    context.pop().store('C').pop().store('B')
+def POP_rr(mmu, cpu, meta, context):
+    opcode = cpu.read_opcode()
+    register_operand_r1 = {0xC1: 'B',0xE1: 'H'}
+    register_operand_r2 = {0xC1: 'C',0xE1: 'L'}
 
-def PUSHBC(mmu, cpu, meta, context):
-    context.load('B').push().load('C').push()
-    #B = cpu.reg.GET_B()
-    #C = cpu.reg.GET_C()
-    #cpu.stack.push(B)
-    #cpu.stack.push(C)
+    r1 = register_operand_r1[opcode]
+    r2 = register_operand_r2[opcode]
+    context.pop().store(r2).pop().store(r1)
 
-def LDn8d(mmu, cpu, meta, context):
+def PUSH_rr(mmu, cpu, meta, context):
+    opcode = cpu.read_opcode()
+    register_operand_r1 = {0xC5: 'B', 0xE5: 'H'}
+    register_operand_r2 = {0xC5: 'C', 0xE5: 'L'}
+
+    r1 = register_operand_r1[opcode]
+    r2 = register_operand_r2[opcode]
+
+    context.load(r1).push().load(r2).push()
+    
+def LD_r_nn(mmu, cpu, meta, context):
     # get Register from opcode
     pc = cpu.pc + 1
     val = mmu.read(pc)
@@ -252,6 +268,10 @@ def OR_r(mmu, cpu, meta, context):
 
     context.load('A').bitwise(r1, BitwiseOperators.OR).store('A')
 
+def RST_nn(mmu, cpu, meta, context):
+    r1 = 'PC'
+    context.load(r1).push().jump(0x00 + 0x28).store(r1)
+
 def SUB_r(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
     registers = {0x90: 'B'}
@@ -266,8 +286,8 @@ def LD_n_n(mmu, cpu, meta, context):
     #input('lower param: ' + cpu.debugger.format_hex(lower_param))
     #input('blargh')
 
-    register_operand_1 = {0x47: 'B', 0x4F: 'C', 0x67: 'H', 0x57: 'D', 0x7C: 'A',0x7B: 'A', 0x78: 'A' }
-    register_operand_2 = {0x47: 'A', 0x4F: 'A', 0x67: 'A', 0x57: 'A', 0x7C: 'H',0x7B: 'E', 0x78: 'B' }
+    register_operand_1 = {0x47: 'B', 0x4F: 'C', 0x67: 'H', 0x57: 'D', 0x7C: 'A',0x7B: 'A', 0x78: 'A',0x79: 'A', 0x5F: 'E' }
+    register_operand_2 = {0x47: 'A', 0x4F: 'A', 0x67: 'A', 0x57: 'A', 0x7C: 'H',0x7B: 'E', 0x78: 'B',0x79: 'C', 0x5F: 'A' }
     r1 = register_operand_1[opcode]
     r2 = register_operand_2[opcode]
     context.load(r2).store(r1)

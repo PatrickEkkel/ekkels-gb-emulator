@@ -40,6 +40,8 @@ class OpcodeState:
     def storereg(self, register, value):
         if register == 'HL':
             self._cpu.reg.SET_HL(value)
+        elif register == 'PC':
+            self._cpu.pc = value 
         elif register == 'BC':
             self._cpu.reg.SET_BC(value)
         elif register == 'A':
@@ -54,6 +56,8 @@ class OpcodeState:
             self._cpu.reg.SET_D(value)
         elif register == 'H':
             self._cpu.reg.SET_H(value)
+        elif register == 'L':
+            self._cpu.reg.SET_L(value)
         else:
             print('store reg')
             input('not implemented')
@@ -61,6 +65,8 @@ class OpcodeState:
     def loadreg(self, register):
         if register == 'HL':
             return self._cpu.reg.GET_HL()
+        elif register == 'PC':
+            return self._cpu.pc
         elif register == 'A':
             return self._cpu.reg.GET_A()
         elif register == 'B':
@@ -73,6 +79,8 @@ class OpcodeState:
             return self._cpu.reg.GET_E()
         elif register == 'H':
             return self._cpu.reg.GET_H()
+        elif register == 'L':
+            return self._cpu.reg.GET_L()
         elif register == 'BC':
             return self._cpu.reg.GET_BC()
         else:
@@ -300,6 +308,10 @@ class OpcodeContext:
             context = self._select_reg(register)._loadval_from_reg()
 
         return context
+
+    def jump(self, address):
+        self._set_reg_value(address)
+        return self
 
     def push(self):
         self._cpu.stack.push(self._get_select_reg_value())

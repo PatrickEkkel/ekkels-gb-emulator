@@ -75,7 +75,7 @@ class Opcode(Token):
             result = 'r'
         elif len(self.register) == 2:
             result = 'rr'
-        elif len(self.register) == 3:
+        elif len(self.register) == 3 and not 'H' in self.register:
             result = '(r)'
         elif len(self.register) == 4:
             result = '(rr)'
@@ -99,6 +99,8 @@ class Opcode(Token):
                 result = 'nnnn'
             elif len(self.address) == 2:
                 result = 'nn'
+            elif len(self.address) == 3 and 'H' in self.address:
+                result = 'nnH'
             elif len(self.address) == 1:
                 result = 'nn'
             return result
@@ -176,7 +178,7 @@ class Tokenizer:
             return self.tokens[1]
         elif len(self.tokens) > 1 and len(self.tokens[1]) == 1:
             return self.tokens[1]
-        elif len(self.tokens) > 1 and len(self.tokens[1]) == 3:
+        elif len(self.tokens) > 1 and len(self.tokens[1]) == 3 and not 'H' in self.tokens[1]:
             return self.tokens[1]
         elif  len(self.tokens) > 1 and len(self.tokens[1]) == 4 and (self.tokens[1] in REGISTERS_16B or self.tokens[1] in REGISTERS_8B  or self.tokens[1] in OFFSET_REGISTERS):
             return self.tokens[1]
@@ -191,6 +193,8 @@ class Tokenizer:
             if len(self.tokens) > 2:
                 return self.tokens[2]
             elif len(self.tokens) > 1 and len(self.tokens[1]) == 4:
+                return self.tokens[1]
+            elif len(self.tokens) > 1 and len(self.tokens[1]) == 3 and 'H' in self.tokens[1]:
                 return self.tokens[1]
             elif len(self.tokens) > 1 and len(self.tokens[1]) == 2 and (self.tokens[1] not in REGISTERS_16B and self.tokens[1] not in REGISTERS_8B and self.tokens[1] not in OFFSET_REGISTERS):
                 return self.tokens[1]
@@ -234,13 +238,13 @@ class GBA_ASM:
         else:
             # if we need to load two registers for example LD A B, concatinate
             # the operands
-
             if opcode.addressing_mode == Opcode.REGISTER_TRANSFER or opcode.addressing_mode == Opcode.OFFSET_REGISTER_TRANSFER:
                 key = f'{opcode.register} {opcode.address}'
                 self.encoded_program.append(opcode_meta['register_options'][key])
-
             elif opcode.register:
-                self.encoded_program.append(opcode_meta['register_options'][opcode.register])
+                self.encoded_program.append(opcode_meta['register_options'][opcode.register])     
+            elif opcode.address and 'H' in opcode.address:
+                self.encoded_program.append(opcode_meta['register_options'][opcode.address])     
             else:
                 self.encoded_program.append(opcode_meta['register_options']['x'])
             if opcode.address:
