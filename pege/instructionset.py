@@ -42,7 +42,8 @@ instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XOR_r 
                 {'m': 'CPL'        , 'datatype': ''   , 'opcode': opcodes.CPL      , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'x': 0x2F}},
                 {'m': 'AND nn'     , 'datatype': ''   , 'opcode': opcodes.AND_nn   , 'length': 2, 'cycles': 8,       'jump_instruction': False, 'register_options': {'x': 0xE6 }},
                 {'m': 'AND r'      , 'datatype': ''   , 'opcode': opcodes.AND_r    , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'C': 0xA1 }},
-                {'m': 'RST nnH'    , 'datatype': ''   , 'opcode': opcodes.RST_nn   , 'length': 1, 'cycles': 16,      'jump_instruction': False, 'register_options': {'28H': 0xEF}}
+                {'m': 'RST nnH'    , 'datatype': ''   , 'opcode': opcodes.RST_nn   , 'length': 1, 'cycles': 16,      'jump_instruction': False, 'register_options': {'28H': 0xEF}},
+                {'m': 'ADD rr rr'  , 'datatype': ''   , 'opcode': opcodes.ADD_nn_nn, 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'HL DE': 0x19}}
                ]
 
 def get_instruction_by_mnemonic(mnemonic):

@@ -83,6 +83,8 @@ class OpcodeState:
             return self._cpu.reg.GET_L()
         elif register == 'BC':
             return self._cpu.reg.GET_BC()
+        elif register == 'DE':
+            return self._cpu.reg.GET_DE()
         else:
             print('loadreg')
             input('not implemented')
@@ -236,13 +238,18 @@ class OpcodeContext:
             input('not implemented')
 
         return self
+    
+    def add(self, register=None):
+        value_a = self._get_select_reg_value()
+        self._select_reg(register)._loadval_from_reg()
+        value_b = self._get_select_reg_value()
+        self._set_reg_value(value_a + value_b)
+        return self
 
     def sub(self, register=None):
         value_a = self._get_select_reg_value()
         self._select_reg(register)._loadval_from_reg()
         value_b = self._get_select_reg_value()
-        #input(value_b)
-        #input(value_a)
         self._set_reg_value(value_a - value_b)
         return self
 

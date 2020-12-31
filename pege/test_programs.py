@@ -515,6 +515,19 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_D() == 0x80
 
+    def test_ADD_HL_DE_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['ADD HL DE']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_DE(0x02)
+        gb.CPU.reg.SET_HL(0x09)
+        gb._run()
+        input(gb.CPU.debugger.format_hex(gb.CPU.reg.GET_HL()))
+        assert gb.CPU.reg.GET_HL() == 0x0B
+        
+
     def test_ld_e_a(self):
         gbasm = GBA_ASM()
         test_program = ['LD E A']

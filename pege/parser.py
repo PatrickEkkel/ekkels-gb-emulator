@@ -65,6 +65,9 @@ class Opcode(Token):
             self.addressing_mode = Opcode.OFFSET_REGISTER_TRANSFER
         elif self.register in REGISTERS_8B and self.address in OFFSET_REGISTERS:
             self.addressing_mode = Opcode.OFFSET_REGISTER_TRANSFER
+        elif self.register in REGISTERS_16B and self.address in REGISTERS_16B:
+            self.addressing_mode = Opcode.OFFSET_REGISTER_TRANSFER
+            
 
     def has_label(self):
         return self.label is not None
@@ -162,7 +165,7 @@ class Tokenizer:
                 #input(result.register)
                 result.determine_adressing_mode()
                 # determine, 8 bit or 16 bit value
-                if result.address and result.address not in OFFSET_REGISTERS:
+                if result.address and result.address not in OFFSET_REGISTERS and result.address not in REGISTERS_16B:
                     if len(result.address) == 4:
                         result.address = encode_16bit_value(result.address)
                     elif len(result.address) == 2:
@@ -255,7 +258,7 @@ class GBA_ASM:
                     sb = opcode.address[0:2]
                     self.encoded_program.append(int(fb, 16))
                     self.encoded_program.append(int(sb, 16))
-                elif len(opcode.address) == 2:
+                elif len(opcode.address) == 2 and opcode.addressing_mode != Opcode.OFFSET_REGISTER_TRANSFER:
                     fb = opcode.address[0:2]
                     opcode.address = fb
                     self.encoded_program.append(int(fb, 16))

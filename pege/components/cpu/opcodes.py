@@ -253,6 +253,14 @@ def SUB_r(mmu, cpu, meta, context):
     r2 = 'A'
     context.load(r2).sub(r1).store(r2).flags(Z,1,H,C)
 
+
+def ADD_nn_nn(mmu, cpu, meta, context):
+    opcode = cpu.read_opcode()
+    register_operand_1 = {0x19: 'DE'}
+    r1 = 'HL'
+    r2 = register_operand_1[opcode]
+    context.load(r2).add(r1).store(r1).flags('-',0,H,C)
+
 def LD_n_n(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
     #input('upper param: ' + cpu.debugger.format_hex(upper_param))
