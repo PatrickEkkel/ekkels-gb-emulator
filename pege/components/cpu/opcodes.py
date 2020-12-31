@@ -354,7 +354,8 @@ def CB(mmu, cpu, meta, context):
         result = instruction(mmu, cpu)
     else:
         hex = cpu.debugger.format_hex(opcode)
-        print(f'Unknown CB opcode {hex} at {cpu.pc}')
+        pc = cpu.debugger.format_hex(cpu.pc)
+        input(f'Unknown CB opcode {hex} at {pc}')
 
     return result
 

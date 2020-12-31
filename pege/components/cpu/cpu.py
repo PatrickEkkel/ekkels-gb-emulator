@@ -247,7 +247,6 @@ class CPU:
             success = False
             opcode = self.read_opcode()
 
-            #cycle = self.opcode_cycles[opcode]
             hex = self.debugger.format_hex(opcode)
             hex_pc = self.debugger.format_hex(self.pc)
             opcode_meta = None
@@ -265,7 +264,6 @@ class CPU:
                         # stop execution by returning False
                         return False
 
-                #self.debugger.show_opcode_description(opcode_meta['m'])
                 context = OpcodeContext(self, self._mmu, opcode_meta)
                 self.debugger.print_opcode(context.opcode)
                 instruction(self._mmu,self, opcode_meta, context)
