@@ -221,7 +221,7 @@ class CPU:
         self.opcodes[0x20] = opcodes.JRNZn
         self.opcodes[0x28] = opcodes.JRZn
         self.opcodes[0x06] = opcodes.LD_r_nn
-        self.opcodes[0x1A] = opcodes.LDAn
+        #self.opcodes[0x1A] = opcodes.LDAn
         self.cb_opcodes[0x7c] = opcodes.BIT7H
         self.cb_opcodes[0x11] = opcodes.RLC
 

@@ -316,7 +316,7 @@ class OpcodeContext:
 
         return context
 
-    def jump(self, address):
+    def set(self, address):
         self._set_reg_value(address)
         return self
 

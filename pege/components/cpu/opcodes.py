@@ -113,18 +113,13 @@ def LDHnA(mmu, cpu, meta):
 # length: 1 byte
 # 0x1A
 # Read the Value of register DE from memory and put the contents of adress DE in A
-def LDAn(mmu, cpu, meta, context):
-
-    parameter = cpu.read_upper_opcode_parameter()
-    result = False
-    if parameter == 0x1:
-        DE = cpu.reg.GET_DE()
-        val = mmu.read(DE)
-        cpu.reg.SET_A(val)
-        result = True
-
-    return result
-
+def LD_r_i16(mmu, cpu, meta, context):
+    opcode = cpu.read_opcode()
+    register_operand_1 = {0x1A: 'DE',0x5E: 'HL', 0x56: 'HL'}
+    register_operand_2 = {0x1A: 'A', 0x5E: 'E' , 0x56: 'D' }
+    r1 = register_operand_1[opcode]
+    r2 = register_operand_2[opcode]
+    context.load(r1,addressing_mode=AddressingMode.ir16).store(r2)
 
 # length 1 byte
 # 0xE2
@@ -210,8 +205,8 @@ def LDnA(mmu, cpu):
 
 def POP_rr(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
-    register_operand_r1 = {0xC1: 'B',0xE1: 'H'}
-    register_operand_r2 = {0xC1: 'C',0xE1: 'L'}
+    register_operand_r1 = {0xC1: 'B',0xE1: 'H', 0xD1: 'D'}
+    register_operand_r2 = {0xC1: 'C',0xE1: 'L', 0xD1: 'E'}
 
     r1 = register_operand_r1[opcode]
     r2 = register_operand_r2[opcode]
@@ -219,8 +214,8 @@ def POP_rr(mmu, cpu, meta, context):
 
 def PUSH_rr(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
-    register_operand_r1 = {0xC5: 'B', 0xE5: 'H'}
-    register_operand_r2 = {0xC5: 'C', 0xE5: 'L'}
+    register_operand_r1 = {0xC5: 'B', 0xE5: 'H', 0xD5: 'D'}
+    register_operand_r2 = {0xC5: 'C', 0xE5: 'L', 0xD5: 'E'}
 
     r1 = register_operand_r1[opcode]
     r2 = register_operand_r2[opcode]
@@ -243,7 +238,13 @@ def OR_r(mmu, cpu, meta, context):
 
 def RST_nn(mmu, cpu, meta, context):
     r1 = 'PC'
-    context.load(r1).push().jump(0x00 + 0x28).store(r1)
+    context.load(r1).push().set(0x00 + 0x28).store(r1)
+
+
+def JP_HL(mmu, cpu, meta, context):
+    r1 = 'HL'
+    r2 = 'PC'
+    context.load(r1, addressing_mode=AddressingMode.ir16).store(r2)
 
 def SUB_r(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()

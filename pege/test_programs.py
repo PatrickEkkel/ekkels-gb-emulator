@@ -429,6 +429,17 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_HL() == 0xAFBF
 
+
+    def test_push_pop_de_opcode(self):
+        gbasm = GBA_ASM()
+        #test_program = ['LD DE AFBF', 'PUSH DE', 'LD DE 0000','POP DE']
+        test_program = ['LD DE AFBF', 'PUSH DE', 'LD DE 0000','POP DE']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb._run()
+        assert gb.CPU.reg.GET_DE() == 0xAFBF
+
     def test_push_pop_bc_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['LD BC AFBF', 'PUSH BC', 'LD BC 0000','POP BC']
@@ -437,6 +448,18 @@ class ProgramTests(unittest.TestCase):
         gb.power_on(skipbios=True,standby=True)
         gb._run()
         assert gb.CPU.reg.GET_BC() == 0xAFBF
+
+    def test_jp_hl_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['JP (HL)','LD DE 1234']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_HL(0x8000)
+        gb.CPU.reg.SET_DE(0x8080)
+        gb.mmu.write(0x8000,0x104)
+        gb._run()
+        assert gb.CPU.reg.GET_DE() == 0x8080
 
     def test_ld_hl_a(self):
         gbasm = GBA_ASM()
@@ -449,7 +472,31 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.mmu.read(0x8000) == 0xFF
 
-    def test_ld_a_de(self):
+    def test_ld_d_hl_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD D (HL)']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_HL(0x8000)
+        gb.mmu.write(0x8000,0xFA)
+        gb._run()
+
+        assert gb.CPU.reg.GET_D() == 0xFA
+
+
+    def test_ld_e_hl_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD E (HL)']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_HL(0x8000)
+        gb.mmu.write(0x8000,0xFA)
+        gb._run()
+
+        assert gb.CPU.reg.GET_E() == 0xFA
+    def test_ld_a_de_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['LD A (DE)']
         bitstream = gbasm.parse(test_program)
@@ -524,7 +571,6 @@ class ProgramTests(unittest.TestCase):
         gb.CPU.reg.SET_DE(0x02)
         gb.CPU.reg.SET_HL(0x09)
         gb._run()
-        input(gb.CPU.debugger.format_hex(gb.CPU.reg.GET_HL()))
         assert gb.CPU.reg.GET_HL() == 0x0B
         
 
