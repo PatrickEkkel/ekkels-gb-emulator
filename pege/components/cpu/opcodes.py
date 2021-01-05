@@ -377,7 +377,7 @@ def SWAP_r(mmu, cpu, meta, context):
          # and r with 0xF0 and shift left, or the resulting value with the transient register
         operation=BitwiseOperators.AND, value=0xF0).bitwise(
         operation=BitwiseOperators.SHIFT_RIGHT, position=4).bitwise(
-        operation=BitwiseOperators.OR, transient_load=True).store('A')
+        operation=BitwiseOperators.OR, transient_load=True).store('A').flags(Z,0,0,0)
 
 # length: 1 bytes
 # 0xAF
@@ -405,8 +405,14 @@ def CB(mmu, cpu, meta, context):
     result = False
     if instruction:
         context = OpcodeContext(cpu, mmu, meta)
-        cpu.debugger.print_opcode(opcode_meta['m'])
-        result = instruction(mmu, cpu, meta, context)
+        try:
+            cpu.debugger.print_opcode(opcode_meta['m'])
+            result = instruction(mmu, cpu, meta, context)
+        except:
+            hex = cpu.debugger.format_hex(opcode)
+            pc = cpu.debugger.format_hex(cpu.pc)
+            input(f'opcode failed {hex} at {pc}')
+
     else:
         hex = cpu.debugger.format_hex(opcode)
         pc = cpu.debugger.format_hex(cpu.pc)
@@ -500,19 +506,18 @@ def RLA(mmu, cpu, meta, context):
 
 
 # CB opcodes
-def BIT7H(mmu, cpu):
-    cpu.debugger.print_opcode('BIT7H')
+def BIT7H(mmu, cpu, meta, context):
     HL = cpu.reg.GET_HL()
     H = MMU.get_high_byte(HL)
     # check if most significant bit is 1
     isset = H >> 7 & 0x01
-
-    if isset:
+    #input(cpu.debugger.format_hex(isset))
+    if isset == 1:
+        #input('clear zero')
         cpu.reg.CLEAR_ZERO()
     else:
+        #input('set zero')
         cpu.reg.SET_ZERO()
-
-    return True
 
 # length: 2 bytes
 # 0xCB 0x11
@@ -521,9 +526,7 @@ def BIT7H(mmu, cpu):
 # where the most significant bit is shifted out, put in a carry bit and
 #
 
-
-def RLC(mmu, cpu):
-    cpu.debugger.print_opcode('RLC')
+def RLC(mmu, cpu, meta, context):
     # get the value from the C register
     C = cpu.reg.GET_C()
     previous_carry = cpu.reg.GET_CARRY()
@@ -547,4 +550,3 @@ def RLC(mmu, cpu):
     # clear substract and half carry
     cpu.reg.CLEAR_SUBSTRACT()
     cpu.reg.CLEAR_HALF_CARRY()
-    return True

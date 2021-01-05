@@ -220,8 +220,8 @@ class CPU:
         self.opcodes[0x20] = opcodes.JRNZn
         self.opcodes[0x28] = opcodes.JRZn
         self.opcodes[0x06] = opcodes.LD_r_nn
-        self.cb_opcodes[0x7c] = opcodes.BIT7H
-        self.cb_opcodes[0x11] = opcodes.RLC
+        #self.cb_opcodes[0x7c] = opcodes.BIT7H
+        #self.cb_opcodes[0x11] = opcodes.RLC
 
 
     def read_opcode(self):

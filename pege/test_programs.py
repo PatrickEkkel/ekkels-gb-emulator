@@ -572,6 +572,19 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_D() == 0x80
 
+    def test_BIT7H_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['CB BIT 7 H']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.CPU.reg.SET_H(0xF0)
+        gb.CPU.reg.CLEAR_ZERO()
+        gb.power_on(skipbios=True,standby=True)
+        gb._run()
+        assert gb.CPU.reg.GET_ZERO() == True
+        #assert gb.CPU.reg.GET_H() == 0x80
+
+
     def test_ADD_HL_DE_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['ADD HL DE']
