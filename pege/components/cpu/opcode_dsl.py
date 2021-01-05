@@ -36,6 +36,7 @@ class OpcodeState:
         self.selected_address_key = None
         self.selected_address_value = None
         self.addressing_mode = AddressingMode.IMPLIED
+        self.transient_value = None
 
     def storereg(self, register, value):
         if register == 'HL':
@@ -103,7 +104,9 @@ class BitwiseOperators:
     # CPL is short for complement register, which is a bitwise NOT
     CPL = 4
     NOT = 4
-
+    SHIFT_RIGHT = 5
+    SHIFT_LEFT = 6
+    
 class AddressingMode:
     # Direct 8 bit adressing mode pc+1
     d8 = 10
@@ -209,17 +212,24 @@ class OpcodeContext:
         else:
             self._cpu.reg.CLEAR_ZERO()
 
-    def bitwise(self, register, operation):
+    def bitwise(self, register=None, operation=None, position=0, value=None,transient_load=False):
         if operation == BitwiseOperators.OR:
-            value_a =  self._get_select_reg_value()
-            self._select_reg(register)._loadval_from_reg()
+            if not transient_load:
+                value_a =  self._get_select_reg_value()
+                self._select_reg(register)._loadval_from_reg()
+            else:
+                value_a = self.opcode_state.transient_value
+            
             value_b = self._get_select_reg_value()
             self._set_reg_value(value_a | value_b)
             self._check_zero()
         elif operation == BitwiseOperators.AND:
             value_a = self._get_select_reg_value()
-            self._select_reg(register)._loadval_from_reg()
-            value_b = self._get_select_reg_value()
+            if value is not None:
+                value_b = value
+            else:
+                self._select_reg(register)._loadval_from_reg()
+                value_b = self._get_select_reg_value()
             self._set_reg_value(value_a & value_b)
             #self._check_zero()
         elif operation == BitwiseOperators.CPL:
@@ -232,7 +242,13 @@ class OpcodeContext:
             self._select_reg(register)._loadval_from_reg()
             value_b = self._get_select_reg_value()
             self._set_reg_value(value_a ^ value_b)
-         
+        elif operation == BitwiseOperators.SHIFT_LEFT:
+            value_a = self._get_select_reg_value()
+            self._set_reg_value(value_a << position)
+        elif operation == BitwiseOperators.SHIFT_RIGHT:
+            value_a = self._get_select_reg_value()
+            self._set_reg_value(value_a >> position)
+        
         else:
             print('bitwise')
             input('not implemented')
@@ -304,6 +320,16 @@ class OpcodeContext:
             register = self._get_selected_reg()
 
         return self._select_reg(register)._increg()
+
+    def transient_load(self):
+        value_a =  self.opcode_state.transient_value
+        self._set_reg_value(value)
+        return self
+
+    def transient_store(self):
+        value_a = self._get_select_reg_value()
+        self.opcode_state.transient_value = value_a
+        return self
 
     def load(self, register=None, addressing_mode=AddressingMode.IMPLIED):
         self._set_adressingmode(addressing_mode)

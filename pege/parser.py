@@ -1,4 +1,4 @@
-from instructionset import create_mnemonic_dictionary
+from instructionset import create_mnemonic_dictionary, create_cb_mnemonic_dictionary
 
 OFFSET_REGISTERS = ['(C)','(HL)','(DE)']
 REGISTERS_8B = ['A', 'B', 'C', 'D', 'E', 'F','H']
@@ -304,14 +304,23 @@ class GBA_ASM:
                  self.encoded_program.append(int(sb, 16))
 
     def parse(self, program):
-        instructions = create_mnemonic_dictionary()
+        normal_instructions = create_mnemonic_dictionary()
+        cb_instructions = create_cb_mnemonic_dictionary()
 
         self._preprocess(program)
-        for p in program:
+        for p in program: 
+            if 'CB' in p:
+                self.instructions = cb_instructions
+                p = p.replace('CB ','')
+                self.encoded_program.append(0xCB)
+            else:
+                self.instructions = normal_instructions
+
             tokenizer = Tokenizer()
             opcode = tokenizer.tokenize(p)
             address = None
 
+            
             if isinstance(opcode, Opcode):
                 if opcode.has_label():
                     self._handle_opcode_label(opcode)

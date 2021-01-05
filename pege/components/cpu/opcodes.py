@@ -10,8 +10,10 @@ N = 3
 H = 4
 C = 5
 
+
 def NOP(mmu, cpu, meta, context):
     opcode = Opcode(meta)
+
 
 def DEC_rr(mmu, cpu, meta, context):
     upper_param = cpu.read_upper_opcode_parameter()
@@ -22,23 +24,28 @@ def DEC_rr(mmu, cpu, meta, context):
 # 0x05,0x3D,0x0D length: 1 byte
 # decrements the value of register n by 1
 # flags zhn-
+
+
 def DEC_r(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
 
-    registers = {0x05: 'B',0x0D: 'C',0x3D: 'A',0x1D: 'E',0x15: 'D'}
+    registers = {0x05: 'B', 0x0D: 'C', 0x3D: 'A', 0x1D: 'E', 0x15: 'D'}
     r1 = registers[opcode]
     context.load(r1).dec().store(r1).flags(Z, 1, H, '-')
+
 
 def RET(mmu, cpu, meta, context):
     val1 = cpu.stack.pop()
     val2 = cpu.stack.pop()
 
-    jump_address =  bitwise_functions.merge_8bit_values(val2, val1)
+    jump_address = bitwise_functions.merge_8bit_values(val2, val1)
     cpu.debugger.print_iv(jump_address)
     cpu.pc = jump_address
 
+
 def DI(mmu, cpu, meta, context):
     cpu.interrupts_enabled = False
+
 
 def EI(mmu, cpu, meta, context):
     cpu.interrupts_enabled = True
@@ -63,13 +70,14 @@ def INCnn(mmu, cpu, meta, context):
 
     return result
 
+
 def INCn(mmu, cpu, meta, context):
 
     opcode = cpu.read_opcode()
 
-    registers = {0xC: 'C', 0x04: 'B',0x24: 'H'}
+    registers = {0xC: 'C', 0x04: 'B', 0x24: 'H'}
     r1 = registers[opcode]
-    context.load(r1).inc().store(r1).flags(Z,0,H,'-')
+    context.load(r1).inc().store(r1).flags(Z, 0, H, '-')
 
 
 # length: 2 bytes
@@ -93,6 +101,8 @@ def LDHAn(mmu, cpu, meta, context):
 # length: 2 bytes
 # 0xE0 and 1 byte unsigned
 # write contents of register A to memory address FF00 + n
+
+
 def LDHnA(mmu, cpu, meta):
     opcode = Opcode(meta)
     # get 8 bit unsigned parameter
@@ -113,22 +123,27 @@ def LDHnA(mmu, cpu, meta):
 # length: 1 byte
 # 0x1A
 # Read the Value of register DE from memory and put the contents of adress DE in A
+
+
 def LD_r_i16(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
-    register_operand_1 = {0x1A: 'DE',0x5E: 'HL', 0x56: 'HL'}
-    register_operand_2 = {0x1A: 'A', 0x5E: 'E' , 0x56: 'D' }
+    register_operand_1 = {0x1A: 'DE', 0x5E: 'HL', 0x56: 'HL'}
+    register_operand_2 = {0x1A: 'A', 0x5E: 'E', 0x56: 'D'}
     r1 = register_operand_1[opcode]
     r2 = register_operand_2[opcode]
-    context.load(r1,addressing_mode=AddressingMode.ir16).store(r2)
+    context.load(r1, addressing_mode=AddressingMode.ir16).store(r2)
 
 # length 1 byte
 # 0xE2
 # write contents of register A to memory address FF00 + C
+
+
 def LDCA(mmu, cpu, meta, context):
-    C =  cpu.reg.GET_C()
+    C = cpu.reg.GET_C()
     A = cpu.reg.GET_A()
     offset_address = 0xFF00 + C
     mmu.write(offset_address, A)
+
 
 def CPn(mmu, cpu, meta, context):
     cpu.pc += 1
@@ -140,7 +155,6 @@ def CPn(mmu, cpu, meta, context):
         cpu.reg.SET_ZERO()
     else:
         cpu.reg.CLEAR_ZERO()
-
 
     if A < n:
         cpu.reg.SET_CARRY()
@@ -157,6 +171,8 @@ def CPn(mmu, cpu, meta, context):
 # length: 3 bytes
 # Put value A into nn
 # 0xEA 16 bit immediate value
+
+
 def LDnn16a(mmu, cpu, meta, context):
     A = cpu.reg.GET_A()
     cpu.pc += 1
@@ -164,53 +180,60 @@ def LDnn16a(mmu, cpu, meta, context):
     mmu.write(address, A)
     cpu.pc += 1
 
+
 def AND_r(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
     register_operand_1 = {0xA1: 'C'}
     r1 = 'A'
     r2 = register_operand_1[opcode]
-    context.load(r2).bitwise(r1,operation=BitwiseOperators.AND).store(r1).flags(Z,0,1,0)
+    context.load(r2).bitwise(
+        r1, operation=BitwiseOperators.AND).store(r1).flags(Z, 0, 1, 0)
+
 
 def AND_nn(mmu, cpu, meta, context):
     r1 = 'A'
-    context.load(addressing_mode=AddressingMode.d8).bitwise(r1, operation=BitwiseOperators.AND).store(r1).flags(Z,0,1,0)
+    context.load(addressing_mode=AddressingMode.d8).bitwise(
+        r1, operation=BitwiseOperators.AND).store(r1).flags(Z, 0, 1, 0)
+
 
 def LDnA(mmu, cpu):
-     cpu.debugger.print_opcode('LDnA')
-     upper_param = cpu.read_upper_opcode_parameter()
-     lower_param = cpu.read_lower_opcode_parameter()
-     A = cpu.reg.GET_A()
-     result = False
+    cpu.debugger.print_opcode('LDnA')
+    upper_param = cpu.read_upper_opcode_parameter()
+    lower_param = cpu.read_lower_opcode_parameter()
+    A = cpu.reg.GET_A()
+    result = False
 
-     if lower_param == 0x70:
-         if upper_param == 0x06:
-             H = cpu.reg.GET_H()
-             H = A
-             cpu.reg.SET_H(H)
-             result = True
-         elif upper_param == 0x05:
-             D = cpu.reg.GET_D()
-             D = A
-             cpu.reg.SET_D(D)
-             result = True
+    if lower_param == 0x70:
+        if upper_param == 0x06:
+            H = cpu.reg.GET_H()
+            H = A
+            cpu.reg.SET_H(H)
+            result = True
+        elif upper_param == 0x05:
+            D = cpu.reg.GET_D()
+            D = A
+            cpu.reg.SET_D(D)
+            result = True
 
-     elif lower_param == 0xF0:
+    elif lower_param == 0xF0:
         if upper_param == 0x04:
-             C = cpu.reg.GET_C()
-             C = A
-             cpu.reg.SET_C(C)
-             result = True
+            C = cpu.reg.GET_C()
+            C = A
+            cpu.reg.SET_C(C)
+            result = True
 
-     return result
+    return result
+
 
 def POP_rr(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
-    register_operand_r1 = {0xC1: 'B',0xE1: 'H', 0xD1: 'D'}
-    register_operand_r2 = {0xC1: 'C',0xE1: 'L', 0xD1: 'E'}
+    register_operand_r1 = {0xC1: 'B', 0xE1: 'H', 0xD1: 'D'}
+    register_operand_r2 = {0xC1: 'C', 0xE1: 'L', 0xD1: 'E'}
 
     r1 = register_operand_r1[opcode]
     r2 = register_operand_r2[opcode]
     context.pop().store(r2).pop().store(r1)
+
 
 def PUSH_rr(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
@@ -221,20 +244,23 @@ def PUSH_rr(mmu, cpu, meta, context):
     r2 = register_operand_r2[opcode]
 
     context.load(r1).push().load(r2).push()
-    
+
+
 def LD_r_nn(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
-    register_operand_1 = {0x1E: 'E', 0x06: 'B', 0x0E: 'C', 0x3E: 'A',0x2E:'L', 0x16: 'D'}
+    register_operand_1 = {0x1E: 'E', 0x06: 'B',
+                          0x0E: 'C', 0x3E: 'A', 0x2E: 'L', 0x16: 'D'}
     r1 = register_operand_1[opcode]
     context.load(addressing_mode=AddressingMode.d8).store(r1)
 
 
 def OR_r(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
-    register_operand_1 = {0xB0: 'B',0xB1: 'C'}
+    register_operand_1 = {0xB0: 'B', 0xB1: 'C'}
     r1 = register_operand_1[opcode]
 
     context.load('A').bitwise(r1, BitwiseOperators.OR).store('A')
+
 
 def RST_nn(mmu, cpu, meta, context):
     r1 = 'PC'
@@ -246,13 +272,14 @@ def JP_HL(mmu, cpu, meta, context):
     r2 = 'PC'
     context.load(r1, addressing_mode=AddressingMode.ir16).store(r2)
 
+
 def SUB_r(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
     registers = {0x90: 'B'}
 
     r1 = registers[opcode]
     r2 = 'A'
-    context.load(r2).sub(r1).store(r2).flags(Z,1,H,C)
+    context.load(r2).sub(r1).store(r2).flags(Z, 1, H, C)
 
 
 def ADD_nn_nn(mmu, cpu, meta, context):
@@ -260,22 +287,27 @@ def ADD_nn_nn(mmu, cpu, meta, context):
     register_operand_1 = {0x19: 'DE'}
     r1 = 'HL'
     r2 = register_operand_1[opcode]
-    context.load(r2).add(r1).store(r1).flags('-',0,H,C)
+    context.load(r2).add(r1).store(r1).flags('-', 0, H, C)
+
 
 def LD_n_n(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
     #input('upper param: ' + cpu.debugger.format_hex(upper_param))
     #input('lower param: ' + cpu.debugger.format_hex(lower_param))
-    #input('blargh')
+    # input('blargh')
 
-    register_operand_1 = {0x47: 'B', 0x4F: 'C', 0x67: 'H', 0x57: 'D', 0x7C: 'A',0x7B: 'A', 0x78: 'A',0x79: 'A', 0x5F: 'E' }
-    register_operand_2 = {0x47: 'A', 0x4F: 'A', 0x67: 'A', 0x57: 'A', 0x7C: 'H',0x7B: 'E', 0x78: 'B',0x79: 'C', 0x5F: 'A' }
+    register_operand_1 = {0x47: 'B', 0x4F: 'C', 0x67: 'H', 0x57: 'D',
+                          0x7C: 'A', 0x7B: 'A', 0x78: 'A', 0x79: 'A', 0x5F: 'E'}
+    register_operand_2 = {0x47: 'A', 0x4F: 'A', 0x67: 'A', 0x57: 'A',
+                          0x7C: 'H', 0x7B: 'E', 0x78: 'B', 0x79: 'C', 0x5F: 'A'}
     r1 = register_operand_1[opcode]
     r2 = register_operand_2[opcode]
     context.load(r2).store(r1)
 
+
 def CPL(mmu, cpu, meta, context):
     context.load('A').bitwise('A', BitwiseOperators.CPL).store('A')
+
 
 def LDHLnn(mmu, cpu, meta, context):
     context.load(addressing_mode=AddressingMode.d8).store('HL')
@@ -299,20 +331,25 @@ def LDnn16d(mmu, cpu, meta, context):
 
     cpu.pc += 1
 
+
 def LDHL8A(mmu, cpu, meta, context):
-    context.load('HL').store('A',AddressingMode.dr16)
+    context.load('HL').store('A', AddressingMode.dr16)
+
 
 def LDI_HL_A(mmu, cpu, meta, context):
     r1 = 'HL'
     r2 = 'A'
-    context.load('HL').store('A', addressing_mode=AddressingMode.dr16).load('HL').inc().store()
+    context.load('HL').store(
+        'A', addressing_mode=AddressingMode.dr16).load('HL').inc().store()
+
 
 def LDI_A_HL(mmu, cpu, meta, context):
     r1 = 'HL'
     r2 = 'A'
-    context.load('HL', addressing_mode=AddressingMode.ir16).store('A').load('HL').inc().store()
+    context.load('HL', addressing_mode=AddressingMode.ir16).store(
+        'A').load('HL').inc().store()
 
-#def LDIHL8A(mmu, cpu, meta, context):
+# def LDIHL8A(mmu, cpu, meta, context):
 
 
 def LDDHL8A(mmu, cpu, meta, context):
@@ -321,7 +358,7 @@ def LDDHL8A(mmu, cpu, meta, context):
     A = cpu.reg.GET_A()
     AF = cpu.reg.GET_AF()
     HL = cpu.reg.GET_HL()
-    mmu.write(HL,A)
+    mmu.write(HL, A)
     result = False
     if parameter == 0x03:
         HL -= 1
@@ -332,32 +369,51 @@ def LDDHL8A(mmu, cpu, meta, context):
     cpu.reg.SET_HL(HL)
 
 
+def SWAP_r(mmu, cpu, meta, context):
+    context.load('A').bitwise(
+        # and r with 0x0F and shift left, store the value in the transient register
+        operation=BitwiseOperators.AND, value=0x0F).bitwise(
+        operation=BitwiseOperators.SHIFT_LEFT, position=4).transient_store().load('A').bitwise(
+         # and r with 0xF0 and shift left, or the resulting value with the transient register
+        operation=BitwiseOperators.AND, value=0xF0).bitwise(
+        operation=BitwiseOperators.SHIFT_RIGHT, position=4).bitwise(
+        operation=BitwiseOperators.OR, transient_load=True).store('A')
+
 # length: 1 bytes
 # 0xAF
+
+
 def XOR_r(mmu, cpu, meta, context):
-  opcode = cpu.read_opcode() 
-  register_operand_1 = {0xAF: 'A',0xA9: 'C'}
-  r1 = 'A'
-  r2 = register_operand_1[opcode]
-  context.load(r1).bitwise(r2,BitwiseOperators.XOR).store(r1).flags(Z,0,0,0)
+    opcode = cpu.read_opcode()
+    register_operand_1 = {0xAF: 'A', 0xA9: 'C'}
+    r1 = 'A'
+    r2 = register_operand_1[opcode]
+    context.load(r1).bitwise(
+        r2, BitwiseOperators.XOR).store(r1).flags(Z, 0, 0, 0)
 
 # special prefix for a different set of opcodes
+
+
 def CB(mmu, cpu, meta, context):
     cpu.pc += 1
     opcode = cpu.read_opcode()
     instruction = cpu.cb_opcodes[opcode]
+    opcode_meta = cpu.cb_opcode_meta[opcode]
     # fetch the special instruction from cb_opcode list
     # increment the PC, so we can get the CB instruction
     # do nothing, its just a prefix
     result = False
     if instruction:
-        result = instruction(mmu, cpu)
+        context = OpcodeContext(cpu, mmu, meta)
+        cpu.debugger.print_opcode(opcode_meta['m'])
+        result = instruction(mmu, cpu, meta, context)
     else:
         hex = cpu.debugger.format_hex(opcode)
         pc = cpu.debugger.format_hex(cpu.pc)
         input(f'Unknown CB opcode {hex} at {pc}')
 
     return result
+
 
 def JRn(mmu, cpu, meta, context):
     pc = cpu.pc
@@ -376,11 +432,13 @@ def JRZn(mmu, cpu, meta, context):
         jump_address = cpu.pc + val
         cpu.pc = jump_address
 
+
 def JPnn(mmu, cpu, meta, context):
     cpu.pc += 1
     nn = mmu.read_u16(cpu.pc)
     cpu.debugger.print_iv(nn)
     cpu.pc = nn - 1
+
 
 def JRNZn(mmu, cpu, meta, context):
     pc = cpu.pc + 1
@@ -396,6 +454,8 @@ def JRNZn(mmu, cpu, meta, context):
 # length: 3 bytes
 # 0xCD
 # pushes the PC to the stack and jump to specified 16 bit operand
+
+
 def CALLnn(mmu, cpu, meta, context):
     # address of next instruction
     pc = cpu.pc + 1
@@ -439,7 +499,6 @@ def RLA(mmu, cpu, meta, context):
     return True
 
 
-
 # CB opcodes
 def BIT7H(mmu, cpu):
     cpu.debugger.print_opcode('BIT7H')
@@ -461,6 +520,8 @@ def BIT7H(mmu, cpu):
 # It seems what we are doing here is called 'Rotate trough carry'
 # where the most significant bit is shifted out, put in a carry bit and
 #
+
+
 def RLC(mmu, cpu):
     cpu.debugger.print_opcode('RLC')
     # get the value from the C register
@@ -469,7 +530,6 @@ def RLC(mmu, cpu):
 
     # get msb from register
     msb = (C & 0x80) == 0x80
-
 
     C = bitwise_functions.shift_left(C, 8)
     C |= previous_carry

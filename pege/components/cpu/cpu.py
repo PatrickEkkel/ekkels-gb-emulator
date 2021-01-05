@@ -208,7 +208,6 @@ class CPU:
         self.interrupts_enabled = True
         self.test_mode = False
         self.stop_at = None
-        #self.debug_opcode = False
         self.stack = Stack(self, mmu)
         self.reg = Registers()
         self.debugger = Debugger(self, mmu)
@@ -221,7 +220,6 @@ class CPU:
         self.opcodes[0x20] = opcodes.JRNZn
         self.opcodes[0x28] = opcodes.JRZn
         self.opcodes[0x06] = opcodes.LD_r_nn
-        #self.opcodes[0x1A] = opcodes.LDAn
         self.cb_opcodes[0x7c] = opcodes.BIT7H
         self.cb_opcodes[0x11] = opcodes.RLC
 

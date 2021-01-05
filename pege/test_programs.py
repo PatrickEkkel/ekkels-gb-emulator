@@ -484,6 +484,16 @@ class ProgramTests(unittest.TestCase):
 
         assert gb.CPU.reg.GET_D() == 0xFA
 
+    def test_swap_a_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['CB SWAP A']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0xAF)
+        gb._run()
+        #print(gb.CPU.debugger.format_hex(gb.CPU.reg.GET_A()))   
+        assert gb.CPU.reg.GET_A() == 0xFA
 
     def test_ld_e_hl_opcode(self):
         gbasm = GBA_ASM()

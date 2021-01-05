@@ -3,7 +3,8 @@ import bitwise_functions
 
 opcode_descriptions = {'LDH r nn': 'LDH A,(n) = put memory address $FF00+n into A'}
 
-cb_instructions =  [{'m': 'CB', 'datatype': '', 'opcode': opcodes.CB, 'length': 1, 'cycles': 4, 'jump_instruction': False, 'register_options': {'x': 0xCB } },
+cb_instructions =  [{'m': 'CB', 'datatype': '', 'opcode': opcodes.CB, 'length': 1, 'cycles': 4, 'jump_instruction': False, 'register_options': {'x': 0xCB }, },
+                    {'m': 'SWAP r','datatype': '', 'opcode': opcodes.SWAP_r, 'length': 2, 'cycles': 8, 'jump_instruction:': False, 'register_options': {'A': 0x37}}
  ]
 
 instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XOR_r    , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'A': 0xAF, 'C': 0xA9}    },
@@ -53,6 +54,13 @@ def get_instruction_by_mnemonic(mnemonic):
     for i in instructions:
         if i['m'] == mnemonic:
             return i
+
+def create_cb_mnemonic_dictionary():
+    result = {}
+    for instruction in cb_instructions:
+        result[instruction['m']] = instruction
+
+    return result
 
 def create_mnemonic_dictionary():
     result = {}

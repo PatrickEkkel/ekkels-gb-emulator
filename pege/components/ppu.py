@@ -116,7 +116,6 @@ class PPU:
 
     def _vblank(self):
         pass
-
     def step(self):
         if self.current_mode == self.OAM_SEARCH and self.ticks == 80:
             self._oam_search()

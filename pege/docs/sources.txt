@@ -12,6 +12,7 @@ https://blog.ryanlevick.com/DMG-01/public/book/graphics/tile_ram.html
 https://blog.tigris.fr/2019/09/15/writing-an-emulator-the-first-pixel/
 http://bgb.bircd.org/pandocs.htm#powerupsequence
 https://keisan.casio.com/exec/system/14495408631029
+https://github.com/jansegre/gameboy/blob/master/spec/gbspec.txt
 # test program to verify CPU emulation
 
 https://github.com/retrio/gb-test-roms/tree/master/cpu_instrs
