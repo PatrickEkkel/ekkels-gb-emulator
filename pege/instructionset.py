@@ -5,8 +5,8 @@ opcode_descriptions = {'LDH r nn': 'LDH A,(n) = put memory address $FF00+n into 
 
 cb_instructions =  [{'m': 'CB', 'datatype': '', 'opcode': opcodes.CB, 'length': 1, 'cycles': 4, 'jump_instruction': False, 'register_options': {'x': 0xCB }, },
                     {'m': 'SWAP r','datatype': '', 'opcode': opcodes.SWAP_r, 'length': 2, 'cycles': 8, 'jump_instruction:':False, 'register_options': {'A': 0x37 } },
-                    {'m': 'BIT 7 r','datatype': '', 'opcode': opcodes.BIT7H, 'length': 2, 'cycles': 8, 'jump_instruction': False, 'register_options': {'H': 0x7C } },
-                    {'m': 'RL r'   , 'datatype': '', 'opcode': opcodes.RLC,  'length': 2, 'cycles': 8, 'jump_instruction': False, 'register_options': {'C': 0x11}}
+                    {'m': 'BIT 7 r','datatype': '', 'opcode': opcodes.BIT_7_r, 'length': 2, 'cycles': 8, 'jump_instruction': False, 'register_options': {'H': 0x7C } },
+                    {'m': 'RL r'   , 'datatype': '', 'opcode': opcodes.RLC,  'length': 2, 'cycles': 8, 'jump_instruction': False, 'register_options': {'C': 0x11 } }
  ]
 
 instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XOR_r    , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'A': 0xAF, 'C': 0xA9}    },

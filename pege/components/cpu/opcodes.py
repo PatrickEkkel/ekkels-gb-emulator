@@ -506,7 +506,7 @@ def RLA(mmu, cpu, meta, context):
 
 
 # CB opcodes
-def BIT7H(mmu, cpu, meta, context):
+def BIT_7_r(mmu, cpu, meta, context):
     HL = cpu.reg.GET_HL()
     H = MMU.get_high_byte(HL)
     # check if most significant bit is 1
