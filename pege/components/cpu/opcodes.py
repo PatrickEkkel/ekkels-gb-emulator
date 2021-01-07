@@ -259,7 +259,7 @@ def OR_r(mmu, cpu, meta, context):
     register_operand_1 = {0xB0: 'B', 0xB1: 'C'}
     r1 = register_operand_1[opcode]
 
-    context.load('A').bitwise(r1, BitwiseOperators.OR).store('A')
+    context.load('A').bitwise(r1, BitwiseOperators.OR).store('A').flags(Z,0,0,0)
 
 
 def RST_nn(mmu, cpu, meta, context):
@@ -309,8 +309,8 @@ def CPL(mmu, cpu, meta, context):
     context.load('A').bitwise('A', BitwiseOperators.CPL).store('A')
 
 
-def LDHLnn(mmu, cpu, meta, context):
-    context.load(addressing_mode=AddressingMode.d8).store('HL')
+def LD_HL_nn(mmu, cpu, meta, context):
+    context.load('HL').load(addressing_mode=AddressingMode.d8).store(addressing_mode=AddressingMode.i8)
 
 
 # length: 3 bytes

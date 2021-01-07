@@ -1,7 +1,7 @@
 from instructionset import create_mnemonic_dictionary, create_cb_mnemonic_dictionary
 
 OFFSET_REGISTERS = ['(C)','(HL)','(DE)']
-REGISTERS_8B = ['A', 'B', 'C', 'D', 'E', 'F','H']
+REGISTERS_8B = ['A', 'B', 'C', 'D', 'E', 'F','H','L']
 REGISTERS_16B = ['HL', 'DE', 'SP', 'BC']
 
 SPECIAL_OPCODES = ['LDI','LDH']

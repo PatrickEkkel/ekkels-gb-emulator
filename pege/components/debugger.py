@@ -13,8 +13,8 @@ class Debugger:
         self.step_instruction = False
         self.show_description = False
         self.stop_at = None
-        self.stop_at_opcode = None
-        self.stop_and_step_at = None # 0x235
+        self.stop_at_opcode = None #0xEF
+        self.stop_and_step_at = None #0x27A0
         self.exit_at_breakpoint = False
 
 
@@ -78,21 +78,20 @@ class Debugger:
             print(f'PC: {hex_pc} CPU: {hex}', end=' ')
 
     def debug(self, pc, opcode):
-        if self.step_instruction or self.stop_at == pc:
+        if self.stop_and_step_at and pc == self.stop_and_step_at:
+            self.step_instruction = True
             self.print_register()
             self.print_vram()
             input('press enter to continue...')
-
             return True
 
-        if self.stop_at_opcode == opcode:
-            self.print_register()
-            input('press enter to continue...')
-            return True
-
-        if self.stop_and_step_at and pc >= self.stop_and_step_at:
+        elif self.step_instruction or self.stop_at == pc:
             self.print_register()
             self.print_vram()
             input('press enter to continue...')
+            return True
 
+        elif self.stop_at_opcode == opcode:
+            self.print_register()
+            input('press enter to continue...')
             return True

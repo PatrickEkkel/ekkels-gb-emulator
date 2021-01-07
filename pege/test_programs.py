@@ -314,10 +314,13 @@ class ProgramTests(unittest.TestCase):
 
     def test_LDHLnn_opcode(self):
         gbasm = GBA_ASM()
-        test_program = ['LD HL 32']
+        test_program = ['LD (HL) 32']
         bitstream = gbasm.parse(test_program)
-        gb = self.create_gameboy(bitstream)
-        assert gb.CPU.reg.GET_HL() == 0x32
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_HL(0x8000)
+        gb._run()
+        assert gb.mmu.read(0x8000) == 0x32
 
     def test_XOR_A_opcode(self):
         gbasm = GBA_ASM()

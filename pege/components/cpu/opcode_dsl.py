@@ -108,6 +108,7 @@ class BitwiseOperators:
     SHIFT_LEFT = 6
     
 class AddressingMode:
+    i8 = 9
     # Direct 8 bit adressing mode pc+1
     d8 = 10
     # Indirect 16 bit register adressing mode, read 16 value from register and use it as pointer to loaded value
@@ -149,6 +150,11 @@ class OpcodeContext:
         self._mmu.write(self.opcode_state.selected_register_value, value)
         return self
 
+    def _store_addr_from_opcode_to_addr(self, reg=None):
+        value = self.opcode_state.selected_address_value
+        self._mmu.write(self.opcode_state.selected_register_value, value)
+        return self
+        
     # write the current address value that is stored in the buffer to (reg)
     def _storeaddr_to_reg(self,reg=None):
         value = self.opcode_state.selected_address_value
@@ -182,6 +188,7 @@ class OpcodeContext:
 
     def _get_selected_reg(self):
         return self.opcode_state.selected_register_key
+        
     def _get_select_reg_value(self):
         if self.opcode_state.addressing_mode == AddressingMode.d8:
             return self.opcode_state.selected_address_value
@@ -355,6 +362,7 @@ class OpcodeContext:
         return self
 
     def store(self, register=None, addressing_mode=None):
+        
         if addressing_mode != None:
             self._set_adressingmode(addressing_mode)
 
@@ -362,6 +370,8 @@ class OpcodeContext:
             register = self._get_selected_reg()
         if self.opcode_state.addressing_mode == AddressingMode.IMPLIED:
             self._select_reg(register)._storereg()
+        elif self.opcode_state.addressing_mode == AddressingMode.i8:
+            self._select_reg(register)._store_addr_from_opcode_to_addr(register)
         elif self.opcode_state.addressing_mode == AddressingMode.d8:
             self._select_reg(register)._storeaddr_to_reg(register)
         elif self.opcode_state.addressing_mode == AddressingMode.ir16:
