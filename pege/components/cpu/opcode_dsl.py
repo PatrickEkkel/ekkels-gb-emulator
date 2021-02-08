@@ -108,6 +108,8 @@ class BitwiseOperators:
     SHIFT_LEFT = 6
     
 class AddressingMode:
+    # means 8 bit unsigned data, which are added to $FF00 in certain instructions
+    a8 = 8
     i8 = 9
     # Direct 8 bit adressing mode pc+1
     d8 = 10
@@ -115,6 +117,8 @@ class AddressingMode:
     ir16 = 11
     # direct read 16 register, put the address in the register without dereferencing
     dr16 = 12
+
+
     IMPLIED = 13
 
 class OpcodeContext:
@@ -150,9 +154,21 @@ class OpcodeContext:
         self._mmu.write(self.opcode_state.selected_register_value, value)
         return self
 
+    # write the value of the passed register (reg) in the buffer to the offset FF00 + n(where n is the value loaded via selected_address_value)
+    def _storereg_to_addr_offset(self, reg):
+        value = self.opcode_state.loadreg(reg)    
+        address = 0xFF00 + self.opcode_state.selected_address_value
+        #print(("0x{:x}".format(value)))
+        #input('value')
+        #print(("0x{:x}".format(address)))
+        #input('address')       
+        self._mmu.write(address, value)
+
+    # write to loaded register values memory addres and write the value that is read from memory 
     def _store_addr_from_opcode_to_addr(self, reg=None):
         value = self.opcode_state.selected_address_value
-        self._mmu.write(self.opcode_state.selected_register_value, value)
+        address = self.opcode_state.selected_register_value
+        self._mmu.write(address, value)
         return self
         
     # write the current address value that is stored in the buffer to (reg)
@@ -172,11 +188,14 @@ class OpcodeContext:
         return self
 
     # read the current position of the program counter as an address value for the current selected register
-    def _loadaddr_from_opcode(self):
+    def _loadaddr_from_opcode(self, offset=None):
         self._cpu.pc += 1
         self.opcode_state.selected_address_key = self._cpu.pc
         self.opcode_state.selected_address_value = self._mmu.read(self._cpu.pc)
         return self
+    # read the current opf the program counter as an address value for currect selected register with offset FF00
+    #def _loadaddr_from_opcode_FF00(self):
+    #    _loadaddr_from_opcode()
 
     def _set_adressingmode(self, addressing_mode):
         self.opcode_state.addressing_mode = addressing_mode
@@ -378,4 +397,7 @@ class OpcodeContext:
             self._select_reg(register)._storeaddr_to_reg(register)
         elif self.opcode_state.addressing_mode == AddressingMode.dr16:
             self._select_reg(register)._storereg_to_addr(register)
+        elif self.opcode_state.addressing_mode == AddressingMode.a8:
+            self._storereg_to_addr_offset(register)
+
         return self

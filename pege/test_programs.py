@@ -27,7 +27,6 @@ class ProgramTests(unittest.TestCase):
 
         game = TestRom(romdata)
         game.print_cartridge_info()
-        #print(game)
         gb = GameBoy(game,testmode=True)
         if run:
             gb.power_on(skipbios=True)
@@ -783,14 +782,13 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_A() == 0x22
 
-        
     def test_AND_nn_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['AND 0F']
         bitstream = gbasm.parse(test_program)
         gb = self.create_gameboy(bitstream,run=False)
         gb.power_on(skipbios=True,standby=True)
-        gb.CPU.reg.SET_A(0x10)
+        gb.CPU.reg.SET_AF(0x10E0)
         gb.CPU.reg.SET_CARRY()
 
         gb._run()
@@ -825,6 +823,20 @@ class ProgramTests(unittest.TestCase):
         #assert bitstream[0] == self._get_instruction('LD rr nn', register='HL')
         #assert bitstream[1] == 0x32
         #assert bitstream[2] == self._get_instruction('LD r r', register='A C')
+
+
+    def test_LDHAn_opcode(self):
+        gbasm = GBA_ASM()
+        test_prgram = ['LDH 20 A']
+        targeted_memory_address = 0xFF00 + 0x20
+        expected_value = 0xBC
+        bitstream = gbasm.parse(test_prgram)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(expected_value)
+        gb._run()
+        value =  gb.mmu.read(targeted_memory_address)
+        assert value == expected_value
 
     def test_LDHAn_parse(self):
         gbasm = GBA_ASM()

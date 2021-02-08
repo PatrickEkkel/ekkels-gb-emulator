@@ -28,7 +28,7 @@ class MMU:
     IO_REGISTER_START      = 0xFF00
     IO_REGISTER_END        = 0xFF7F
 
-    CARTRIDGE_ROM_00_START = 0x000
+    CARTRIDGE_ROM_00_START = 0x0000
     CARTRIDGE_ROM_00_END   = 0x3FFF
 
     CARTRIDGE_ROM_01_START = 0x4000
@@ -39,6 +39,8 @@ class MMU:
 
     OAM_START              = 0xFE00
     OAM_END                = 0xFE9F
+
+    FF00 = 0xEF
 
 
     def __init__(self):
@@ -52,6 +54,11 @@ class MMU:
         self.wram_bank_1 = self.init_memory(MMU.WRAM_BANK_1_START, MMU.WRAM_BANK_1_END)
         self.oam = self.init_memory(MMU.OAM_START, MMU.OAM_END)
         self.unmapped = self.init_memory(0x0,0xFFFF)
+        self.init_io_registers()
+
+
+    def init_io_registers(self):
+        self.io[0xFF00] = MMU.FF00
 
 
     def init_memory(self, start,end):
@@ -90,12 +97,16 @@ class MMU:
         elif self._is_io(address):
             self.io[address] = value
         elif self._is_hram(address):
+            #print('hram write')
             self.hram[address] = value
         elif self._is_wram_bank0(address):
+            #print('wram bank 0')
             self.wram_bank_0[address] = value
         elif self._is_wram_bank1(address):
+            #print('wram bank 1')
             self.wram_bank_1[address] = value
         elif self._is_oam(address):
+            #print('wram bank oam')
             self.oam[address]  = value
         elif self._is_not_usable(address):
             print('not usable')
