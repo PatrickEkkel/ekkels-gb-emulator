@@ -158,10 +158,6 @@ class OpcodeContext:
     def _storereg_to_addr_offset(self, reg):
         value = self.opcode_state.loadreg(reg)    
         address = 0xFF00 + self.opcode_state.selected_address_value
-        #print(("0x{:x}".format(value)))
-        #input('value')
-        #print(("0x{:x}".format(address)))
-        #input('address')       
         self._mmu.write(address, value)
 
     # write to loaded register values memory addres and write the value that is read from memory 

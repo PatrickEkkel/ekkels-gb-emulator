@@ -40,7 +40,7 @@ class MMU:
     OAM_START              = 0xFE00
     OAM_END                = 0xFE9F
 
-    FF00 = 0xEF
+    FF00 = 0xCF
 
 
     def __init__(self):
@@ -113,10 +113,7 @@ class MMU:
         else:
             # just dump all illigal writes in this array, so we can use it for testing
             self.unmapped[address] = value
-            print()
-            print(self.print_hex(address))
-            input('nothing to write')
-
+            
     def _is_not_usable(self, address):
         return address >= MMU.NOT_USABLE_START and address <= MMU.NOT_USABLE_END
 

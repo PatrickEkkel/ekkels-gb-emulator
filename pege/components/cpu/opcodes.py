@@ -84,14 +84,26 @@ def INCn(mmu, cpu, meta, context):
 # 0xF0 and 1 byte unsigned
 # write contents of A into memory address FF00 + n
 
-def LDHAn(mmu, cpu, meta, context):
+def LDH_nn_A(mmu, cpu, meta, context):
     context.load('A').load(addressing_mode=AddressingMode.d8).store('A',AddressingMode.a8)
+
+def LDHAn(mmu, cpu, meta, context):
+    # get 8 bit unsigned parameter
+    cpu.pc += 1
+    n = mmu.read(cpu.pc)
+    # print disassembly info
+
+    # read A register
+    A = cpu.reg.GET_A()
+
+    offset_address = 0xFF00 + n
+    cpu.debugger.print_iv(offset_address)
+    value = mmu.read(offset_address)
+    cpu.reg.SET_A(value)
 
 # length: 2 bytes
 # 0xE0 and 1 byte unsigned
 # write contents of register A to memory address FF00 + n
-
-
 def LDHnA(mmu, cpu, meta):
     opcode = Opcode(meta)
     # get 8 bit unsigned parameter

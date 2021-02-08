@@ -14,8 +14,7 @@ class Debugger:
         self.show_description = False
         self.stop_at = None
         self.stop_at_opcode = None #0xEF
-        self.stop_and_step_at = 0x02A6 #0x29B3
-        #self.stop_and_step_at = 0x0233 #0x29B3
+        self.stop_and_step_at = 0x29a8 #0x29B3
         self.exit_at_breakpoint = False
 
 
