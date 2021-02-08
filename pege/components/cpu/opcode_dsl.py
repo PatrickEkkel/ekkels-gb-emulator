@@ -246,14 +246,18 @@ class OpcodeContext:
             self._set_reg_value(value_a | value_b)
             self._check_zero()
         elif operation == BitwiseOperators.AND:
-            value_a = self._get_select_reg_value()
+            if not transient_load:
+                value_a =  self._get_select_reg_value()
+                #self._select_reg(register)._loadval_from_reg()
+            else:
+                value_a = self.opcode_state.transient_value
+        
             if value is not None:
                 value_b = value
             else:
                 self._select_reg(register)._loadval_from_reg()
                 value_b = self._get_select_reg_value()
             self._set_reg_value(value_a & value_b)
-            #self._check_zero()
         elif operation == BitwiseOperators.CPL:
             value = self._get_select_reg_value()
             self._set_reg_value(value ^ 0xFF)

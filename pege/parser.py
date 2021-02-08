@@ -11,6 +11,8 @@ def encode_8bit_value(value):
         result =  "{:x}".format(value)
     else:
         result =  "{:x}".format(value)
+    if len(result) == 1:
+        result = "0{:x}".format(value)
     return result
 
 def encode_16bit_value(value):

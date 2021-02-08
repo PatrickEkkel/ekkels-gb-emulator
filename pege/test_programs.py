@@ -789,14 +789,19 @@ class ProgramTests(unittest.TestCase):
         gb = self.create_gameboy(bitstream,run=False)
         gb.power_on(skipbios=True,standby=True)
         gb.CPU.reg.SET_AF(0x10E0)
-        gb.CPU.reg.SET_CARRY()
+        for b in bitstream:
+            self.print_hex(b)
 
         gb._run()
+
+        print(gb.CPU.debugger.format_hex(gb.CPU.reg.GET_AF()))
+       
         assert gb.CPU.reg.GET_A() == 0x00
         assert gb.CPU.reg.GET_ZERO() == True
         assert gb.CPU.reg.GET_HALF_CARRY() == True
         assert gb.CPU.reg.GET_SUBSTRACT() == False
         assert gb.CPU.reg.GET_CARRY() == False
+
     # Put value at address HL into A. Increment HL.
     def test_LDI_A_HL_opcode(self):
         gbasm = GBA_ASM()
@@ -809,20 +814,6 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_HL() == 0x8001
         assert gb.CPU.reg.GET_A() == 0x100
-
-    # TODO: finish up
-    #def test_LDHLnn_parse(self):
-    #    gbasm = GBA_ASM()
-    #    test_program = ['LD HL 32', 'LD A C']
-        #test_program = ['LD A C']
-    #    bitstream = gbasm.parse(test_program)
-
-        #for b in bitstream:
-        #    self.print_hex(b)
-
-        #assert bitstream[0] == self._get_instruction('LD rr nn', register='HL')
-        #assert bitstream[1] == 0x32
-        #assert bitstream[2] == self._get_instruction('LD r r', register='A C')
 
 
     def test_LDHAn_opcode(self):

@@ -55,7 +55,11 @@ class MMU:
         self.oam = self.init_memory(MMU.OAM_START, MMU.OAM_END)
         self.unmapped = self.init_memory(0x0,0xFFFF)
         self.init_io_registers()
+        self.components = []
 
+
+    def register_component(self, component):
+        self.components.append(component)
 
     def init_io_registers(self):
         self.io[0xFF00] = MMU.FF00
@@ -89,30 +93,32 @@ class MMU:
         return value & 0xFF
 
     def write(self,address, value):
-        # writing to VRAM
-        if self._is_vram(address):
-            self.vram[address] = value
-        elif self._is_rom(address):
-            print('ignoring rom writes')
-        elif self._is_io(address):
-            self.io[address] = value
-        elif self._is_hram(address):
-            #print('hram write')
-            self.hram[address] = value
-        elif self._is_wram_bank0(address):
-            #print('wram bank 0')
-            self.wram_bank_0[address] = value
-        elif self._is_wram_bank1(address):
-            #print('wram bank 1')
-            self.wram_bank_1[address] = value
-        elif self._is_oam(address):
-            #print('wram bank oam')
-            self.oam[address]  = value
-        elif self._is_not_usable(address):
-            print('not usable')
-        else:
-            # just dump all illigal writes in this array, so we can use it for testing
-            self.unmapped[address] = value
+
+        if not self._handle_write(address, value):
+            # writing to VRAM
+            if self._is_vram(address):
+                self.vram[address] = value
+            elif self._is_rom(address):
+                print('ignoring rom writes')
+            elif self._is_io(address):
+                self.io[address] = value
+            elif self._is_hram(address):
+                #print('hram write')
+                self.hram[address] = value
+            elif self._is_wram_bank0(address):
+                #print('wram bank 0')
+                self.wram_bank_0[address] = value
+            elif self._is_wram_bank1(address):
+                #print('wram bank 1')
+                self.wram_bank_1[address] = value
+            elif self._is_oam(address):
+                #print('wram bank oam')
+                self.oam[address]  = value
+            elif self._is_not_usable(address):
+                print('not usable')
+            else:
+                # just dump all illigal writes in this array, so we can use it for testing
+                self.unmapped[address] = value
             
     def _is_not_usable(self, address):
         return address >= MMU.NOT_USABLE_START and address <= MMU.NOT_USABLE_END
@@ -137,6 +143,24 @@ class MMU:
 
     def _is_hram(self, address):
         return address >= MMU.HRAM_START and address <= MMU.HRAM_END
+    
+    def _handle_read(self, address):
+        result = None
+        for c in self.components:
+            if c.is_in_range(address):
+                result = c.read(address)
+                break
+        
+        return result
+
+    def _handle_write(self, address, value):
+        result = False
+        for c in self.components:
+            if c.is_in_range(address):
+                c.write(address, value)
+                break
+        return result
+        
 
     def read(self, address):
         local_data = None
@@ -152,30 +176,37 @@ class MMU:
         #    local_data = self.bios.data
 
         # is the address within vram?
-        if self._is_rom(address):
-            if self.booted:
-                return self.rom.read(address)
-            elif not self.booted and address >= MMU.BOOTROM_END:
-                return self.rom.read(address)
-            else:
-                return self.bios.read(address)
-        elif self._is_hram(address):
-            return self.hram[address]
-        elif self._is_vram(address):
-            return self.vram[address]
-        elif self._is_io(address):
-            return self.io[address]
-        elif self._is_wram_bank1(address):
-            return self.wram_bank_1[address]
-        elif self._is_wram_bank0(address):
-            return self.wram_bank_0[address]
-        elif self._is_oam(address):
-            return self._is_oam[address]
+
+        value =  self._handle_read(address)
+            
+        if value:
+            return value
         else:
-            # trying to access unmapped memory
-            # just return the garbage array
-            return self.unmapped[address]
-            #return 0x0000
+            if self._is_rom(address):
+                if self.booted:
+                    return self.rom.read(address)
+                elif not self.booted and address >= MMU.BOOTROM_END:
+                    return self.rom.read(address)
+                else:
+                    return self.bios.read(address)
+            elif self._is_hram(address):
+                return self.hram[address]
+            elif self._is_vram(address):
+                return self.vram[address]
+            elif self._is_io(address):
+                return self.io[address]
+            elif self._is_wram_bank1(address):
+                return self.wram_bank_1[address]
+            elif self._is_wram_bank0(address):
+                return self.wram_bank_0[address]
+            elif self._is_oam(address):
+                return self._is_oam[address]
+            else:
+                # trying to access unmapped memory
+                # just return the garbage array
+                return self.unmapped[address]
+        
+                #return 0x0000
 
 
     def _getbyte(self,address, signed=False):

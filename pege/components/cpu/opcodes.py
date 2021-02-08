@@ -193,8 +193,8 @@ def AND_r(mmu, cpu, meta, context):
 
 def AND_nn(mmu, cpu, meta, context):
     r1 = 'A'
-    context.load(r1).load(addressing_mode=AddressingMode.d8).bitwise(
-        r1, operation=BitwiseOperators.AND).store(r1).flags(Z, 0, 1, 0)
+    context.load(r1).transient_store().load(addressing_mode=AddressingMode.d8).bitwise(
+        r1, operation=BitwiseOperators.AND, transient_load=True).store(r1,addressing_mode=AddressingMode.IMPLIED).flags(Z, 0, 1, 0)
 
 
 def LDnA(mmu, cpu):
@@ -409,10 +409,11 @@ def CB(mmu, cpu, meta, context):
         try:
             cpu.debugger.print_opcode(opcode_meta['m'])
             result = instruction(mmu, cpu, meta, context)
-        except:
+        except Exception as e:
+            
             hex = cpu.debugger.format_hex(opcode)
             pc = cpu.debugger.format_hex(cpu.pc)
-            input(f'opcode failed {hex} at {pc}')
+            input(f'opcode failed {hex} at {pc} cause:{e}')
 
     else:
         hex = cpu.debugger.format_hex(opcode)

@@ -3,6 +3,7 @@ from components.cpu.cpu import CPU
 from components.ppu import PPU
 from components.clock import CPUClock
 from components.screen import Screen
+from components.joypad import JoyPad
 from components.mmu import MMU
 class GameBoy:
     CPU_SPEED = 4194304 # 4.1Mhz # 1.04Mhz
@@ -16,6 +17,7 @@ class GameBoy:
         self._clock = CPUClock(GameBoy.CPU_SPEED)
 
         self.CPU = CPU(self.mmu,  self._clock)
+        self.joypad = JoyPad(self.mmu)
         if testmode:
             # just stop at 0x150, so we can test most small programs
             self.CPU.test_mode = True
@@ -27,6 +29,7 @@ class GameBoy:
             self.mmu.disable_bootrom()
             self.CPU.pc = 0x100
             self.CPU.reg.initialize_without_bootrom()
+            
     def _run(self):
         cont = True
         while(cont):
