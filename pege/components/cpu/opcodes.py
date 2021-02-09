@@ -193,8 +193,8 @@ def AND_r(mmu, cpu, meta, context):
 
 def AND_nn(mmu, cpu, meta, context):
     r1 = 'A'
-    context.load(r1).transient_store().load(addressing_mode=AddressingMode.d8).bitwise(
-        r1, operation=BitwiseOperators.AND, transient_load=True).store(r1,addressing_mode=AddressingMode.IMPLIED).flags(Z, 0, 1, 0)
+    context.load(r1, transient_store=True).load(addressing_mode=AddressingMode.d8).bitwise(
+        r1, operation=BitwiseOperators.AND, transient_load=True).store(r1).flags(Z, 0, 1, 0)
 
 
 def LDnA(mmu, cpu):
@@ -265,7 +265,8 @@ def OR_r(mmu, cpu, meta, context):
 
 def RST_nn(mmu, cpu, meta, context):
     r1 = 'PC'
-    context.load(r1).push().set(0x00 + 0x28).store(r1)
+    # go to position 0x28 
+    context.load(r1).push().set(0x00 + 0x27).store(r1)
 
 
 def JP_HL(mmu, cpu, meta, context):
@@ -282,8 +283,13 @@ def SUB_r(mmu, cpu, meta, context):
     r2 = 'A'
     context.load(r2).sub(r1).store(r2).flags(Z, 1, H, C)
 
+def ADD_r_r(mmu, cpu, meta, context):
+    #opcode = cpu.read_opcode()
+    r1 = 'A'
+    r2 = 'A'
+    context.load(r2).add(r1).store(r1).flags(Z, 0, H, C)
 
-def ADD_nn_nn(mmu, cpu, meta, context):
+def ADD_rr_rr(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
     register_operand_1 = {0x19: 'DE'}
     r1 = 'HL'

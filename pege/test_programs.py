@@ -598,7 +598,16 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_HL() == 0x0B
         
-
+    def test_ADD_A_A_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['ADD A A']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0x24)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0x48
+        assert gb.CPU.reg.GET_HALF_CARRY() == False
     def test_ld_e_a(self):
         gbasm = GBA_ASM()
         test_program = ['LD E A']

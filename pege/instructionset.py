@@ -42,11 +42,12 @@ instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XOR_r 
                 {'m': 'RLA'        , 'datatype': ''   , 'opcode': opcodes.RLA      , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'x': 0x17  } },
                 {'m': 'POP rr'     , 'datatype': ''   , 'opcode': opcodes.POP_rr   , 'length': 1, 'cycles': 12,      'jump_instruction': False, 'register_options': {'BC': 0xC1,'HL': 0xE1,'DE': 0xD1} },
                 {'m': 'INC rr'     , 'datatype': ''   , 'opcode': opcodes.INCnn    , 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'HL': 0x23, 'DE': 0x13} },
-                {'m': 'CPL'        , 'datatype': ''   , 'opcode': opcodes.CPL      , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'x': 0x2F}},
-                {'m': 'AND nn'     , 'datatype': ''   , 'opcode': opcodes.AND_nn   , 'length': 2, 'cycles': 8,       'jump_instruction': False, 'register_options': {'x': 0xE6 }},
-                {'m': 'AND r'      , 'datatype': ''   , 'opcode': opcodes.AND_r    , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'C': 0xA1 }},
-                {'m': 'RST nnH'    , 'datatype': ''   , 'opcode': opcodes.RST_nn   , 'length': 1, 'cycles': 16,      'jump_instruction': False, 'register_options': {'28H': 0xEF}},
-                {'m': 'ADD rr rr'  , 'datatype': ''   , 'opcode': opcodes.ADD_nn_nn, 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'HL DE': 0x19}},
+                {'m': 'CPL'        , 'datatype': ''   , 'opcode': opcodes.CPL      , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'x': 0x2F} },
+                {'m': 'AND nn'     , 'datatype': ''   , 'opcode': opcodes.AND_nn   , 'length': 2, 'cycles': 8,       'jump_instruction': False, 'register_options': {'x': 0xE6 } },
+                {'m': 'AND r'      , 'datatype': ''   , 'opcode': opcodes.AND_r    , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'C': 0xA1 } },
+                {'m': 'RST nnH'    , 'datatype': ''   , 'opcode': opcodes.RST_nn   , 'length': 1, 'cycles': 16,      'jump_instruction': False, 'register_options': {'28H': 0xEF} },
+                {'m': 'ADD rr rr'  , 'datatype': ''   , 'opcode': opcodes.ADD_rr_rr, 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'HL DE': 0x19}},
+                {'m': 'ADD r r'    , 'datatype': ''   , 'opcode': opcodes.ADD_r_r  , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'A A': 0x87  } },
                 {'m': 'JP (rr)'    , 'datatype': ''   , 'opcode': opcodes.JP_HL    , 'length': 1, 'cycles': [4,4],       'jump_instruction': True,  'register_options': {'(HL)': 0xE9} }
                ]
 

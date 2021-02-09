@@ -223,8 +223,10 @@ class OpcodeContext:
         value = self._get_select_reg_value()
         half_carry = ((value & 0xF) + (value & 0xf)) & 0x10
         if half_carry:
+            #input('half carry set')
             self._cpu.reg.SET_HALF_CARRY()
         else:
+            #input('half carry not set')
             self._cpu.reg.CLEAR_HALF_CARRY()
 
     def _check_zero(self):
@@ -279,6 +281,7 @@ class OpcodeContext:
             print('bitwise')
             input('not implemented')
 
+        self._set_adressingmode(AddressingMode.IMPLIED)
         return self
     
     def add(self, register=None):
@@ -357,7 +360,7 @@ class OpcodeContext:
         self.opcode_state.transient_value = value_a
         return self
 
-    def load(self, register=None, addressing_mode=AddressingMode.IMPLIED):
+    def load(self, register=None, addressing_mode=AddressingMode.IMPLIED, transient_store=False):
         self._set_adressingmode(addressing_mode)
         if addressing_mode == AddressingMode.d8:
             context = self._loadaddr_from_opcode()
@@ -366,7 +369,10 @@ class OpcodeContext:
         elif addressing_mode == AddressingMode.IMPLIED:
             context = self._select_reg(register)._loadval_from_reg()
 
-        return context
+        if transient_store:
+            return self.transient_store()
+        return self
+        
 
     def set(self, address):
         self._set_reg_value(address)
