@@ -38,6 +38,9 @@ class OpcodeState:
         self.addressing_mode = AddressingMode.IMPLIED
         self.transient_value = None
 
+        self.left_operand = None
+        self.right_operand = None
+
     def storereg(self, register, value):
         if register == 'HL':
             self._cpu.reg.SET_HL(value)
@@ -214,19 +217,25 @@ class OpcodeContext:
         self.opcode_state.selected_register_value = value
 
     def _check_carry(self):
-        pass
+        value_a = self.opcode_state.left_operand
+        value_b = self.opcode_state.right_operand
 
+        carry = (value_a & 0x80) and (value_b & 0x80)
+
+        if carry:
+            self._cpu.reg.SET_CARRY()
+        else:
+            self._cpu.reg.CLEAR_CARRY()
     def _check_substract(self):
         pass
 
     def _check_half_carry(self):
-        value = self._get_select_reg_value()
-        half_carry = ((value & 0xF) + (value & 0xf)) & 0x10
+        value_a = self.opcode_state.left_operand
+        value_b = self.opcode_state.right_operand
+        half_carry = ((value_a & 0xF) + (value_b & 0xf)) & 0x10
         if half_carry:
-            #input('half carry set')
             self._cpu.reg.SET_HALF_CARRY()
         else:
-            #input('half carry not set')
             self._cpu.reg.CLEAR_HALF_CARRY()
 
     def _check_zero(self):
@@ -236,46 +245,43 @@ class OpcodeContext:
         else:
             self._cpu.reg.CLEAR_ZERO()
 
+    def _set_operands(self, left,right):
+        self.opcode_state.left_operand = left
+        self.opcode_state.right_operand = right
+
     def bitwise(self, register=None, operation=None, position=0, value=None,transient_load=False):
-        if operation == BitwiseOperators.OR:
-            if not transient_load:
-                value_a =  self._get_select_reg_value()
+        if not transient_load:
+            value_a =  self._get_select_reg_value()
+            if register:
                 self._select_reg(register)._loadval_from_reg()
-            else:
-                value_a = self.opcode_state.transient_value
-            
-            value_b = self._get_select_reg_value()
-            self._set_reg_value(value_a | value_b)
-            self._check_zero()
-        elif operation == BitwiseOperators.AND:
-            if not transient_load:
-                value_a =  self._get_select_reg_value()
-                #self._select_reg(register)._loadval_from_reg()
-            else:
-                value_a = self.opcode_state.transient_value
-        
-            if value is not None:
+        else:
+            value_a = self.opcode_state.transient_value
+
+        if value is not None:
                 value_b = value
-            else:
+        else:
+            if register:
                 self._select_reg(register)._loadval_from_reg()
                 value_b = self._get_select_reg_value()
+            
+        if operation == BitwiseOperators.OR:
+            value_b = self._get_select_reg_value()
+            self._set_reg_value(value_a | value_b)
+        elif operation == BitwiseOperators.AND:
             self._set_reg_value(value_a & value_b)
+            self._set_operands(value_a, value_b)
         elif operation == BitwiseOperators.CPL:
             value = self._get_select_reg_value()
             self._set_reg_value(value ^ 0xFF)
-            self._cpu.reg.SET_SUBSTRACT()
-            self._cpu.reg.SET_HALF_CARRY()
         elif operation == BitwiseOperators.XOR:
-            value_a = self._get_select_reg_value()
-            self._select_reg(register)._loadval_from_reg()
-            value_b = self._get_select_reg_value()
             self._set_reg_value(value_a ^ value_b)
+            self._set_operands(value_a, value_b)
         elif operation == BitwiseOperators.SHIFT_LEFT:
-            value_a = self._get_select_reg_value()
             self._set_reg_value(value_a << position)
         elif operation == BitwiseOperators.SHIFT_RIGHT:
-            value_a = self._get_select_reg_value()
             self._set_reg_value(value_a >> position)
+        elif operation == BitwiseOperators.NOT:
+            self._set_reg_value(~value_a)
         
         else:
             print('bitwise')
@@ -289,6 +295,7 @@ class OpcodeContext:
         self._select_reg(register)._loadval_from_reg()
         value_b = self._get_select_reg_value()
         self._set_reg_value(value_a + value_b)
+        self._set_operands(value_a, value_b)
         return self
 
     def sub(self, register=None):
@@ -296,13 +303,19 @@ class OpcodeContext:
         self._select_reg(register)._loadval_from_reg()
         value_b = self._get_select_reg_value()
         self._set_reg_value(value_a - value_b)
+        self._set_operands(value_a, value_b)
         return self
 
     def dec(self, register=None):
         if register == None:
             register = self._get_selected_reg()
+        
+        value_a = self._get_select_reg_value()
+        self._select_reg(register)._decreg()
+        value_b = self._get_select_reg_value()
+        self._set_operands(value_a,value_b)
 
-        return self._select_reg(register)._decreg()
+        return self
 
     def flags(self, zero, substract, halfcarry, carry):
         I = '-'
@@ -347,17 +360,23 @@ class OpcodeContext:
     def inc(self, register=None):
         if register == None:
             register = self._get_selected_reg()
-
-        return self._select_reg(register)._increg()
+        value_a = self._get_select_reg_value()
+        self._select_reg(register)._increg()
+        value_b = self._get_select_reg_value()
+        self._set_operands(value_a, value_b)
+        return self
 
     def transient_load(self):
         value_a =  self.opcode_state.transient_value
         self._set_reg_value(value)
         return self
 
-    def transient_store(self):
-        value_a = self._get_select_reg_value()
-        self.opcode_state.transient_value = value_a
+    def transient_store(self, value=None):
+        if value:
+            self.opcode_state.transient_value = value
+        else:
+            value_a = self._get_select_reg_value()
+            self.opcode_state.transient_value = value_a
         return self
 
     def load(self, register=None, addressing_mode=AddressingMode.IMPLIED, transient_store=False):
@@ -373,37 +392,53 @@ class OpcodeContext:
             return self.transient_store()
         return self
         
+    def reset(self, position):
+        value_a = self._get_select_reg_value()
+        value_a = value_a & ~(1 << position)
+        self._set_reg_value(value_a)
+        
+        return self
 
     def set(self, address):
         self._set_reg_value(address)
         return self
 
     def push(self):
-        self._cpu.stack.push(self._get_select_reg_value())
+        if len(self._get_selected_reg()) == 2:
+            self._cpu.stack.push_u16bit(self._get_select_reg_value())    
+        else:
+            self._cpu.stack.push(self._get_select_reg_value())
         return self
 
     def pop(self):
         self._set_reg_value(self._cpu.stack.pop())
         return self
-
-    def store(self, register=None, addressing_mode=None):
+    
+    def store(self, register=None, addressing_mode=None,transient_store=False, value=None):
         
         if addressing_mode != None:
             self._set_adressingmode(addressing_mode)
 
-        if register == None:
-            register = self._get_selected_reg()
-        if self.opcode_state.addressing_mode == AddressingMode.IMPLIED:
-            self._select_reg(register)._storereg()
-        elif self.opcode_state.addressing_mode == AddressingMode.i8:
-            self._select_reg(register)._store_addr_from_opcode_to_addr(register)
-        elif self.opcode_state.addressing_mode == AddressingMode.d8:
-            self._select_reg(register)._storeaddr_to_reg(register)
-        elif self.opcode_state.addressing_mode == AddressingMode.ir16:
-            self._select_reg(register)._storeaddr_to_reg(register)
-        elif self.opcode_state.addressing_mode == AddressingMode.dr16:
-            self._select_reg(register)._storereg_to_addr(register)
-        elif self.opcode_state.addressing_mode == AddressingMode.a8:
-            self._storereg_to_addr_offset(register)
+        if transient_store:
+            if value:
+                self.transient_store(value)
+            else:
+                value_a = self._get_select_reg_value()
+                self.transient_store(value_a)
+        else:
+            if register == None:
+                register = self._get_selected_reg()
+            if self.opcode_state.addressing_mode == AddressingMode.IMPLIED:
+                self._select_reg(register)._storereg()
+            elif self.opcode_state.addressing_mode == AddressingMode.i8:
+                self._select_reg(register)._store_addr_from_opcode_to_addr(register)
+            elif self.opcode_state.addressing_mode == AddressingMode.d8:
+                self._select_reg(register)._storeaddr_to_reg(register)
+            elif self.opcode_state.addressing_mode == AddressingMode.ir16:
+                self._select_reg(register)._storeaddr_to_reg(register)
+            elif self.opcode_state.addressing_mode == AddressingMode.dr16:
+                self._select_reg(register)._storereg_to_addr(register)
+            elif self.opcode_state.addressing_mode == AddressingMode.a8:
+                self._storereg_to_addr_offset(register)
 
         return self

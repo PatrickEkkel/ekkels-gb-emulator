@@ -180,10 +180,13 @@ class Stack:
 
 
     def push_u16bit(self, value):
+        #sp = self.cpu.reg.GET_SP()
         lowbyte = MMU.get_high_byte(value)
         highbyte = MMU.get_low_byte(value)
         self.push(lowbyte)
         self.push(highbyte)
+        #sp -= 1
+        #self.cpu.reg.SET_SP(sp)
 
     def push(self, value):
         sp = self.cpu.reg.GET_SP()

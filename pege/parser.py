@@ -77,7 +77,7 @@ class Opcode(Token):
     def _print_register(self):
         result = ''
         if len(self.register) == 1 and self.register.isnumeric():
-            result = self.register
+            result = 'b'
         if len(self.register) == 1 and (self.register in REGISTERS_8B or self.register in REGISTERS_16B):
             result = 'r'
         elif len(self.register) == 2:
@@ -249,8 +249,11 @@ class GBA_ASM:
                 key = f'{opcode.register} {opcode.address}'
                 self.encoded_program.append(opcode_meta['register_options'][key])
             elif opcode.register and not opcode.register.isnumeric():
-                self.encoded_program.append(opcode_meta['register_options'][opcode.register])     
-            elif opcode.address and 'H' in opcode.address:
+                self.encoded_program.append(opcode_meta['register_options'][opcode.register])
+            elif opcode.address and 'H' in opcode.address and len(opcode.address) == 3:
+                # RST
+                self.encoded_program.append(opcode_meta['register_options'][opcode.address])   
+            elif opcode.address and opcode.address in REGISTERS_8B:
                 self.encoded_program.append(opcode_meta['register_options'][opcode.address])     
             else:
                 self.encoded_program.append(opcode_meta['register_options']['x'])

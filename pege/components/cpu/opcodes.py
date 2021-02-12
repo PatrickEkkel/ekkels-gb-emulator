@@ -266,13 +266,24 @@ def OR_r(mmu, cpu, meta, context):
 def RST_nn(mmu, cpu, meta, context):
     r1 = 'PC'
     # go to position 0x28 
-    context.load(r1).push().set(0x00 + 0x27).store(r1)
+    context.load(r1).inc().push().set(0x00 + 0x27).store(r1)
 
 
 def JP_HL(mmu, cpu, meta, context):
     r1 = 'HL'
     r2 = 'PC'
-    context.load(r1, addressing_mode=AddressingMode.ir16).store(r2)
+    context.load(r1).dec().store(r2)
+
+
+def RES_n_r(mmu, cpu, meta, context):
+    opcode = cpu.read_opcode()
+    registers = {0x87: 'A'}
+    values = {0x87: 0}
+    r1 = registers[opcode]
+    v1 = values[opcode]
+    context.load(r1).reset(v1).store()
+    #context.load(r1, transient_store=True).
+    
 
 
 def SUB_r(mmu, cpu, meta, context):
@@ -313,7 +324,7 @@ def LD_n_n(mmu, cpu, meta, context):
 
 
 def CPL(mmu, cpu, meta, context):
-    context.load('A').bitwise('A', BitwiseOperators.CPL).store('A')
+    context.load('A').bitwise('A', BitwiseOperators.CPL).store('A').flags('-',1,1,'-')
 
 
 def LD_HL_nn(mmu, cpu, meta, context):

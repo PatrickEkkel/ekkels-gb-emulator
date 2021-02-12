@@ -5,7 +5,8 @@ opcode_descriptions = {'LDH r nn': 'LDH A,(n) = put memory address $FF00+n into 
 
 cb_instructions =  [{'m': 'CB', 'datatype': '', 'opcode': opcodes.CB, 'length': 1, 'cycles': 4, 'jump_instruction': False, 'register_options': {'x': 0xCB }, },
                     {'m': 'SWAP r','datatype': '', 'opcode': opcodes.SWAP_r, 'length': 2, 'cycles': 8, 'jump_instruction:':False, 'register_options': {'A': 0x37 } },
-                    {'m': 'BIT 7 r','datatype': '', 'opcode': opcodes.BIT_7_r, 'length': 2, 'cycles': 8, 'jump_instruction': False, 'register_options': {'H': 0x7C } },
+                    {'m': 'BIT b r','datatype': '', 'opcode': opcodes.BIT_7_r, 'length': 2, 'cycles': 8, 'jump_instruction': False, 'register_options': {'H': 0x7C } },
+                    {'m': 'RES b r', 'datatype': '', 'opcode': opcodes.RES_n_r, 'length': 2, 'cycles': 8, 'jump_instruction': False, 'register_options' :{'A': 0x87} },
                     {'m': 'RL r'   , 'datatype': '', 'opcode': opcodes.RLC,  'length': 2, 'cycles': 8, 'jump_instruction': False, 'register_options': {'C': 0x11 } }
  ]
 

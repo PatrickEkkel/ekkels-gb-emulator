@@ -6,6 +6,7 @@ class Debugger:
         self.cpu = cpu
         self.mmu = mmu
         self.show_registers = True
+        self.show_stack = False
         self.show_vram = False
         self.show_opcodes = True
         self.show_cpu_flags = False
@@ -14,7 +15,7 @@ class Debugger:
         self.show_description = False
         self.stop_at = None
         self.stop_at_opcode = None #0xEF
-        self.stop_and_step_at = 0x02FA # 0x29a8 #0x29B3
+        self.stop_and_step_at = 0x2824 # 0x29a8 #0x29B3
         self.exit_at_breakpoint = False
 
 
@@ -37,12 +38,27 @@ class Debugger:
             BC = self.format_hex(self.cpu.reg.GET_BC())
             DE = self.format_hex(self.cpu.reg.GET_DE())
             HL = self.format_hex(self.cpu.reg.GET_HL())
+            SP = self.format_hex(self.cpu.reg.GET_SP())
             print('\n')
             print(f'AF: {AF}')
             print(f'BC: {BC}')
             print(f'DE: {DE}')
             print(f'HL: {HL}')
-
+            print(f'SP: {SP}')
+    def print_stack(self):
+        if self.show_stack:
+            SP = self.cpu.reg.GET_SP()
+            end_of_stack = 0xFFFF
+            print('\n')
+            
+            i = SP
+            while(i < end_of_stack):
+                if self.mmu.read(i) != 0x00 or i == SP:
+                    mem_address = "0x{:x}".format(i)
+                    mem_value = "0x{:x}".format(self.mmu.read(i))
+                    print(f' {mem_address}: {mem_value} ')
+                i += 1
+                
     def print_vram(self):
         if self.show_vram:
             start =  MMU.VRAM_START
@@ -81,6 +97,7 @@ class Debugger:
         if self.stop_and_step_at and pc == self.stop_and_step_at:
             self.step_instruction = True
             self.print_register()
+            self.print_stack()
             self.print_vram()
             input('press enter to continue...')
             return True
@@ -88,6 +105,7 @@ class Debugger:
         elif self.step_instruction or self.stop_at == pc:
             self.print_register()
             self.print_vram()
+            self.print_stack()
             input('press enter to continue...')
             return True
 

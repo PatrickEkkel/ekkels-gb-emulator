@@ -197,6 +197,8 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         print(gb.CPU.debugger.format_hex(gb.CPU.reg.GET_A()))
         assert gb.CPU.reg.GET_A() == 0x10
+        assert gb.CPU.reg.GET_SUBSTRACT() == True
+        assert gb.CPU.reg.GET_HALF_CARRY() == True
 
 
     def test_LD_H_A_opcode(self):
@@ -457,11 +459,20 @@ class ProgramTests(unittest.TestCase):
         bitstream = gbasm.parse(test_program)
         gb = self.create_gameboy(bitstream,run=False)
         gb.power_on(skipbios=True,standby=True)
-        gb.CPU.reg.SET_HL(0x8000)
+        gb.CPU.reg.SET_HL(0x104)
         gb.CPU.reg.SET_DE(0x8080)
-        gb.mmu.write(0x8000,0x104)
         gb._run()
         assert gb.CPU.reg.GET_DE() == 0x8080
+
+    def test_RES_A_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['CB RES 0 A']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0xFF)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0xFE
 
     def test_ld_hl_a(self):
         gbasm = GBA_ASM()

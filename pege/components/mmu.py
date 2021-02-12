@@ -200,7 +200,7 @@ class MMU:
             elif self._is_wram_bank0(address):
                 return self.wram_bank_0[address]
             elif self._is_oam(address):
-                return self._is_oam[address]
+                return self.oam[address]
             else:
                 # trying to access unmapped memory
                 # just return the garbage array
