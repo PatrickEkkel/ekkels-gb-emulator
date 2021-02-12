@@ -388,7 +388,18 @@ class ProgramTests(unittest.TestCase):
         bitstream = gbasm.parse(test_program)
         gb = self.create_gameboy(bitstream)
 
-    def test_INCn_opcode(self):
+    
+    def test_INC_E_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['INC E']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_E(0x01)
+        gb._run()
+        assert gb.CPU.reg.GET_E() == 0x02
+
+    def test_INC_C_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['INC C']
         bitstream = gbasm.parse(test_program)
@@ -811,7 +822,18 @@ class ProgramTests(unittest.TestCase):
 
         assert gb.CPU.reg.GET_DE() == 0x1001
     
-    def test_AND_r_opcode(self):
+    def test_AND_A_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['AND A']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0xFF)
+        gb.CPU.reg.SET_C(0xFF)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0xFF
+
+    def test_AND_C_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['AND C']
         bitstream = gbasm.parse(test_program)

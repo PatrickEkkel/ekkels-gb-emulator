@@ -71,11 +71,11 @@ def INCnn(mmu, cpu, meta, context):
     return result
 
 
-def INCn(mmu, cpu, meta, context):
+def INC_r(mmu, cpu, meta, context):
 
     opcode = cpu.read_opcode()
 
-    registers = {0xC: 'C', 0x04: 'B', 0x24: 'H'}
+    registers = {0xC: 'C', 0x04: 'B', 0x24: 'H',0x1C: 'E'}
     r1 = registers[opcode]
     context.load(r1).inc().store(r1).flags(Z, 0, H, '-')
 
@@ -184,7 +184,7 @@ def LDnn16a(mmu, cpu, meta, context):
 
 def AND_r(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
-    register_operand_1 = {0xA1: 'C'}
+    register_operand_1 = {0xA1: 'C', 0xA7: 'A'}
     r1 = 'A'
     r2 = register_operand_1[opcode]
     context.load(r2).bitwise(
