@@ -1,3 +1,4 @@
+from ..mmu import MMU
 class Opcode:
     def __init__(self, meta, address=None):
         self.mnemonic = meta['m']
@@ -62,6 +63,8 @@ class OpcodeState:
             self._cpu.reg.SET_H(value)
         elif register == 'L':
             self._cpu.reg.SET_L(value)
+        elif register == 'F':
+            self._cpu.reg.SET_F(value)
         else:
             print('store reg')
             input('not implemented')
@@ -81,6 +84,8 @@ class OpcodeState:
             return self._cpu.reg.GET_D()
         elif register == 'E':
             return self._cpu.reg.GET_E()
+        elif register == 'F':
+            return self._cpu.reg.GET_F()
         elif register == 'H':
             return self._cpu.reg.GET_H()
         elif register == 'L':
@@ -113,6 +118,8 @@ class BitwiseOperators:
 class AddressingMode:
     # means 8 bit unsigned data, which are added to $FF00 in certain instructions
     a8 = 8
+    # 16 bit addressing mode
+    a16 = 15
     i8 = 9
     # Direct 8 bit adressing mode pc+1
     d8 = 10
@@ -173,8 +180,12 @@ class OpcodeContext:
     # write the current address value that is stored in the buffer to (reg)
     def _storeaddr_to_reg(self,reg=None):
         value = self.opcode_state.selected_address_value
+        if self.opcode_state.addressing_mode == AddressingMode.a16:
+            value = MMU.get_high_byte(value)
+        
         self.opcode_state.storereg(reg, value)
         return self
+
 
     # load the value from the memory address that is currently in the loaded register value buffer
     def _loadaddr_from_reg(self):
@@ -182,15 +193,26 @@ class OpcodeContext:
         self.opcode_state.selected_address_value = self._mmu.read(self.opcode_state.selected_register_value)
         return self
 
+    # load the address value based on the address that is loaded in address value
+    def _loadaddr_value_to_reg(self):
+        self.opcode_state.selected_address_value = self._mmu.read(self.opcode_state.selected_address_value)
+        self._storeaddr_to_reg(self._get_selected_reg())
+        
     def _loadval_from_reg(self):
         self.opcode_state.load_register_value()
         return self
 
     # read the current position of the program counter as an address value for the current selected register
     def _loadaddr_from_opcode(self, offset=None):
-        self._cpu.pc += 1
-        self.opcode_state.selected_address_key = self._cpu.pc
-        self.opcode_state.selected_address_value = self._mmu.read(self._cpu.pc)
+        if self.opcode_state.addressing_mode == AddressingMode.d8:
+            self._cpu.pc += 1   
+            self.opcode_state.selected_address_key = self._cpu.pc
+            self.opcode_state.selected_address_value = self._mmu.read(self._cpu.pc)
+        elif self.opcode_state.addressing_mode == AddressingMode.a16:
+            self._cpu.pc += 1   
+            self.opcode_state.selected_address_key = self._cpu.pc
+            self.opcode_state.selected_address_value = self._mmu.read_u16(self._cpu.pc)
+            self._cpu.pc += 1
         return self
     # read the current opf the program counter as an address value for currect selected register with offset FF00
     #def _loadaddr_from_opcode_FF00(self):
@@ -383,6 +405,8 @@ class OpcodeContext:
         self._set_adressingmode(addressing_mode)
         if addressing_mode == AddressingMode.d8:
             context = self._loadaddr_from_opcode()
+        elif addressing_mode == AddressingMode.a16:
+            context = self._select_reg(register)._loadaddr_from_opcode()._loadaddr_value_to_reg()
         elif addressing_mode == AddressingMode.ir16:
             context = self._select_reg(register)._loadval_from_reg()._loadaddr_from_reg()
         elif addressing_mode == AddressingMode.IMPLIED:
@@ -396,7 +420,6 @@ class OpcodeContext:
         value_a = self._get_select_reg_value()
         value_a = value_a & ~(1 << position)
         self._set_reg_value(value_a)
-        
         return self
 
     def set(self, address):
@@ -435,6 +458,8 @@ class OpcodeContext:
             elif self.opcode_state.addressing_mode == AddressingMode.d8:
                 self._select_reg(register)._storeaddr_to_reg(register)
             elif self.opcode_state.addressing_mode == AddressingMode.ir16:
+                self._select_reg(register)._storeaddr_to_reg(register)
+            elif self.opcode_state.addressing_mode == AddressingMode.a16:
                 self._select_reg(register)._storeaddr_to_reg(register)
             elif self.opcode_state.addressing_mode == AddressingMode.dr16:
                 self._select_reg(register)._storereg_to_addr(register)

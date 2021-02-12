@@ -313,6 +313,26 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_A() == 0x10
 
+    def test_LD_A_nnnn_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD A DF7F']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.mmu.write(0xDF7F,0xFFAA)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0xFF
+
+    def test_LD_DEnn_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD (DE) 32']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_DE(0x8000)
+        gb._run()
+        assert gb.mmu.read(0x8000) == 0x32
+
     def test_LDHLnn_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['LD (HL) 32']

@@ -238,8 +238,8 @@ def POP_rr(mmu, cpu, meta, context):
 
 def PUSH_rr(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
-    register_operand_r1 = {0xC5: 'B', 0xE5: 'H', 0xD5: 'D'}
-    register_operand_r2 = {0xC5: 'C', 0xE5: 'L', 0xD5: 'E'}
+    register_operand_r1 = {0xC5: 'B', 0xE5: 'H', 0xD5: 'D', 0xF5: 'A'}
+    register_operand_r2 = {0xC5: 'C', 0xE5: 'L', 0xD5: 'E', 0xF5: 'F'}
 
     r1 = register_operand_r1[opcode]
     r2 = register_operand_r2[opcode]
@@ -282,8 +282,6 @@ def RES_n_r(mmu, cpu, meta, context):
     r1 = registers[opcode]
     v1 = values[opcode]
     context.load(r1).reset(v1).store()
-    #context.load(r1, transient_store=True).
-    
 
 
 def SUB_r(mmu, cpu, meta, context):
@@ -310,10 +308,7 @@ def ADD_rr_rr(mmu, cpu, meta, context):
 
 def LD_n_n(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
-    #input('upper param: ' + cpu.debugger.format_hex(upper_param))
-    #input('lower param: ' + cpu.debugger.format_hex(lower_param))
-    # input('blargh')
-
+   
     register_operand_1 = {0x47: 'B', 0x4F: 'C', 0x67: 'H', 0x57: 'D',
                           0x7C: 'A', 0x7B: 'A', 0x78: 'A', 0x79: 'A', 0x5F: 'E'}
     register_operand_2 = {0x47: 'A', 0x4F: 'A', 0x67: 'A', 0x57: 'A',
@@ -327,8 +322,12 @@ def CPL(mmu, cpu, meta, context):
     context.load('A').bitwise('A', BitwiseOperators.CPL).store('A').flags('-',1,1,'-')
 
 
-def LD_HL_nn(mmu, cpu, meta, context):
-    context.load('HL').load(addressing_mode=AddressingMode.d8).store(addressing_mode=AddressingMode.i8)
+def LD_rr_nn(mmu, cpu, meta, context):
+    opcode = cpu.read_opcode()
+
+    registers = {0x12: 'DE',0x36: 'HL'}
+    r1 = registers[opcode]
+    context.load(r1).load(addressing_mode=AddressingMode.d8).store(addressing_mode=AddressingMode.i8)
 
 
 # length: 3 bytes
@@ -349,6 +348,8 @@ def LDnn16d(mmu, cpu, meta, context):
 
     cpu.pc += 1
 
+def LD_r_nnnn(mmu, cpu, meta, context):
+    context.load('A', addressing_mode=AddressingMode.a16).store('A')
 
 def LDHL8A(mmu, cpu, meta, context):
     context.load('HL').store('A', AddressingMode.dr16)
