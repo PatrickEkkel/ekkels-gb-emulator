@@ -274,6 +274,9 @@ def JP_HL(mmu, cpu, meta, context):
     r2 = 'PC'
     context.load(r1).dec().store(r2)
 
+def JP_Z_nnnn(mmu, cpu, meta, context):
+    r1 = 'PC'
+    context.load(r1,addressing_mode=AddressingMode.d16).branch(Z).store(r1)
 
 def RES_n_r(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()

@@ -607,6 +607,30 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_L() == 0x80
 
+    def test_JP_Z_nnnn_opcode_zero_flag(self):
+        gbasm = GBA_ASM()
+        # skip over 0x0104 0x0105
+        test_program = ['JPZ 0105','LD A 80 ','NOP','CB SWAP A']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_ZERO()
+        gb.CPU.reg.SET_A(0x20)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0x02
+
+    def test_JP_Z_nnnn_opcode_non_zero_flag(self):
+        gbasm = GBA_ASM()
+        # don't skip over 0x0104 0x0105
+        test_program = ['JPZ 0105','LD A 80 ','NOP','CB SWAP A']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.CLEAR_ZERO()
+        gb.CPU.reg.SET_A(0x20)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0x08
+        
     def test_LD_D_d8_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['LD D 80']
