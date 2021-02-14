@@ -15,6 +15,9 @@ def NOP(mmu, cpu, meta, context):
     opcode = Opcode(meta)
 
 
+def DEC_HL(mmu, cpu, meta, context):
+    r1 = 'HL'
+    context.load(r1,AddressingMode.ir16).dec().store()
 def DEC_rr(mmu, cpu, meta, context):
     upper_param = cpu.read_upper_opcode_parameter()
     operand_mapping = {0x00: 'BC'}
@@ -33,6 +36,9 @@ def DEC_r(mmu, cpu, meta, context):
     r1 = registers[opcode]
     context.load(r1).dec().store(r1).flags(Z, 1, H, '-')
 
+def RET_Z(mmu, cpu, meta, context):
+    r1 = 'PC'
+    context.pop().store(transient_store=True).pop().merge().branch(Z).store(r1)
 
 def RET(mmu, cpu, meta, context):
     val1 = cpu.stack.pop()
@@ -75,7 +81,7 @@ def INC_r(mmu, cpu, meta, context):
 
     opcode = cpu.read_opcode()
 
-    registers = {0xC: 'C', 0x04: 'B', 0x24: 'H',0x1C: 'E'}
+    registers = {0xC: 'C', 0x04: 'B', 0x24: 'H',0x1C: 'E', 0x2C: 'L'}
     r1 = registers[opcode]
     context.load(r1).inc().store(r1).flags(Z, 0, H, '-')
 
@@ -128,8 +134,8 @@ def LDHnA(mmu, cpu, meta):
 
 def LD_r_i16(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
-    register_operand_1 = {0x1A: 'DE', 0x5E: 'HL', 0x56: 'HL'}
-    register_operand_2 = {0x1A: 'A', 0x5E: 'E', 0x56: 'D'}
+    register_operand_1 = {0x1A: 'DE', 0x5E: 'HL', 0x56: 'HL', 0x7E: 'HL'}
+    register_operand_2 = {0x1A: 'A', 0x5E: 'E', 0x56: 'D', 0x7E: 'A'}
     r1 = register_operand_1[opcode]
     r2 = register_operand_2[opcode]
     context.load(r1, addressing_mode=AddressingMode.ir16).store(r2)
@@ -228,12 +234,20 @@ def LDnA(mmu, cpu):
 
 def POP_rr(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
-    register_operand_r1 = {0xC1: 'B', 0xE1: 'H', 0xD1: 'D'}
-    register_operand_r2 = {0xC1: 'C', 0xE1: 'L', 0xD1: 'E'}
+    register_operand_r1 = {0xC1: 'B', 0xE1: 'H', 0xD1: 'D',0xF1: 'A'}
+    register_operand_r2 = {0xC1: 'C', 0xE1: 'L', 0xD1: 'E',0xF1: 'F'}
 
     r1 = register_operand_r1[opcode]
     r2 = register_operand_r2[opcode]
     context.pop().store(r2).pop().store(r1)
+
+# special ekkel sauice opcode that we can use in our unit testing to clear all flags and still use the parser
+def CLRFL(mmu, cpu, meta, context):
+    context.flags(0,0,0,0)
+
+# special ekkel sauice opcode that we can use in our unit testing to set all flags and still use the parser
+def SETFL(mmu, cpu, meta, context):
+    context.flags(1,1,1,1)
 
 
 def PUSH_rr(mmu, cpu, meta, context):

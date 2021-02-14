@@ -45,6 +45,7 @@ class Debugger:
             print(f'DE: {DE}')
             print(f'HL: {HL}')
             print(f'SP: {SP}')
+            
     def print_stack(self):
         if self.show_stack:
             SP = self.cpu.reg.GET_SP()

@@ -145,8 +145,6 @@ class OpcodeContext:
         self.opcode_state = OpcodeState(cpu)
         self.opcode = Opcode(self._meta)
 
-
-
     def _decreg(self, register=None):
         self.opcode_state.selected_register_value -= 1
         return self
@@ -457,7 +455,14 @@ class OpcodeContext:
     def pop(self):
         self._set_reg_value(self._cpu.stack.pop())
         return self
-    
+
+    # take two 8 bit values and concatinate them into one  16 bit value
+    def merge(self):
+        # we assume that you are using the transient_value here, because it is the only way to put 2 values in the buffer
+        value_b = self.opcode_state.transient_value
+        value_a = self._get_select_reg_value()
+        self._set_reg_value((value_a << 8) | value_b)
+        return self
     def store(self, register=None, addressing_mode=None,transient_store=False, value=None):
         if self.opcode_state.conditionial == None or self.opcode_state.conditionial:
             if addressing_mode != None:
@@ -488,5 +493,7 @@ class OpcodeContext:
                     self._select_reg(register)._storereg_to_addr(register)
                 elif self.opcode_state.addressing_mode == AddressingMode.a8:
                     self._storereg_to_addr_offset(register)
+                else:
+                    input('no addressing mode found')
 
         return self

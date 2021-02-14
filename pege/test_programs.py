@@ -464,10 +464,21 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_HL() == 0xAFBF
 
+    def test_push_pop_af_opcode(self):
+        gbasm = GBA_ASM()
+        #test_program = ['LD AF AFBF', 'PUSH AF', 'LD AF 0000','POP AF']
+        test_program = ['PUSH AF','LD A 00','CLRFL','POP AF']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0x10)
+        gb.CPU.reg.SET_F(0x20)
+        
+        gb._run()
+        assert gb.CPU.reg.GET_AF() == 0x1020
 
     def test_push_pop_de_opcode(self):
         gbasm = GBA_ASM()
-        #test_program = ['LD DE AFBF', 'PUSH DE', 'LD DE 0000','POP DE']
         test_program = ['LD DE AFBF', 'PUSH DE', 'LD DE 0000','POP DE']
         bitstream = gbasm.parse(test_program)
         gb = self.create_gameboy(bitstream,run=False)
@@ -484,6 +495,19 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_BC() == 0xAFBF
 
+
+    def test_dec_hl_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['DEC (HL)']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_HL(0x8000)
+        gb.mmu.write(0x8000,0xFFFF)
+        gb._run()
+        gb.mmu.read(0x8000) == 0xFFFE
+
+        
     def test_jp_hl_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['JP (HL)','LD DE 1234']
@@ -562,6 +586,18 @@ class ProgramTests(unittest.TestCase):
 
         assert gb.CPU.reg.GET_A() == 0xFA
 
+    def test_ld_a_hl_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD A (HL)']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_HL(0x8000)
+        gb.mmu.write(0x8000,0xFA)
+        gb._run()
+        
+        assert gb.CPU.reg.GET_A() == 0xFA
+
     def test_LD_E_d8_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['LD E 80']
@@ -597,6 +633,34 @@ class ProgramTests(unittest.TestCase):
         gb.power_on(skipbios=True,standby=True)
         gb._run()
         assert gb.CPU.reg.GET_A() == 0x80
+
+    def test_RETZ_opcode_non_zero(self):
+        gbasm = GBA_ASM()
+        test_program = ['RETZ','LD A 10','NOP']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0x20)
+        gb.CPU.reg.CLEAR_ZERO()
+        gb.CPU.stack.push_u16bit(0x0110)
+        #for b in bitstream:
+        #    self.print_hex(b)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0x10
+
+    def test_RETZ_opcode_with_zero(self):
+        gbasm = GBA_ASM()
+        test_program = ['RETZ','LD A 10','NOP']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0x20)
+        gb.CPU.reg.SET_ZERO()
+        gb.CPU.stack.push_u16bit(0x0110)
+        #for b in bitstream:
+        #    self.print_hex(b)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0x20
 
     def test_LD_L_d8_opcode(self):
         gbasm = GBA_ASM()
@@ -735,6 +799,18 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_HL() == 0x8001
         assert gb.mmu.read(0x8000) == 0x10
+
+    def test_INC_L_opcode(self):
+        gbasm = GBA_ASM()
+        test_program  = ['INC L']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_L(0x02)
+        gb.CPU.reg.SET_SUBSTRACT()
+        gb._run()
+        assert gb.CPU.reg.GET_L() == 0x03
+        assert gb.CPU.reg.GET_SUBSTRACT() == False
 
     def test_INC_B_opcode(self):
         gbasm = GBA_ASM()
