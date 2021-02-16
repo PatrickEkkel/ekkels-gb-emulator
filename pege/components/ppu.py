@@ -1,5 +1,6 @@
 import time
 from .mmu import MMU
+from .cpu.interrupt_handler import InterruptHandler
 from .fetcher import Fetcher
 from .screen import Screen
 
@@ -68,6 +69,9 @@ class PPU:
         self.tile_index = 0
 
     def _do_vblank(self):
+        interrupt_flags = self._mmu.read(InterruptHandler.IF)
+        interrupt_flags = interrupt_flags | 0x0040
+        self._mmu.write(InterruptHandler.IF, interrupt_flags)
         self.current_mode = PPU.VBLANK
         self._increment_ly()
 

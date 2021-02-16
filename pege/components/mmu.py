@@ -169,14 +169,6 @@ class MMU:
         # this implies that we are not trying to read addresses from the bootrom
         # everything above 0x104 to 7FFF is 'cartrdige ROM' space, switchable via MBC if available
 
-
-        #if self.bootrom_loaded:
-        #    local_data = self.data
-        #else:
-        #    local_data = self.bios.data
-
-        # is the address within vram?
-
         value =  self._handle_read(address)
             
         if value:

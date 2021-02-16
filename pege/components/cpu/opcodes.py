@@ -50,11 +50,11 @@ def RET(mmu, cpu, meta, context):
 
 
 def DI(mmu, cpu, meta, context):
-    cpu.interrupts_enabled = False
+    context.set(0xFFFF).store(value=0x0000)
 
 
 def EI(mmu, cpu, meta, context):
-    cpu.interrupts_enabled = True
+    context.set(0xFFFF).store(value=0xFFFF)
 
 
 def INCnn(mmu, cpu, meta, context):

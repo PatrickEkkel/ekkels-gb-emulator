@@ -15,6 +15,7 @@ https://keisan.casio.com/exec/system/14495408631029
 https://github.com/jansegre/gameboy/blob/master/spec/gbspec.txt
 https://gbdev.io/pandocs/#joypad-input
 http://www.emulatronia.com/doctec/consolas/gameboy/gameboy.txt
+https://gbdev.gg8.se/wiki/articles/Interrupts#FFFF_-_IE_-_Interrupt_Enable_.28R.2FW.29
 # test program to verify CPU emulation
 
 https://github.com/retrio/gb-test-roms/tree/master/cpu_instrs

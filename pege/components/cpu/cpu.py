@@ -1,6 +1,7 @@
 from ..mmu import MMU
 from ..debugger import Debugger
 from .opcode_dsl import OpcodeContext
+from .interrupt_handler import InterruptHandler
 
 import instructionset
 from instructionset import opcode_descriptions
@@ -208,10 +209,10 @@ class CPU:
         self._mmu = mmu
         self._clock = clock
         self.disable_cpu = False
-        self.interrupts_enabled = True
         self.test_mode = False
         self.stop_at = None
         self.stack = Stack(self, mmu)
+        self.interrupt_handler = InterruptHandler(mmu, self)
         self.reg = Registers()
         self.debugger = Debugger(self, mmu)
         self.opcodes = instructionset.create_opcode_map('opcode')
@@ -223,9 +224,6 @@ class CPU:
         self.opcodes[0x20] = opcodes.JRNZn
         self.opcodes[0x28] = opcodes.JRZn
         self.opcodes[0x06] = opcodes.LD_r_nn
-        #self.cb_opcodes[0x7c] = opcodes.BIT7H
-        #self.cb_opcodes[0x11] = opcodes.RLC
-
 
     def read_opcode(self):
         # PUT CPU in execute NOP forever, very handy when working on GPU
@@ -243,7 +241,10 @@ class CPU:
     def step(self):
         if self.test_mode and self.pc == self.stop_at:
             return False
+        
+        # handle interrupts 
 
+        self.interrupt_handler.step()
         if not self._clock.wait():
             success = False
             opcode = self.read_opcode()
@@ -275,12 +276,8 @@ class CPU:
                     print(f'Opcode failed {hex} at {hex_pc}')
                     success = False
                 else:
-                    if cycle:
                         self._clock.update(cycle)
                         success = True
-                    else:
-                        print(f'Old style opcode detected. {hex}')
-                        success = False
             else:
                 print(f'Unknown opcode {hex} at {hex_pc}')
             self.pc += 1

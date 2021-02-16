@@ -748,21 +748,6 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_E() == 0xFA
 
-    #def test_JRZ_nn(self):
-    #    gbasm = GBA_ASM()
-    #    test_program = ['JRZ jumphere:','NOP','INC C','NOP','jumphere:','INC C','labeltje:','INC C','JRZ labeltje:']
-    #    bitstream = gbasm.parse(test_program)
-
-    #    for b in bitstream:
-    #        self.print_hex(b)
-    #    gb = self.create_gameboy(bitstream,run=False)
-    #    gb.power_on(skipbios=True,standby=True)
-    #    gb.CPU.reg.SET_C(0x1000)
-    #    gb.CPU.reg.SET_ZERO()
-    #    gb._run()
-    #    assert True
-        #assert gb.CPU.reg.GET_C() == 0x1002
-
     def test_CALLnn_opcode(self):
         gbasm = GBA_ASM()
 
@@ -785,7 +770,27 @@ class ProgramTests(unittest.TestCase):
         assert bitstream[3] == 0x0C
         assert bitstream[4] == 0x04
 
+    
+    def test_EI_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['EI']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.mmu.write(0xFFFF,0x0000)
+        gb._run()
+        assert gb.mmu.read(0xFFFF) == 0xFFFF
 
+    def test_DI_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['DI']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.mmu.write(0xFFFF,0xFFFF)
+        gb._run()
+        assert gb.mmu.read(0xFFFF) == 0x0000
+        
     # Put A into memory address HL. Increment HL.
     def test_LDI_HL_A_opcode(self):
         gbasm = GBA_ASM()
