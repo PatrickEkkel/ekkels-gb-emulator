@@ -12,7 +12,7 @@ class InterruptHandler(Component):
         super().__init__(mmu)
         self._mmu = mmu
         self._cpu = cpu
-        self.mapping = {InterruptHandler.IF: 0xFF00, InterruptHandler.IE: 0xFFFF}
+        self.mapping = {InterruptHandler.IF: 0xFF00, InterruptHandler.IE: 0xFFE1}
     def _format_hex(self, opcode):
         return ("0x{:x}".format(opcode))
 

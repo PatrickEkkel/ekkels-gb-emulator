@@ -648,6 +648,20 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_A() == 0x10
 
+    def test_RETNZ_opcode_non_zero(self):
+        gbasm = GBA_ASM()
+        test_program = ['RETNZ','LD A 10','NOP']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0x20)
+        gb.CPU.reg.SET_ZERO()
+        gb.CPU.stack.push_u16bit(0x0110)
+        #for b in bitstream:
+        #    self.print_hex(b)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0x10
+
     def test_RETZ_opcode_with_zero(self):
         gbasm = GBA_ASM()
         test_program = ['RETZ','LD A 10','NOP']

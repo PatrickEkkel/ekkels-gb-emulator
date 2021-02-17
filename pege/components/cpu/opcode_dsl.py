@@ -274,6 +274,12 @@ class OpcodeContext:
         self.opcode_state.left_operand = left
         self.opcode_state.right_operand = right
 
+    def _conditional_operand(self, value, invert):
+        if invert:
+            self.opcode_state.conditionial = not value
+        else:
+            self.opcode_state.conditionial = value
+
     def bitwise(self, register=None, operation=None, position=0, value=None,transient_load=False):
         if not transient_load:
             value_a =  self._get_select_reg_value()
@@ -342,7 +348,7 @@ class OpcodeContext:
 
         return self
     
-    def branch(self, flag):
+    def branch(self, flag, invert=False):
         I = '-'
         E = 0
         S = 1
@@ -351,16 +357,20 @@ class OpcodeContext:
         H = 4
         C = 5
         if flag == Z:
-            self.opcode_state.conditionial = self._cpu.reg.GET_ZERO()
+            #self.opcode_state.conditionial = self._cpu.reg.GET_ZERO()
+            self._conditional_operand(self._cpu.reg.GET_ZERO(), invert)
         elif flag == N:
-            self.opcode_state.conditionial = self._cpu.reg.GET_SUBSTRACT()
+            self._conditional_operand(self._cpu.reg.GET_SUBSTRACT(), invert)
+            #self.opcode_state.conditionial = self._cpu.reg.GET_SUBSTRACT()
         elif flag == H:
-            self.opcode_state.conditionial = self._cpu.reg.GET_HALF_CARRY()
+            self._conditional_operand(self._cpu.reg.GET_HALF_CARRY(), invert)
+            #self.opcode_state.conditionial = self._cpu.reg.GET_HALF_CARRY()
         elif flag == C:
-            self.opcode_state.conditionial = self._cpu.reg.GET_CARRY()
+            self._conditional_operand(self._cpu.reg.GET_CARRY(), invert)
+            #self.opcode_state.conditionial = self._cpu.reg.GET_CARRY()
         return self
-        
 
+    
     def flags(self, zero, substract, halfcarry, carry):
         I = '-'
         E = 0

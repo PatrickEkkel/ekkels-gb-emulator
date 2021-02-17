@@ -40,6 +40,10 @@ def RET_Z(mmu, cpu, meta, context):
     r1 = 'PC'
     context.pop().store(transient_store=True).pop().merge().branch(Z).store(r1)
 
+def RET_NZ(mmu, cpu, meta, context):
+    r1 = 'PC'
+    context.pop().store(transient_store=True).pop().merge().branch(Z,invert=True).store(r1)
+
 def RET(mmu, cpu, meta, context):
     val1 = cpu.stack.pop()
     val2 = cpu.stack.pop()
