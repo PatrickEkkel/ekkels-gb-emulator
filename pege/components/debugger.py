@@ -8,15 +8,17 @@ class Debugger:
         self.show_registers = True
         self.show_stack = False
         self.show_vram = False
-        self.show_opcodes = True
+        self.show_opcodes = False
         self.show_cpu_flags = False
         self.show_program_counter = True
+        self.show_memory_address = None # 0xFF40
+        self.break_on_memory_value = None #0x91
         self.step_instruction = False
         self.show_description = False
         self.stop_at = None
         self.stop_at_opcode = None #0xEF
-        self.stop_and_step_at = 0x028F
-        self.stop_and_step_at = 0x01d5 # 0x2824 # 0x29a8 #0x29B3
+        self.stop_and_step_at = None
+        self.stop_and_step_at = None # 0x66 # 0x2824 # 0x29a8 #0x29B3
         self.exit_at_breakpoint = False
 
 
@@ -60,6 +62,14 @@ class Debugger:
                     mem_value = "0x{:x}".format(self.mmu.read(i))
                     print(f' {mem_address}: {mem_value} ')
                 i += 1
+    
+    def print_memory_address(self):
+        if self.show_memory_address:
+            memory_address = "0x{:x}".format(self.show_memory_address)
+            memory_value = "0x{:x}".format(self.mmu.read(self.show_memory_address))
+            print(f'Memory address {memory_address}: {memory_value} ')
+
+
                 
     def print_vram(self):
         if self.show_vram:
@@ -101,6 +111,7 @@ class Debugger:
             self.print_register()
             self.print_stack()
             self.print_vram()
+            self.print_memory_address()
             input('press enter to continue...')
             return True
 
@@ -108,10 +119,18 @@ class Debugger:
             self.print_register()
             self.print_vram()
             self.print_stack()
+            self.print_memory_address()
             input('press enter to continue...')
             return True
 
         elif self.stop_at_opcode == opcode:
             self.print_register()
+            self.print_memory_address()
+            input('press enter to continue...')
+        elif self.break_on_memory_value and self.mmu.read(self.show_memory_address) == self.break_on_memory_value:
+            self.print_register()
+            self.print_vram()
+            self.print_stack()
+            self.print_memory_address()
             input('press enter to continue...')
             return True

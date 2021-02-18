@@ -5,6 +5,7 @@ from components.clock import CPUClock
 from components.screen import Screen
 from components.joypad import JoyPad
 from components.mmu import MMU
+from memorymap import *
 class GameBoy:
     CPU_SPEED = 4194304 # 4.1Mhz # 1.04Mhz
     def __init__(self, cartridge,testmode=False):
@@ -25,6 +26,8 @@ class GameBoy:
         self.PPU = PPU(self.mmu, self.screen, self._clock)
 
     def _init(self, skipbios):
+        # disable interrupts
+        self.mmu.write(IE_REGISTER,0x0000)
         if skipbios:
             self.mmu.disable_bootrom()
             self.CPU.pc = 0x100

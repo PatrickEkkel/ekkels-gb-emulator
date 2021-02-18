@@ -10,6 +10,10 @@ class Fetcher:
     READ_DATA_1 = 2
     PUSH_PIXELS = 3
 
+    LY_REGISTER = 0xFF44
+    LCDC_REGISTER = 0xFF40
+
+
 
     def __init__(self, mmu, ppu):
         self._mmu = mmu
@@ -46,14 +50,19 @@ class Fetcher:
 
 
     def _read_tile(self):
-        LY = self.ppu.get_LY()
+        LY = self._getLY()
+        #LY = self.ppu.get_LY()
         current_offset = self.offset + self.column
         tile_id = self._mmu.read(current_offset)
         self.tile_address = self.tilemap_ram + (tile_id * 16)
 
+    def _getLY(self):
+        return self._mmu.read(Fetcher.LY_REGISTER)
+
     def _read_data_0(self):
         address = self.tile_address
-        offset = (self.ppu.get_LY() % 8)
+        LY = self._getLY()
+        offset = (LY % 8)
         offset += offset
         tile_row = address + offset
         b = tile_row

@@ -5,9 +5,15 @@ class Clock:
         self._clock = 0
         self._current = 0
         self._speed = speed
+        self.debug = True
 
     def tick(self):
         if self._clock == self._speed:
+            # we need to carry ticks over to the new cycle
+            if self.wait():
+                self._current = self._current - self._clock
+            else:
+                self._current = 0     
             self._clock = 0
         self._clock += 1
 

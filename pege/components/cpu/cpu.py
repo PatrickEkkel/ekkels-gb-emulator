@@ -172,13 +172,11 @@ class Registers:
         self.SET_HL(0x014D)
         self.SET_SP(0xFFFE)
 
-
 class Stack:
 
     def __init__(self, cpu, mmu):
         self.mmu = mmu
         self.cpu = cpu
-
 
     def push_u16bit(self, value):
         #sp = self.cpu.reg.GET_SP()
@@ -276,8 +274,8 @@ class CPU:
                     print(f'Opcode failed {hex} at {hex_pc}')
                     success = False
                 else:
-                        self._clock.update(cycle)
-                        success = True
+                    self._clock.update(cycle)
+                success = True
             else:
                 print(f'Unknown opcode {hex} at {hex_pc}')
             self.pc += 1

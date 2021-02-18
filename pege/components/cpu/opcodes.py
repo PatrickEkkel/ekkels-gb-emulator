@@ -1,4 +1,5 @@
 import bitwise_functions
+import time
 from components.cpu.opcode_dsl import OpcodeContext, BitwiseOperators, AddressingMode, Opcode
 from ..mmu import MMU
 
@@ -157,6 +158,7 @@ def LDCA(mmu, cpu, meta, context):
 
 
 def CPn(mmu, cpu, meta, context):
+ 
     cpu.pc += 1
     n = mmu.read(cpu.pc)
     A = cpu.reg.GET_A()
@@ -489,15 +491,21 @@ def JPnn(mmu, cpu, meta, context):
 
 def JRNZn(mmu, cpu, meta, context):
     pc = cpu.pc + 1
+    cpu.pc += 1
     val = mmu.read_s8(pc)
     cpu.debugger.print_iv(val)
     jump_address = pc
+    
     if not cpu.reg.GET_ZERO():
         jump_address += val
         cpu.pc = jump_address
-    else:
-        cpu.pc += 1
+    #else:
+    #    if cpu.pc == 0x69:
+    #        input('dikke jump')
+    # cpu.pc += 1
 
+
+    
 # length: 3 bytes
 # 0xCD
 # pushes the PC to the stack and jump to specified 16 bit operand

@@ -40,7 +40,7 @@ class MMU:
     OAM_START              = 0xFE00
     OAM_END                = 0xFE9F
 
-    FF00 = 0xCF
+    #FF00 = 0xCF
 
 
     def __init__(self):
@@ -54,15 +54,15 @@ class MMU:
         self.wram_bank_1 = self.init_memory(MMU.WRAM_BANK_1_START, MMU.WRAM_BANK_1_END)
         self.oam = self.init_memory(MMU.OAM_START, MMU.OAM_END)
         self.unmapped = self.init_memory(0x0,0xFFFF)
-        self.init_io_registers()
+        #self.init_io_registers()
         self.components = []
 
 
     def register_component(self, component):
         self.components.append(component)
 
-    def init_io_registers(self):
-        self.io[0xFF00] = MMU.FF00
+    #def init_io_registers(self):
+    #    self.io[0xFF00] = MMU.FF00
 
 
     def init_memory(self, start,end):
@@ -94,6 +94,8 @@ class MMU:
 
     def write(self,address, value):
 
+        if address == 0xFFB6:
+            input('start DMA')
         if not self._handle_write(address, value):
             # writing to VRAM
             if self._is_vram(address):

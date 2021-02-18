@@ -1,8 +1,8 @@
+from memorymap import *
 from .component import Component
 
 class JoyPad(Component):
-    JOYPAD_REGISTER = 0xFF00
-
+    
     JOYPAD_DIRECTIONS = 0xCF
     JOYPAD_BUTTONS = 0xEF
     P15 = 0x20
@@ -37,5 +37,5 @@ class JoyPad(Component):
         
         
     def is_in_range(self, address):
-        return JoyPad.JOYPAD_REGISTER == address
+        return JP_REGISTER == address
             
