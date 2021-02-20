@@ -482,12 +482,9 @@ def JRZn(mmu, cpu, meta, context):
         cpu.pc = jump_address
 
 
-def JPnn(mmu, cpu, meta, context):
-    cpu.pc += 1
-    nn = mmu.read_u16(cpu.pc)
-    cpu.debugger.print_iv(nn)
-    cpu.pc = nn - 1
-
+def JP_nnnn(mmu, cpu, meta, context):
+    r1 = 'PC'
+    context.load(r1, addressing_mode=AddressingMode.d16).store(r1).load(r1).dec().store(r1)
 
 def JRNZn(mmu, cpu, meta, context):
     pc = cpu.pc + 1
@@ -499,10 +496,7 @@ def JRNZn(mmu, cpu, meta, context):
     if not cpu.reg.GET_ZERO():
         jump_address += val
         cpu.pc = jump_address
-    #else:
-    #    if cpu.pc == 0x69:
-    #        input('dikke jump')
-    # cpu.pc += 1
+    
 
 
     
