@@ -126,12 +126,6 @@ class PPU(Component):
     
     def write(self, address, value):
         self.mapping[address] = value
-        #if(value == 0):
-        #    input('LY reset')
-        #    print(self.mapping[address])
-        #elif (value == 144):
-        #    input('Vblank moment')
-        #    print(self.mapping[address])
 
     def is_in_range(self, address):
         return address == LCDC_REGISTER or address == LY_REGISTER

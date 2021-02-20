@@ -18,7 +18,8 @@ class Clock:
         self._clock += 1
 
     def wait(self):
-        return self._current > self._clock
+        return False
+        #return self._current > self._clock
 
     def start_of_cycle(self):
         return self._clock == 0

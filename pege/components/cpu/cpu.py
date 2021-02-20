@@ -2,7 +2,7 @@ from ..mmu import MMU
 from ..debugger import Debugger
 from .opcode_dsl import OpcodeContext
 from .interrupt_handler import InterruptHandler
-
+import time
 import instructionset
 from instructionset import opcode_descriptions
 from . import opcodes
@@ -204,6 +204,7 @@ class Stack:
 class CPU:
     def __init__(self, mmu, clock):
         self.pc = 0x00
+        self.print_counter = 0
         self._mmu = mmu
         self._clock = clock
         self.disable_cpu = False
@@ -235,51 +236,59 @@ class CPU:
 
     def read_upper_opcode_parameter(self):
         return self._mmu.read(self.pc) >> 4 & 0xFF
+    
+    def _handle_opcode_failure(self, opcode):
+         hex = self.debugger.format_hex(opcode)
+         hex_pc = self.debugger.format_hex(self.pc)
+         print(f'Opcode failed {hex} at {hex_pc}')
+    
+    def _handle_unknown_opcode(self, opcode):
+        hex = self.debugger.format_hex(opcode)
+        hex_pc = self.debugger.format_hex(self.pc)
+        print(f'Unknown opcode {hex} at {hex_pc}')
+
+    def debug(self, context, opcode):
+        result = True
+        self.debugger.print_state(opcode)
+        if self.debugger.debug(self.pc, opcode):
+            if self.debugger.exit_at_breakpoint:
+                # stop execution by returning False
+                result = True
+        self.debugger.print_opcode(context.opcode)
+        return result
+        
 
     def step(self):
         if self.test_mode and self.pc == self.stop_at:
             return False
         
         # handle interrupts 
-
         self.interrupt_handler.step()
-        if not self._clock.wait():
-            success = False
-            opcode = self.read_opcode()
-
-            hex = self.debugger.format_hex(opcode)
-            hex_pc = self.debugger.format_hex(self.pc)
-            opcode_meta = None
-            if opcode == 0xcb:
-                instruction = self.cb_opcodes[opcode]
-                opcode_meta = self.cb_opcode_meta[opcode]
-            else:
-                instruction = self.opcodes[opcode]
-                opcode_meta = self.opcode_meta[opcode]
-            if instruction:
-                self.debugger.print_state(opcode)
-
-                if self.debugger.debug(self.pc, opcode):
-                    if self.debugger.exit_at_breakpoint:
-                        # stop execution by returning False
-                        return False
-
-                context = OpcodeContext(self, self._mmu, opcode_meta)
-                self.debugger.print_opcode(context.opcode)
-                instruction(self._mmu,self, opcode_meta, context)
-                cycle = context.opcode.get_cycles()
-                self.debugger.print_cpu_flags()
-                self.debugger.end()
-                if cycle == -1:
-                    print(f'Opcode failed {hex} at {hex_pc}')
-                    success = False
-                else:
-                    self._clock.update(cycle)
-                success = True
-            else:
-                print(f'Unknown opcode {hex} at {hex_pc}')
-            self.pc += 1
-            return success
+        success = False
+        opcode = self.read_opcode()
+        opcode_meta = None
+        if opcode == 0xcb:
+            instruction = self.cb_opcodes[opcode]
+            opcode_meta = self.cb_opcode_meta[opcode]
         else:
-            self._clock.tick()
-        return True
+            instruction = self.opcodes[opcode]
+            opcode_meta = self.opcode_meta[opcode]
+        if instruction:
+            context = OpcodeContext(self, self._mmu, opcode_meta)
+            success = self.debug(context, opcode)
+            instruction(self._mmu,self, opcode_meta, context)
+            cycle = context.opcode.get_cycles()
+            self.debugger.print_cpu_flags()
+            self.debugger.end()
+            if cycle == -1:
+                self._handle_opcode_failure(opcode)
+                success = False
+            else:
+                self._clock.update(cycle)
+                success = True
+        else:
+            self._handle_unknown_opcode(opcode)
+        self.pc += 1
+        #self._clock.tick()
+        return success
+        

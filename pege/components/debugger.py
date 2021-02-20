@@ -8,7 +8,7 @@ class Debugger:
         self.show_registers = True
         self.show_stack = False
         self.show_vram = False
-        self.show_opcodes = False
+        self.show_opcodes = True
         self.show_cpu_flags = False
         self.show_program_counter = True
         self.show_memory_address = None # 0xFF40

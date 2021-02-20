@@ -24,7 +24,6 @@ class Fetcher:
         self.tile_address = None
         self.column = 0
         self.ticks = 0
-
     def update_row(self, scy):
         if scy % 8 == 0:
                 self.offset += 32
@@ -76,6 +75,7 @@ class Fetcher:
 
 
     def step(self):
+            
         self.ticks += 1
         if self.ticks < 2:
             return
