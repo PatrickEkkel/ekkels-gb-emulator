@@ -20,7 +20,7 @@ instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XOR_r 
                 {'m': 'DEC (rr)'   , 'datatype': '',    'opcode': opcodes.DEC_HL   , 'length': 1, 'cycles': 12,      'jump_instruction': False, 'register_options': {'(HL)': 0x35 } },
                 {'m': 'LD rr nnnn' , 'datatype': '',    'opcode': opcodes.LDnn16d  , 'length': 3, 'cycles': 12,      'jump_instruction': False, 'register_options': {'HL': 0x21,'SP':0x31, 'BC': 0x01,'DE': 0x11     } },
                 {'m': 'LD r nnnn'  , 'datatype': '',    'opcode': opcodes.LD_r_nnnn, 'length': 3, 'cycles': 16,      'jump_instruction': False, 'register_options': {'A': 0xFA } },
-                {'m': 'LDH r nn'   , 'datatype': 'a8',  'opcode': opcodes.LDHAn    , 'length': 2, 'cycles': 12,      'jump_instruction': False, 'register_options': {'A': 0xF0   } },
+                {'m': 'LDHA nn'    , 'datatype': 'a8',  'opcode': opcodes.LDH_r_nn , 'length': 2, 'cycles': 12,      'jump_instruction': False, 'register_options': {'x': 0xF0   } },
                 {'m': 'LDD (HL-) A', 'datatype': '',    'opcode': opcodes.LDDHL8A  , 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'x': 0x32   } },
                 {'m': 'LDI A (HL+)', 'datatype': '',    'opcode': opcodes.LDI_A_HL , 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'x': 0x2A   } },
                 {'m': 'LDI (HL+) A', 'datatype': '',    'opcode': opcodes.LDI_HL_A , 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'x': 0x22   } },

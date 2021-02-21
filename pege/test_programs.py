@@ -1033,7 +1033,7 @@ class ProgramTests(unittest.TestCase):
 
     def test_LDH_r_nn_opcode(self):
         gbasm = GBA_ASM()
-        test_prgram = ['LDH A 20']
+        test_prgram = ['LDHA 20']
         targeted_memory_address = 0xFF00 + 0x20
         expected_value = 0xABBA
         bitstream = gbasm.parse(test_prgram)
@@ -1042,14 +1042,10 @@ class ProgramTests(unittest.TestCase):
 
         gb = self.create_gameboy(bitstream,run=False)
         gb.power_on(skipbios=True,standby=True)
-        #gb.CPU.reg.SET_A(expected_value)
-        gb.mmu.write(targeted_memory_address,expected_value)
-        #input('blarugh')
-        #input(gb.mmu.read(targeted_memory_address))
+        gb.mmu.write(targeted_memory_address,0xABBA)
         gb._run()
         value =  gb.CPU.reg.GET_A()
-        input(value)
-       # assert value == expected_value
+        assert value == expected_value
 
 
 if __name__ == '__main__':

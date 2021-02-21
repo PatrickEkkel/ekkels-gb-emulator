@@ -211,7 +211,7 @@ class OpcodeContext:
 
     # read the current position of the program counter as an address value for the current selected register
     def _loadaddr_from_opcode(self, offset=None):
-        if self.opcode_state.addressing_mode == AddressingMode.d8:
+        if self.opcode_state.addressing_mode == AddressingMode.d8 or self.opcode_state.addressing_mode == AddressingMode.a8:
             self._cpu.pc += 1   
             self.opcode_state.selected_address_key = self._cpu.pc
             self.opcode_state.selected_address_value = self._mmu.read(self._cpu.pc)
@@ -222,15 +222,13 @@ class OpcodeContext:
             self._cpu.pc += 1
         return self
     
-    def _loadaddr_from_opcode_with_offset(self):
-        self._cpu += 1
+    def _loadaddr_with_offset(self):
+        #self._cpu.pc += 1
         offset = 0xFF00
         value =  self.opcode_state.selected_address_value
         memory_address = offset + value
-        self.opcode_state.selected_address_value = self._mmu.read(self._cpu.pc)
-
-
-        
+        self.opcode.selected_address_key = memory_address
+        self.opcode_state.selected_address_value = self._mmu.read(memory_address)        
     def _set_adressingmode(self, addressing_mode):
         self.opcode_state.addressing_mode = addressing_mode
         return self
@@ -450,7 +448,7 @@ class OpcodeContext:
         elif addressing_mode == AddressingMode.d8:
             context = self._loadaddr_from_opcode()
         elif addressing_mode == AddressingMode.a8:
-            context = self._loadaddr_from_opcode().__loadaddr_from_opcode_with_offset()
+            context = self._loadaddr_from_opcode()._loadaddr_with_offset()
         elif addressing_mode == AddressingMode.d16:
             context = self._loadaddr_from_opcode()
         elif addressing_mode == AddressingMode.a16:
