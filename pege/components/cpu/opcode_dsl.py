@@ -170,6 +170,7 @@ class OpcodeContext:
         value = self.opcode_state.loadreg(reg)    
         address = 0xFF00 + self.opcode_state.selected_address_value
         self._mmu.write(address, value)
+    
 
     # write to loaded register values memory addres and write the value that is read from memory 
     def _store_addr_from_opcode_to_addr(self, reg=None):
@@ -221,6 +222,15 @@ class OpcodeContext:
             self._cpu.pc += 1
         return self
     
+    def _loadaddr_from_opcode_with_offset(self):
+        self._cpu += 1
+        offset = 0xFF00
+        value =  self.opcode_state.selected_address_value
+        memory_address = offset + value
+        self.opcode_state.selected_address_value = self._mmu.read(self._cpu.pc)
+
+
+        
     def _set_adressingmode(self, addressing_mode):
         self.opcode_state.addressing_mode = addressing_mode
         return self
@@ -439,6 +449,8 @@ class OpcodeContext:
             context = self._set_reg_value(value)
         elif addressing_mode == AddressingMode.d8:
             context = self._loadaddr_from_opcode()
+        elif addressing_mode == AddressingMode.a8:
+            context = self._loadaddr_from_opcode().__loadaddr_from_opcode_with_offset()
         elif addressing_mode == AddressingMode.d16:
             context = self._loadaddr_from_opcode()
         elif addressing_mode == AddressingMode.a16:

@@ -98,7 +98,10 @@ def INC_r(mmu, cpu, meta, context):
 def LDH_nn_A(mmu, cpu, meta, context):
     context.load('A').load(addressing_mode=AddressingMode.d8).store('A',AddressingMode.a8)
 
-def LDHAn(mmu, cpu, meta, context):
+def LDH_r_nn(mmu, cpu, meta, context):
+
+    #context.load(addressing_mode=AddressingMode.a8).store('A',AddressingMode.d8)
+
     # get 8 bit unsigned parameter
     cpu.pc += 1
     n = mmu.read(cpu.pc)
