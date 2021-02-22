@@ -4,9 +4,6 @@ class Opcode:
         self.mnemonic = meta['m']
         self.address = address
         self.cycles = meta['cycles']
-        #input(meta)
-        if meta.get('jump_instruction') == None:
-            input(meta)
         self.jump_instruction = meta['jump_instruction']
 
 

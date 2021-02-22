@@ -6,7 +6,9 @@ from .interrupt_handler import InterruptHandler
 import time
 import instructionset
 from instructionset import opcode_descriptions
+from constants import *
 from . import opcodes
+
 
 class Registers:
 
@@ -15,11 +17,23 @@ class Registers:
     HALFCARRY = 0x20
     CARRY = 0x10
     def __init__(self):
+        #global _C, _AF
         self.SET_SP(0x0000)
         self.SET_AF(0x0000)
         self.SET_BC(0x0000)
         self.SET_DE(0x0000)
         self.SET_HL(0x0000)
+        self.reg_read_dict = {r_AF: self.GET_AF,
+                              r_A: self.GET_A,
+                              r_C: self.GET_C }
+
+        self.reg_write_dict = {r_AF: self.SET_AF,
+                               r_DE: self.SET_DE,
+                               r_SP: self.SET_SP,
+                               r_HL: self.SET_HL,
+                               r_BC: self.SET_BC,
+                               r_A: self.SET_A,
+                               r_C: self.SET_C }
 
 
     def _set_flag(self, flag):
@@ -220,6 +234,7 @@ class CPU:
         self.opcode_contexts = instructionset.create_opcode_contexts(self, self._mmu)
         self.cb_opcode_contexts = instructionset.create_cb_opcode_contexts(self, self._mmu)
         self.cb_opcodes = instructionset.create_cb_opcode_map('opcode')
+
         self.opcodes[0x20] = opcodes.JRNZn
         self.opcodes[0x28] = opcodes.JRZn
         self.opcodes[0x06] = opcodes.LD_r_nn

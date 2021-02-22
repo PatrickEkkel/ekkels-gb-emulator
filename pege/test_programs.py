@@ -512,7 +512,43 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         gb.mmu.read(0x8000) == 0xFFFE
 
-        
+    
+    def test_LD_DE_nnnn_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD DE 1234']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb._run()
+        assert gb.CPU.reg.GET_DE() == 0x1234
+
+    def test_LD_SP_nnnn_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD SP 8080']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb._run()
+        assert gb.CPU.reg.GET_SP() == 0x8080
+
+    def test_LD_BC_nnnn_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD BC 8080']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb._run()
+        assert gb.CPU.reg.GET_BC() == 0x8080
+
+    def test_LD_HL_nnnn_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD HL 8080']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb._run()
+        assert gb.CPU.reg.GET_HL() == 0x8080
+
     def test_jp_hl_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['JP (HL)','LD DE 1234']

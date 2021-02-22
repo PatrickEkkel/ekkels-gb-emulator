@@ -11,21 +11,22 @@ IE_REGISTER   = 0xFFFF
 
 
 # CPU Registers
-A = 10
-B = 20
-C = 30
-D = 40
-E = 50
-F = 60
+r_A  = 10
+r_B  = 20
+r_C  = 30
+r_D  = 40
+r_E  = 50
+r_F  = 60
 
-AF = 70
-BC = 80
-DE = 90
+r_AF = 70
+r_BC = 80
+r_DE = 90
+r_HL = 95
 
 # Stack Pointer
-SP = 100
+r_SP = 100
 # Program counter
-PC = 110
+r_PC = 110
 
 # CPU FLAGS 
 Z = 120

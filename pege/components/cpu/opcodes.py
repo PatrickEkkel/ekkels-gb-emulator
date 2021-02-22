@@ -2,6 +2,7 @@ import bitwise_functions
 import time
 from components.cpu.opcode_dsl import OpcodeContext, BitwiseOperators, AddressingMode, Opcode
 from ..mmu import MMU
+from constants import *
 
 I = '-'
 E = 0
@@ -118,20 +119,19 @@ def LD_r_i16(mmu, cpu, meta, context):
 # length 1 byte
 # 0xE2
 # write contents of register A to memory address FF00 + C
-
-
 def LDCA(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
 
-    register_operand_1 = {0xE2: 'C'}
-    register_operand_2 = {0xE2: 'A'}
+    register_operand_1 = {0xE2: r_C}
+    register_operand_2 = {0xE2: r_A}
     r1 = register_operand_1[opcode]
-    context.load(r1)
+    r2 = register_operand_2[opcode]
+    context.load_FFOO(r1, r2).store_a8()
 
-    C = cpu.reg.GET_C()
-    A = cpu.reg.GET_A()
-    offset_address = 0xFF00 + C
-    mmu.write(offset_address, A)
+    #C = cpu.reg.GET_C()
+    #A = cpu.reg.GET_A()
+    #offset_address = 0xFF00 + C
+    #mmu.write(offset_address, A)
 
 
 def CPn(mmu, cpu, meta, context):
@@ -186,33 +186,33 @@ def AND_nn(mmu, cpu, meta, context):
         r1, operation=BitwiseOperators.AND, transient_load=True).store(r1).flags(Z, 0, 1, 0)
 
 
-def LDnA(mmu, cpu):
-    cpu.debugger.print_opcode('LDnA')
-    upper_param = cpu.read_upper_opcode_parameter()
-    lower_param = cpu.read_lower_opcode_parameter()
-    A = cpu.reg.GET_A()
-    result = False
+#def LDnA(mmu, cpu):
+#    cpu.debugger.print_opcode('LDnA')
+#    upper_param = cpu.read_upper_opcode_parameter()
+#    lower_param = cpu.read_lower_opcode_parameter()
+#    A = cpu.reg.GET_A()
+#    result = False
 
-    if lower_param == 0x70:
-        if upper_param == 0x06:
-            H = cpu.reg.GET_H()
-            H = A
-            cpu.reg.SET_H(H)
-            result = True
-        elif upper_param == 0x05:
-            D = cpu.reg.GET_D()
-            D = A
-            cpu.reg.SET_D(D)
-            result = True
+#    if lower_param == 0x70:
+#        if upper_param == 0x06:
+#            H = cpu.reg.GET_H()
+#            H = A
+#            cpu.reg.SET_H(H)
+#            result = True
+#        elif upper_param == 0x05:
+#            D = cpu.reg.GET_D()
+#            D = A
+#            cpu.reg.SET_D(D)
+#            result = True
 
-    elif lower_param == 0xF0:
-        if upper_param == 0x04:
-            C = cpu.reg.GET_C()
-            C = A
-            cpu.reg.SET_C(C)
-            result = True
+#    elif lower_param == 0xF0:
+#        if upper_param == 0x04:
+#            C = cpu.reg.GET_C()
+#            C = A
+#            cpu.reg.SET_C(C)
+#            result = True
 
-    return result
+#    return result
 
 
 def POP_rr(mmu, cpu, meta, context):
@@ -333,20 +333,11 @@ def LD_rr_nn(mmu, cpu, meta, context):
 # length: 3 bytes
 # 0x31 and 2 bytes unsigned
 def LDnn16d(mmu, cpu, meta, context):
-    parameter = cpu.read_upper_opcode_parameter()
-    cpu.pc += 1
-    val = mmu.read_u16(cpu.pc)
-    cpu.debugger.print_iv(val)
-    if parameter == 0x03:
-        cpu.reg.SET_SP(val)
-    elif parameter == 0x02:
-        cpu.reg.SET_HL(val)
-    elif parameter == 0x01:
-        cpu.reg.SET_DE(val)
-    elif parameter == 0x00:
-        cpu.reg.SET_BC(val)
+    opcode = cpu.read_opcode()
 
-    cpu.pc += 1
+    register_operand_1 = {0x11: r_DE, 0x31: r_SP, 0x21: r_HL, 0x01: r_BC}
+    r1 = register_operand_1[opcode]
+    context.load_d16().store_d16(r1)
 
 def LD_r_nnnn(mmu, cpu, meta, context):
     context.load('A', addressing_mode=AddressingMode.a16).store('A')
