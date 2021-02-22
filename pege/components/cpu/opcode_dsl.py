@@ -4,6 +4,9 @@ class Opcode:
         self.mnemonic = meta['m']
         self.address = address
         self.cycles = meta['cycles']
+        #input(meta)
+        if meta.get('jump_instruction') == None:
+            input(meta)
         self.jump_instruction = meta['jump_instruction']
 
 
@@ -32,6 +35,9 @@ class OpcodeState:
 
     def __init__(self, cpu):
         self._cpu = cpu
+        self.init()
+
+    def init(self):
         self.selected_register_key = None
         self.selected_register_value = None
         self.selected_address_key = None
@@ -42,6 +48,7 @@ class OpcodeState:
 
         self.left_operand = None
         self.right_operand = None
+
 
     def storereg(self, register, value):
         if register == 'HL':
@@ -170,7 +177,7 @@ class OpcodeContext:
         value = self.opcode_state.loadreg(reg)    
         address = 0xFF00 + self.opcode_state.selected_address_value
         self._mmu.write(address, value)
-    
+        
 
     # write to loaded register values memory addres and write the value that is read from memory 
     def _store_addr_from_opcode_to_addr(self, reg=None):
@@ -287,6 +294,9 @@ class OpcodeContext:
             self.opcode_state.conditionial = not value
         else:
             self.opcode_state.conditionial = value
+        
+    def init(self):
+        self.opcode_state.init()
 
     def bitwise(self, register=None, operation=None, position=0, value=None,transient_load=False):
         if not transient_load:
@@ -490,6 +500,7 @@ class OpcodeContext:
         value_a = self._get_select_reg_value()
         self._set_reg_value((value_a << 8) | value_b)
         return self
+
     def store(self, register=None, addressing_mode=None,transient_store=False, value=None):
         if self.opcode_state.conditionial == None or self.opcode_state.conditionial:
             if addressing_mode != None:

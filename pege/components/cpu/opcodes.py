@@ -102,26 +102,6 @@ def LDH_r_nn(mmu, cpu, meta, context):
     context.load(addressing_mode=AddressingMode.a8).store('A',AddressingMode.d8)
 
  
-# length: 2 bytes
-# 0xE0 and 1 byte unsigned
-# write contents of register A to memory address FF00 + n
-def LDHnA(mmu, cpu, meta):
-    opcode = Opcode(meta)
-    # get 8 bit unsigned parameter
-    cpu.pc += 1
-    val = mmu.read(cpu.pc)
-    # print disassembly info
-    cpu.debugger.print_opcode(opcode)
-    cpu.debugger.print_iv(val)
-
-    # read A register
-    A = cpu.reg.GET_A()
-
-    offset_address = 0xFF00 + val
-
-    mmu.write(offset_address, A)
-    return meta.get_cycles()
-
 # length: 1 byte
 # 0x1A
 # Read the Value of register DE from memory and put the contents of adress DE in A
@@ -141,6 +121,13 @@ def LD_r_i16(mmu, cpu, meta, context):
 
 
 def LDCA(mmu, cpu, meta, context):
+    opcode = cpu.read_opcode()
+
+    register_operand_1 = {0xE2: 'C'}
+    register_operand_2 = {0xE2: 'A'}
+    r1 = register_operand_1[opcode]
+    context.load(r1)
+
     C = cpu.reg.GET_C()
     A = cpu.reg.GET_A()
     offset_address = 0xFF00 + C

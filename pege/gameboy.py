@@ -5,7 +5,7 @@ from components.clock import CPUClock
 from components.screen import Screen
 from components.joypad import JoyPad
 from components.mmu import MMU
-from memorymap import *
+from constants import *
 class GameBoy:
     CPU_SPEED = 4194304 # 4.1Mhz # 1.04Mhz
     def __init__(self, cartridge,testmode=False):

@@ -1,6 +1,7 @@
 from ..mmu import MMU
 from ..debugger import Debugger
 from .opcode_dsl import OpcodeContext
+from .opcode_dsl_new import NewOpcodeContext
 from .interrupt_handler import InterruptHandler
 import time
 import instructionset
@@ -179,13 +180,11 @@ class Stack:
         self.cpu = cpu
 
     def push_u16bit(self, value):
-        #sp = self.cpu.reg.GET_SP()
         lowbyte = MMU.get_high_byte(value)
         highbyte = MMU.get_low_byte(value)
         self.push(lowbyte)
         self.push(highbyte)
-        #sp -= 1
-        #self.cpu.reg.SET_SP(sp)
+        
 
     def push(self, value):
         sp = self.cpu.reg.GET_SP()
@@ -218,7 +217,8 @@ class CPU:
         self.opcode_cycles = instructionset.create_opcode_map('cycles')
         self.opcode_meta = instructionset.create_opcode_metamap()
         self.cb_opcode_meta = instructionset.create_cb_opcode_metamap()
-
+        self.opcode_contexts = instructionset.create_opcode_contexts(self, self._mmu)
+        self.cb_opcode_contexts = instructionset.create_cb_opcode_contexts(self, self._mmu)
         self.cb_opcodes = instructionset.create_cb_opcode_map('opcode')
         self.opcodes[0x20] = opcodes.JRNZn
         self.opcodes[0x28] = opcodes.JRZn
@@ -270,11 +270,13 @@ class CPU:
         if opcode == 0xcb:
             instruction = self.cb_opcodes[opcode]
             opcode_meta = self.cb_opcode_meta[opcode]
+            context  =   self.cb_opcode_contexts[opcode]
         else:
             instruction = self.opcodes[opcode]
             opcode_meta = self.opcode_meta[opcode]
+            context = self.opcode_contexts[opcode]
         if instruction:
-            context = OpcodeContext(self, self._mmu, opcode_meta)
+            context.init()
             success = self.debug(context, opcode)
             instruction(self._mmu,self, opcode_meta, context)
             cycle = context.opcode.get_cycles()
@@ -289,6 +291,5 @@ class CPU:
         else:
             self._handle_unknown_opcode(opcode)
         self.pc += 1
-        #self._clock.tick()
         return success
         

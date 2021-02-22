@@ -1,6 +1,6 @@
 from ..component import Component
 from .opcode_dsl import OpcodeContext
-from memorymap import *
+from constants import *
 
 class InterruptHandler(Component):
 

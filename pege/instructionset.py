@@ -1,10 +1,12 @@
 from components.cpu import  opcodes
+from components.cpu.opcode_dsl import OpcodeContext
+from components.cpu.opcode_dsl_new import NewOpcodeContext
 import bitwise_functions
 
 opcode_descriptions = {'LDH r nn': 'LDH A,(n) = put memory address $FF00+n into A'}
 
 cb_instructions =  [{'m': 'CB', 'datatype': '', 'opcode': opcodes.CB, 'length': 1, 'cycles': 4, 'jump_instruction': False, 'register_options': {'x': 0xCB }, },
-                    {'m': 'SWAP r','datatype': '', 'opcode': opcodes.SWAP_r, 'length': 2, 'cycles': 8, 'jump_instruction:':False, 'register_options': {'A': 0x37 } },
+                    {'m': 'SWAP r','datatype': '', 'opcode': opcodes.SWAP_r, 'length': 2, 'cycles': 8, 'jump_instruction':False, 'register_options': {'A': 0x37 } },
                     {'m': 'BIT b r','datatype': '', 'opcode': opcodes.BIT_7_r, 'length': 2, 'cycles': 8, 'jump_instruction': False, 'register_options': {'H': 0x7C } },
                     {'m': 'RES b r', 'datatype': '', 'opcode': opcodes.RES_n_r, 'length': 2, 'cycles': 8, 'jump_instruction': False, 'register_options' :{'A': 0x87} },
                     {'m': 'RL r'   , 'datatype': '', 'opcode': opcodes.RLC,  'length': 2, 'cycles': 8, 'jump_instruction': False, 'register_options': {'C': 0x11 } }
@@ -32,7 +34,7 @@ instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XOR_r 
                 {'m': 'CP'         , 'datatype': 'd8',  'opcode': opcodes.CPn      , 'length': 2, 'cycles': 8,       'jump_instruction': False, 'register_options': {'x': 0xFE   } },
                 {'m': 'EI'         , 'datatype': ''  ,  'opcode': opcodes.EI       , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'x': 0xFB   } },
                 {'m': 'LD (rr) nn' , 'datatype': 'd8',  'opcode': opcodes.LD_rr_nn , 'length': 2, 'cycles': 12,      'jump_instruction': False, 'register_options': {'(HL)': 0x36, '(DE)': 0x12 } },
-                {'m': 'LD (r) r'   , 'datatype': ''  ,  'opcode': opcodes.LDCA     , 'length': 2, 'cycles': 8,       'jump_instruction': False, 'register_options': {'(C) A':  0xE2  } },
+                {'m': 'LD (r) r'   , 'datatype': ''  ,  'opcode': opcodes.LDCA     , 'length': 2, 'cycles': 8,       'jump_instruction': False, 'register_options': {'(C) A':  0xE2  }, 'oc_handler': NewOpcodeContext },
                 {'m': 'LD r r'     , 'datatype': 'd8',  'opcode': opcodes.LD_n_n   , 'length': 1, 'cycles': 12,      'jump_instruction': False, 'register_options': {'A C': 0x79,'A B': 0x78,'C A': 0x4F, 'A E': 0x7B, 'H A': 0x67,'D A': 0x57,'A H': 0x7C, 'B A': 0x47, 'E A': 0x5F }},
                 {'m': 'LD nnnn A'  , 'datatype': 'a16', 'opcode': opcodes.LDnn16a  , 'length': 3, 'cycles': 16,      'jump_instruction': False, 'register_options': {'x': 0xEA } },
                 {'m': 'INC r'      , 'datatype': ''   , 'opcode': opcodes.INC_r    , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'C': 0xC, 'B': 0x04, 'H': 0x24, 'E': 0x1C, 'L': 0x2C } },
@@ -124,6 +126,29 @@ def create_cb_opcode_map(element):
     for i in cb_instructions:
         for opcode in i['register_options'].values():
             result[opcode] = i[element]
+    return result
+
+
+def create_cb_opcode_contexts(cpu, mmu):
+    result = [None] * 255
+    opcode_meta = create_opcode_metamap() 
+    for i in cb_instructions:
+        for opcode in i['register_options'].values():
+            context = OpcodeContext(cpu, mmu, i)
+            result[opcode] = context
+    return result
+
+def create_opcode_contexts(cpu, mmu):
+    result = [None] * 255
+    opcode_meta = create_opcode_metamap() 
+    for i in instructions:
+        for opcode in i['register_options'].values():
+            if i.get('oc_handler'):
+                context = i['oc_handler'](cpu, mmu, i)
+            else:
+                context = OpcodeContext(cpu, mmu, i)
+
+            result[opcode] = context
     return result
 
 def create_opcode_map(element):

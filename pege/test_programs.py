@@ -386,7 +386,12 @@ class ProgramTests(unittest.TestCase):
         gbasm = GBA_ASM()
         test_program = ['LD (C) A']
         bitstream = gbasm.parse(test_program)
-        gb = self.create_gameboy(bitstream)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_C(0x20)
+        gb.CPU.reg.SET_A(0x80)
+        gb._run()
+        assert gb.mmu.read(0xFF20) == 0x80
 
     
     def test_INC_E_opcode(self):

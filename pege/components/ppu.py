@@ -4,7 +4,8 @@ from .cpu.interrupt_handler import InterruptHandler
 from .fetcher import Fetcher
 from .screen import Screen
 from .component import Component
-from memorymap import *
+from constants import *
+
 
 class FIFO:
     def __init__(self, _screen, _mmu):

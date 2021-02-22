@@ -1,4 +1,4 @@
-from memorymap import *
+from constants import *
 from .component import Component
 
 class JoyPad(Component):
