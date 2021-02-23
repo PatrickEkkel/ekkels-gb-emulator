@@ -26,6 +26,7 @@ class Registers:
         self.reg_read_dict = {r_AF: self.GET_AF,
                               r_A: self.GET_A,
                               r_C: self.GET_C,
+                              r_H: self.GET_H,
                               r_PC: self.GET_PC }
 
         self.reg_write_dict = {r_AF: self.SET_AF,

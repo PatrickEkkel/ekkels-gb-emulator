@@ -403,12 +403,13 @@ def CB(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
     instruction = cpu.cb_opcodes[opcode]
     opcode_meta = cpu.cb_opcode_meta[opcode]
+    context = cpu.cb_opcode_contexts[opcode]
     # fetch the special instruction from cb_opcode list
     # increment the PC, so we can get the CB instruction
     # do nothing, its just a prefix
     result = False
     if instruction:
-        context = OpcodeContext(cpu, mmu, meta)
+        #context = OpcodeContext(cpu, mmu, meta)
         try:
             cpu.debugger.print_opcode(opcode_meta['m'])
             result = instruction(mmu, cpu, meta, context)
@@ -497,6 +498,8 @@ def RLA(mmu, cpu, meta, context):
 
 # CB opcodes
 def BIT_7_r(mmu, cpu, meta, context):
+    #context.load_rd8(r_H).shift_right(7).bitwise_and(0x01).flags(Z, N, H, C)
+
     HL = cpu.reg.GET_HL()
     H = MMU.get_high_byte(HL)
     # check if most significant bit is 1

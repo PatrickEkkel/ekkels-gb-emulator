@@ -836,7 +836,17 @@ class ProgramTests(unittest.TestCase):
         assert bitstream[2] == 0x01
         assert bitstream[3] == 0x0C
         assert bitstream[4] == 0x04
-
+    # RLC opcode is still a bit 'shitty' 
+    #def test_RLC_opcode(self):
+    #    gbasm = GBA_ASM()
+    #    test_program = ['CB RL C']
+    #    bitstream = gbasm.parse(test_program)
+    #    gb = self.create_gameboy(bitstream,run=False)
+    #    gb.power_on(skipbios=True,standby=True)
+    #    gb.CPU.reg.SET_C(0xF0)
+    #    gb._run()
+    #    input(gb.CPU.reg.GET_C())
+        #assert gb.CPU.reg.GET_C() == 0x78
     
     def test_EI_opcode(self):
         gbasm = GBA_ASM()

@@ -48,6 +48,17 @@ class NewOpcodeContext:
     def inc(self, register=None):
         return self
 
+    def shift_right(self, position):
+        value = self._get_value()
+        self._set_value(value >> position)
+        return self
+    
+    def bitwise_and(self, value):
+        value = self._get_value()
+        value &= value
+        self._set_value(value)
+        return self
+
     def load_FFOO(self, r1, r2):
         reg_value_a = self._cpu.reg.reg_read_dict[r1]()
         reg_value_b = self._cpu.reg.reg_read_dict[r2]()
@@ -56,12 +67,19 @@ class NewOpcodeContext:
         self._set_value(reg_value_b)
         return self
 
+    # load 8 bit register into buffer
+    def load_rd8(self, r1):
+        self._set_value(self._cpu.reg.reg_read_dict[r1]())
+        return self
+
+    # load 16 bit direct data into buffer
     def load_d16(self):
         self._cpu.pc += 1
         self._set_value(self._mmu.read_u16(self._cpu.pc))
         self._cpu.pc += 1
         return self
-    
+
+    # load 16 bit register into buffer
     def load_rd16(self, r1):
         reg = self._cpu.reg.reg_read_dict[r1]()
         self._set_value(reg)
