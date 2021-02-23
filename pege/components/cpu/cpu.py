@@ -16,8 +16,8 @@ class Registers:
     SUBSTRACT = 0x40
     HALFCARRY = 0x20
     CARRY = 0x10
-    def __init__(self):
-        #global _C, _AF
+    def __init__(self, _cpu):
+        self._cpu = _cpu
         self.SET_SP(0x0000)
         self.SET_AF(0x0000)
         self.SET_BC(0x0000)
@@ -25,15 +25,17 @@ class Registers:
         self.SET_HL(0x0000)
         self.reg_read_dict = {r_AF: self.GET_AF,
                               r_A: self.GET_A,
-                              r_C: self.GET_C }
+                              r_C: self.GET_C,
+                              r_PC: self.GET_PC }
 
         self.reg_write_dict = {r_AF: self.SET_AF,
                                r_DE: self.SET_DE,
                                r_SP: self.SET_SP,
                                r_HL: self.SET_HL,
                                r_BC: self.SET_BC,
-                               r_A: self.SET_A,
-                               r_C: self.SET_C }
+                               r_A:  self.SET_A,
+                               r_C:  self.SET_C,
+                               r_PC: self.SET_PC }
 
 
     def _set_flag(self, flag):
@@ -150,6 +152,9 @@ class Registers:
 
     def GET_C(self):
         return self.C
+    
+    def SET_PC(self, value):
+        self._cpu.pc = value
 
     def SET_BC(self, value):
         self.B = MMU.get_high_byte(value)
@@ -178,6 +183,8 @@ class Registers:
     def GET_HL(self):
         return (self.GET_H() << 8) | self.GET_L()
         #return self.hl
+    def GET_PC(self):
+        return self._cpu.pc
 
     def initialize_without_bootrom(self):
         self.SET_BC(0x0013)
@@ -225,7 +232,7 @@ class CPU:
         self.stop_at = None
         self.stack = Stack(self, mmu)
         self.interrupt_handler = InterruptHandler(mmu, self)
-        self.reg = Registers()
+        self.reg = Registers(self)
         self.debugger = Debugger(self, mmu)
         self.opcodes = instructionset.create_opcode_map('opcode')
         self.opcode_cycles = instructionset.create_opcode_map('cycles')

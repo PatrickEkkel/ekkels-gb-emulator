@@ -8,4 +8,4 @@ game = Tetris()
 game.print_cartridge_info()
 
 gb = GameBoy(game)
-gb.power_on(skipbios=True)
+gb.power_on(skipbios=False)

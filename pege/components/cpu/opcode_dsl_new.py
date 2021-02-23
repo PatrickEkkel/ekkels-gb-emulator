@@ -23,7 +23,8 @@ class NewOpcodeContext:
     def sub(self, register=None):
         return self
 
-    def dec(self, register=None):
+    def dec(self):
+        self.value -= 0x01
         return self
 
     def branch(self, flag, invert=False):
@@ -58,7 +59,15 @@ class NewOpcodeContext:
     def set(self, address):
         return self
 
-    def push(self):
+    # push current value as a 16bit value on the stack 
+    def push_d16(self):
+        self._cpu.stack.push_u16bit(self.value)
+        return self
+
+    # push the program counter to the stack
+    def push_pc(self):
+        pc =  self._cpu.reg.reg_read_dict[r_PC]()
+        self._cpu.stack.push_u16bit(pc)
         return self
     
     def pop(self):

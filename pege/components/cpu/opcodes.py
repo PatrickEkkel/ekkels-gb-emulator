@@ -473,22 +473,8 @@ def JRNZn(mmu, cpu, meta, context):
 # pushes the PC to the stack and jump to specified 16 bit operand
 
 
-def CALLnn(mmu, cpu, meta, context):
-    # address of next instruction
-    pc = cpu.pc + 1
-    val = mmu.read_u16(pc)
-    pc += 1
-
-    cpu.debugger.print_iv(val)
-    # Decrease the jump value by one, because the step will do a +1
-    cpu.pc = val - 0x01
-    SP = cpu.reg.GET_SP()
-    cpu.stack.push_u16bit(pc)
-
-    # push address of next instruction to the stack
-    return True
-
-
+def CALL_nnnn(mmu, cpu, meta, context):
+    context.load_d16().dec().push_pc().store_d16(r_PC)
 def RLA(mmu, cpu, meta, context):
     # get the value from the C register
     A = cpu.reg.GET_A()

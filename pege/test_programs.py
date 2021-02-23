@@ -1071,7 +1071,7 @@ class ProgramTests(unittest.TestCase):
         #    self.print_hex(b)
         assert bitstream[0] == self._get_instruction('LDH nn A')
         assert bitstream[1] == 0x10
-
+        
     def test_LDH_r_nn_opcode(self):
         gbasm = GBA_ASM()
         test_prgram = ['LDHA 20']

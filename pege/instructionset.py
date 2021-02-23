@@ -39,7 +39,7 @@ instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XOR_r 
                 {'m': 'LD nnnn A'  , 'datatype': 'a16', 'opcode': opcodes.LDnn16a  , 'length': 3, 'cycles': 16,      'jump_instruction': False, 'register_options': {'x': 0xEA } },
                 {'m': 'INC r'      , 'datatype': ''   , 'opcode': opcodes.INC_r    , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'C': 0xC, 'B': 0x04, 'H': 0x24, 'E': 0x1C, 'L': 0x2C } },
                 {'m': 'SUB r'      , 'datatype': ''   , 'opcode': opcodes.SUB_r    , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'B': 0x90 } },
-                {'m': 'CALL nnnn'  , 'datatype': 'a16', 'opcode': opcodes.CALLnn   , 'length': 3, 'cycles': 24,      'jump_instruction': False, 'register_options': {'x': 0xCD } },
+                {'m': 'CALL nnnn'  , 'datatype': 'a16', 'opcode': opcodes.CALL_nnnn, 'length': 3, 'cycles': 24,      'jump_instruction': False, 'register_options': {'x': 0xCD }, 'oc_handler': NewOpcodeContext },
                 {'m': 'OR r'       , 'datatype': ''   , 'opcode': opcodes.OR_r     , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'C': 0xB1,'B': 0xB0 } },
                 {'m': 'LD (rr) r'  , 'datatype': ''   , 'opcode': opcodes.LDHL8A   , 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'(HL) A': 0x77}},
                 {'m': 'RET'        , 'datatype': ''   , 'opcode': opcodes.RET      , 'length': 1, 'cycles': 16,      'jump_instruction': False, 'register_options': {'x': 0xC9 } },
