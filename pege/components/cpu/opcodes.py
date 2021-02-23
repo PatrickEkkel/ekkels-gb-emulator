@@ -128,12 +128,6 @@ def LDCA(mmu, cpu, meta, context):
     r2 = register_operand_2[opcode]
     context.load_FFOO(r1, r2).store_a8()
 
-    #C = cpu.reg.GET_C()
-    #A = cpu.reg.GET_A()
-    #offset_address = 0xFF00 + C
-    #mmu.write(offset_address, A)
-
-
 def CPn(mmu, cpu, meta, context):
  
     cpu.pc += 1
@@ -471,10 +465,9 @@ def JRNZn(mmu, cpu, meta, context):
 # length: 3 bytes
 # 0xCD
 # pushes the PC to the stack and jump to specified 16 bit operand
-
-
 def CALL_nnnn(mmu, cpu, meta, context):
-    context.load_d16().dec().push_pc().store_d16(r_PC)
+    context.load_d16().dec().load_rd16(r_PC).push_d16().store_d16(r_PC)
+
 def RLA(mmu, cpu, meta, context):
     # get the value from the C register
     A = cpu.reg.GET_A()

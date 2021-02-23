@@ -6,7 +6,9 @@ class NewOpcodeContext:
         self._mmu = mmu
         self._cpu = cpu
         self._meta = meta
-        self.value = 0x00
+        #self.value = 0x00
+        self.values = [0x00,0x00]
+        self.pointer = 0
         if meta:
             self.opcode = Opcode(self._meta)
 
@@ -14,6 +16,14 @@ class NewOpcodeContext:
     def init(self):
         pass
 
+    def _set_value(self, value):
+        self.values[self.pointer] = value
+        self.pointer += 1
+
+    def _get_value(self):
+        self.pointer -= 1
+        return self.values[self.pointer]
+        
     def bitwise(self, register=None, operation=None, position=0, value=None,transient_load=False):
         return self
     
@@ -24,7 +34,9 @@ class NewOpcodeContext:
         return self
 
     def dec(self):
-        self.value -= 0x01
+        value = self._get_value()
+        #value -= 0x1
+        self._set_value(value - 0x01)
         return self
 
     def branch(self, flag, invert=False):
@@ -41,13 +53,18 @@ class NewOpcodeContext:
         reg_value_b = self._cpu.reg.reg_read_dict[r2]()
         address = 0xFF00 + reg_value_a
         self.address = address
-        self.value   = reg_value_b
+        self._set_value(reg_value_b)
         return self
 
     def load_d16(self):
         self._cpu.pc += 1
-        self.value = self._mmu.read_u16(self._cpu.pc)
+        self._set_value(self._mmu.read_u16(self._cpu.pc))
         self._cpu.pc += 1
+        return self
+    
+    def load_rd16(self, r1):
+        reg = self._cpu.reg.reg_read_dict[r1]()
+        self._set_value(reg)
         return self
 
     def load(self):
@@ -61,13 +78,8 @@ class NewOpcodeContext:
 
     # push current value as a 16bit value on the stack 
     def push_d16(self):
-        self._cpu.stack.push_u16bit(self.value)
-        return self
-
-    # push the program counter to the stack
-    def push_pc(self):
-        pc =  self._cpu.reg.reg_read_dict[r_PC]()
-        self._cpu.stack.push_u16bit(pc)
+        value = self._get_value()
+        self._cpu.stack.push_u16bit(value)
         return self
     
     def pop(self):
@@ -78,12 +90,15 @@ class NewOpcodeContext:
 
     # store 8 bit data into address
     def store_a8(self):
-        self._cpu._mmu.write(self.address, self.value)
+        value = self._get_value()
+        self._cpu._mmu.write(self.address, value)
         return self
     
     # store 16 data into register BC,DE,HL,SP,PC
     def store_d16(self, r1):
-        self._cpu.reg.reg_write_dict[r1](self.value)
+        value = self._get_value()
+        self._cpu.reg.reg_write_dict[r1](value)
+        return self
 
     def store(self):
         return self
