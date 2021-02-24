@@ -12,17 +12,39 @@ class NewOpcodeContext:
         if meta:
             self.opcode = Opcode(self._meta)
 
-
-    def init(self):
+    def _check_carry(self):
+        pass
+    
+    def _check_substract(self):
         pass
 
+    def _check_half_carry(self):
+        pass
+
+    def _check_zero(self):
+        value = self._get_value()
+        if value == 0x00:
+            self._cpu.reg.SET_ZERO()
+        else:
+            self._cpu.reg.CLEAR_ZERO()
+        
+    def init(self):
+        pass
+    
+    # set a value to the stack TODO: rename to push
     def _set_value(self, value):
         self.values[self.pointer] = value
         self.pointer += 1
 
+    # get a value from the stack TODO: rename to pop
     def _get_value(self):
         self.pointer -= 1
         return self.values[self.pointer]
+    
+    # read a value from the stack without modifying the stackpointer
+    def _read_value(self):
+        pointer = self.pointer - 1
+        return self.values[pointer]
         
     def bitwise(self, register=None, operation=None, position=0, value=None,transient_load=False):
         return self
@@ -41,10 +63,46 @@ class NewOpcodeContext:
 
     def branch(self, flag, invert=False):
         return self
-
-    def flags(self, zero, substract, halfcarry, carry):
-        return self
     
+    def flags(self, zero, substract, halfcarry, carry):
+        I = '-'
+        E = 0
+        S = 1
+        Z = 2
+        N = 3
+        H = 4
+        C = 5
+
+        if zero == Z:
+            self._check_zero()
+        elif zero == S:
+            self._cpu.reg.SET_ZERO()
+        elif zero == E:
+            self._cpu.reg.CLEAR_ZERO()
+
+        if substract == N:
+            self._check_substract()
+        elif substract == S:
+            self._cpu.reg.SET_SUBSTRACT()
+        elif substract == E:
+            self._cpu.reg.CLEAR_SUBSTRACT()
+
+        if halfcarry == H:
+            self._check_half_carry()
+        elif halfcarry == S:
+            self._cpu.reg.SET_HALF_CARRY()
+        elif halfcarry == E:
+            self._cpu.reg.CLEAR_HALF_CARRY()
+
+        if carry == C:
+            self._check_carry()
+        elif carry == S:
+            self._cpu.reg.SET_CARRY()
+        elif carry == E:
+            self._cpu.reg.CLEAR_CARRY()
+
+        return self
+
     def inc(self, register=None):
         return self
 
@@ -105,6 +163,10 @@ class NewOpcodeContext:
 
     def merge(self):
         return self
+
+    def store_rd8(self, r1):
+        value = self._get_value()
+        self._cpu.reg.reg_write_dict[r1](value)
 
     # store 8 bit data into address
     def store_a8(self):

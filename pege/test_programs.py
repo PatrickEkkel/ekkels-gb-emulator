@@ -781,8 +781,7 @@ class ProgramTests(unittest.TestCase):
         gb.power_on(skipbios=True,standby=True)
         gb._run()
         assert gb.CPU.reg.GET_ZERO() == True
-        #assert gb.CPU.reg.GET_H() == 0x80
-
+        
 
     def test_ADD_HL_DE_opcode(self):
         gbasm = GBA_ASM()

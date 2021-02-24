@@ -35,6 +35,7 @@ class Registers:
                                r_HL: self.SET_HL,
                                r_BC: self.SET_BC,
                                r_A:  self.SET_A,
+                               r_H:  self.SET_H,
                                r_C:  self.SET_C,
                                r_PC: self.SET_PC }
 

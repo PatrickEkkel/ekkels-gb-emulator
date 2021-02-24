@@ -490,7 +490,7 @@ def RLA(mmu, cpu, meta, context):
         cpu.reg.SET_CARRY()
     else:
         cpu.reg.CLEAR_CARRY()
-    # clear substract and half carry
+    # clear substract and half carryBIT
     cpu.reg.CLEAR_SUBSTRACT()
     cpu.reg.CLEAR_HALF_CARRY()
     return True
@@ -498,20 +498,7 @@ def RLA(mmu, cpu, meta, context):
 
 # CB opcodes
 def BIT_7_r(mmu, cpu, meta, context):
-    #context.load_rd8(r_H).shift_right(7).bitwise_and(0x01).flags(Z, N, H, C)
-
-    HL = cpu.reg.GET_HL()
-    H = MMU.get_high_byte(HL)
-    # check if most significant bit is 1
-    isset = H >> 7 & 0x01
-    #input(cpu.debugger.format_hex(isset))
-    if isset == 1:
-        #input('clear zero')
-        cpu.reg.CLEAR_ZERO()
-    else:
-        #input('set zero')
-        cpu.reg.SET_ZERO()
-
+    context.load_rd8(r_H).shift_right(7).bitwise_and(0x01).flags(Z, 0, 1, '-')
 # length: 2 bytes
 # 0xCB 0x11
 # Rotates C register left and sets carry bit if most significant bit is 1
