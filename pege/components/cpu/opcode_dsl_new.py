@@ -111,10 +111,10 @@ class NewOpcodeContext:
         self._set_value(value >> position)
         return self
     
-    def bitwise_and(self, value):
-        value = self._get_value()
-        value &= value
-        self._set_value(value)
+    def bitwise_and(self):
+        value_b = self._get_value()
+        value_a = self._get_value()
+        self._set_value(value_a & value_b)
         return self
 
     def load_FFOO(self, r1, r2):
@@ -129,7 +129,12 @@ class NewOpcodeContext:
     def load_rd8(self, r1):
         self._set_value(self._cpu.reg.reg_read_dict[r1]())
         return self
-    
+
+    # load a hardcoded value into the buffer
+    def load_v8(self, value):
+        self._set_value(value)
+        return self
+
     # load 16 bit direct data into buffer
     def load_d16(self):
         self._cpu.pc += 1

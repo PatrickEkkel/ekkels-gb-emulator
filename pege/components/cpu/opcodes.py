@@ -447,7 +447,7 @@ def RLA(mmu, cpu, meta, context):
 
 # CB opcodes
 def BIT_7_r(mmu, cpu, meta, context):
-    context.load_rd8(r_H).shift_right(7).bitwise_and(0x01).flags(Z, 0, 1, '-')
+    context.load_rd8(r_H).shift_right(7).load_v8(0x01).bitwise_and().flags(Z, 0, 1, '-')
 
 # length: 2 bytes
 # 0xCB 0x11
