@@ -84,8 +84,11 @@ class Opcode(Token):
             result = 'rr'
         elif len(self.register) == 3 and not 'H' in self.register:
             result = '(r)'
-        elif len(self.register) == 4:
+        elif len(self.register) == 4 and not self.register.isnumeric():
             result = '(rr)'
+        elif len(self.register) == 4 and self.register.isnumeric():
+            result = 'nnnn'
+
         return result
 
     def _print_address(self):
@@ -189,6 +192,8 @@ class Tokenizer:
             return self.tokens[1]
         elif  len(self.tokens) > 1 and len(self.tokens[1]) == 4 and (self.tokens[1] in REGISTERS_16B or self.tokens[1] in REGISTERS_8B  or self.tokens[1] in OFFSET_REGISTERS):
             return self.tokens[1]
+        elif len(self.tokens) > 1 and len(self.tokens[1]) == 4 and self.tokens[1].isnumeric() and self.tokens[0] != 'JPZ':
+            return self.tokens[1] 
         else:
             return None
 
@@ -272,6 +277,13 @@ class GBA_ASM:
                 elif str(opcode.address) == '0':
                     opcode.address = 0x0
                     self.encoded_program.append(0x0)
+                elif opcode.register and len(opcode.register) == 4 and opcode.addressing_mode != Opcode.OFFSET_REGISTER_TRANSFER:
+                    opcode.address = encode_16bit_value(opcode.register)
+                    fb = opcode.address[2:4]
+                    sb = opcode.address[0:2]
+                    self.encoded_program.append(int(fb, 16))
+                    self.encoded_program.append(int(sb, 16))
+                
 
     def _handle_opcode_label(self, opcode):
         # the asm command contains label that needs to be translated

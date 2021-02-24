@@ -804,6 +804,7 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_A() == 0x48
         assert gb.CPU.reg.GET_HALF_CARRY() == False
+
     def test_ld_e_a(self):
         gbasm = GBA_ASM()
         test_program = ['LD E A']
@@ -814,6 +815,16 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_E() == 0xFA
 
+    
+    def test_LD_nnnn_A_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD 8000 A']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0xAB)
+        gb._run()
+        assert gb.mmu.read(0x8000) == 0xAB
     def test_CALLnn_opcode(self):
         gbasm = GBA_ASM()
 
@@ -1071,6 +1082,20 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         value =  gb.mmu.read(targeted_memory_address)
         assert value == expected_value
+
+    
+    def test_LDD_HL_A_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['LDD (HL-) A']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_HL(0x8000)
+        gb.CPU.reg.SET_A(0x80)
+        gb._run()
+
+        assert gb.CPU.reg.GET_HL() == 0x7FFF
+        assert gb.mmu.read(0x8000) == 0x80
 
     def test_LDHAn_parse(self):
         gbasm = GBA_ASM()

@@ -129,7 +129,7 @@ class NewOpcodeContext:
     def load_rd8(self, r1):
         self._set_value(self._cpu.reg.reg_read_dict[r1]())
         return self
-
+    
     # load 16 bit direct data into buffer
     def load_d16(self):
         self._cpu.pc += 1
@@ -141,6 +141,16 @@ class NewOpcodeContext:
     def load_rd16(self, r1):
         reg = self._cpu.reg.reg_read_dict[r1]()
         self._set_value(reg)
+        return self
+
+    def load_a16(self):
+        self._cpu.pc += 1
+        self.address = self._mmu.read_u16(self._cpu.pc)
+        self._cpu.pc += 1
+        return self
+        
+    def load_ra16(self, r1):
+        self.address = self._cpu.reg.reg_read_dict[r1]()
         return self
 
     def load(self):
@@ -167,11 +177,22 @@ class NewOpcodeContext:
     def store_rd8(self, r1):
         value = self._get_value()
         self._cpu.reg.reg_write_dict[r1](value)
+        
+    def store_rd16(self, r1):
+        value = self._get_value()
+        self._cpu.reg.reg_write_dict[r1](value)
 
     # store 8 bit data into address
     def store_a8(self):
         value = self._get_value()
         self._cpu._mmu.write(self.address, value)
+        return 
+    
+    # store value in the loaded memory address
+    def store_a16(self):
+        value = self._get_value()
+        self._cpu._mmu.write(self.address, value)
+        self._set_value(self.address)
         return self
     
     # store 16 data into register BC,DE,HL,SP,PC

@@ -157,13 +157,8 @@ def CPn(mmu, cpu, meta, context):
 # 0xEA 16 bit immediate value
 
 
-def LDnn16a(mmu, cpu, meta, context):
-    A = cpu.reg.GET_A()
-    cpu.pc += 1
-    address = mmu.read_u16(cpu.pc)
-    mmu.write(address, A)
-    cpu.pc += 1
-
+def LD_nnnn_A(mmu, cpu, meta, context):
+    context.load_a16().load_rd8(r_A).store_a8()
 
 def AND_r(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
@@ -178,35 +173,6 @@ def AND_nn(mmu, cpu, meta, context):
     r1 = 'A'
     context.load(r1, transient_store=True).load(addressing_mode=AddressingMode.d8).bitwise(
         r1, operation=BitwiseOperators.AND, transient_load=True).store(r1).flags(Z, 0, 1, 0)
-
-
-#def LDnA(mmu, cpu):
-#    cpu.debugger.print_opcode('LDnA')
-#    upper_param = cpu.read_upper_opcode_parameter()
-#    lower_param = cpu.read_lower_opcode_parameter()
-#    A = cpu.reg.GET_A()
-#    result = False
-
-#    if lower_param == 0x70:
-#        if upper_param == 0x06:
-#            H = cpu.reg.GET_H()
-#            H = A
-#            cpu.reg.SET_H(H)
-#            result = True
-#        elif upper_param == 0x05:
-#            D = cpu.reg.GET_D()
-#            D = A
-#            cpu.reg.SET_D(D)
-#            result = True
-
-#    elif lower_param == 0xF0:
-#        if upper_param == 0x04:
-#            C = cpu.reg.GET_C()
-#            C = A
-#            cpu.reg.SET_C(C)
-#            result = True
-
-#    return result
 
 
 def POP_rr(mmu, cpu, meta, context):
@@ -353,26 +319,9 @@ def LDI_A_HL(mmu, cpu, meta, context):
     context.load('HL', addressing_mode=AddressingMode.ir16).store(
         'A').load('HL').inc().store()
 
-# def LDIHL8A(mmu, cpu, meta, context):
-
-
-def LDDHL8A(mmu, cpu, meta, context):
-    parameter = cpu.read_upper_opcode_parameter()
-    # get A
-    A = cpu.reg.GET_A()
-    AF = cpu.reg.GET_AF()
-    HL = cpu.reg.GET_HL()
-    mmu.write(HL, A)
-    result = False
-    if parameter == 0x03:
-        HL -= 1
-        result = True
-    elif parameter == 0x02:
-        HL += 1
-        result = True
-    cpu.reg.SET_HL(HL)
-
-
+def LDD_HL_A(mmu, cpu, meta, context):
+    context.load_rd8(r_A).load_ra16(r_HL).store_a16().dec().store_rd16(r_HL)
+    
 def SWAP_r(mmu, cpu, meta, context):
     context.load('A').bitwise(
         # and r with 0x0F and shift left, store the value in the transient register
@@ -499,13 +448,13 @@ def RLA(mmu, cpu, meta, context):
 # CB opcodes
 def BIT_7_r(mmu, cpu, meta, context):
     context.load_rd8(r_H).shift_right(7).bitwise_and(0x01).flags(Z, 0, 1, '-')
+
 # length: 2 bytes
 # 0xCB 0x11
 # Rotates C register left and sets carry bit if most significant bit is 1
 # It seems what we are doing here is called 'Rotate trough carry'
 # where the most significant bit is shifted out, put in a carry bit and
 #
-
 def RLC(mmu, cpu, meta, context):
     # get the value from the C register
     C = cpu.reg.GET_C()
