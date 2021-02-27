@@ -86,8 +86,7 @@ def INCnn(mmu, cpu, meta, context):
 def INC_r(mmu, cpu, meta, context):
 
     opcode = cpu.read_opcode()
-
-    registers = {0xC: 'C', 0x04: 'B', 0x24: 'H',0x1C: 'E', 0x2C: 'L'}
+    registers = {0x3C: 'A', 0xC: 'C', 0x04: 'B', 0x24: 'H',0x1C: 'E', 0x2C: 'L'}
     r1 = registers[opcode]
     context.load(r1).inc().store(r1).flags(Z, 0, H, '-')
 
@@ -354,13 +353,8 @@ def CB(mmu, cpu, meta, context):
     return result
 
 
-def JRn(mmu, cpu, meta, context):
-    pc = cpu.pc
-    cpu.pc += 1
-    jump_address = mmu.read_s8(cpu.pc)
-    cpu.debugger.print_iv(jump_address)
-    cpu.pc += jump_address
-
+def JR_nnnn(mmu, cpu, meta, context):
+    context.load_sd8().load_rd8(r_PC).add().store_rd8(r_PC)
 
 def JRZn(mmu, cpu, meta, context):
     cpu.pc += 1

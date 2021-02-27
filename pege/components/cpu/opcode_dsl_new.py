@@ -68,7 +68,12 @@ class NewOpcodeContext:
     def bitwise(self, register=None, operation=None, position=0, value=None,transient_load=False):
         return self
     
-    def add(self, register=None):
+    def add(self):
+        self.value_a = self._pop()
+        self.value_b = self._pop()
+        value = self.value_a + self.value_b
+
+        self._push(value)
         return self
 
     def sub(self, register=None):
@@ -172,6 +177,12 @@ class NewOpcodeContext:
     def load_d8(self):
         self._cpu.pc += 1
         self._push(self._mmu.read(self._cpu.pc))
+        return self
+
+    # load 8 bit signed data into buffer
+    def load_sd8(self):
+        self._cpu.pc += 1
+        self._push(self._mmu.read_s8(self._cpu.pc))
         return self
 
     # load 16 bit register into buffer

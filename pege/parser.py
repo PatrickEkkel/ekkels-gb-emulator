@@ -192,7 +192,7 @@ class Tokenizer:
             return self.tokens[1]
         elif  len(self.tokens) > 1 and len(self.tokens[1]) == 4 and (self.tokens[1] in REGISTERS_16B or self.tokens[1] in REGISTERS_8B  or self.tokens[1] in OFFSET_REGISTERS):
             return self.tokens[1]
-        elif len(self.tokens) > 1 and len(self.tokens[1]) == 4 and self.tokens[1].isnumeric() and self.tokens[0] != 'JPZ':
+        elif len(self.tokens) > 1 and len(self.tokens[1]) == 4 and self.tokens[1].isnumeric() and self.tokens[0] != 'JPZ' and self.tokens[0] != 'JR':
             return self.tokens[1] 
         else:
             return None
@@ -234,7 +234,6 @@ class GBA_ASM:
             opcode = tokenizer.tokenize(p)
 
             if isinstance(opcode, Label):
-                #input('jup found label')
                 current_address = self.offset + program_counter
                 self.label_lookuptable[opcode.get_label()] = current_address + 2
                 program_counter += 2

@@ -32,7 +32,6 @@ class ProgramTests(unittest.TestCase):
             gb.power_on(skipbios=True)
         return gb
 
-
     def test_JRNZ_label_parser(self):
         gbasm = GBA_ASM()
         test_program = ['loop:', 'JRNZ loop:']
@@ -394,6 +393,16 @@ class ProgramTests(unittest.TestCase):
         assert gb.mmu.read(0xFF20) == 0x80
 
     
+    def test_INC_A_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['INC A']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0x01)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0x02
+
     def test_INC_E_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['INC E']
@@ -1085,7 +1094,16 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_HL() == 0x8001
         assert gb.CPU.reg.GET_A() == 0x100
-
+    
+    def test_JR_nnnn_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['JR 0104','INC A','INC A','INC A','INC A']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0x00)
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0x01
 
     def test_LDHAn_opcode(self):
         gbasm = GBA_ASM()
