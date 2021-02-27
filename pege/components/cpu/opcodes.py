@@ -129,30 +129,7 @@ def LDCA(mmu, cpu, meta, context):
     context.load_FFOO(r1, r2).store_a8()
 
 def CP_n(mmu, cpu, meta, context):
-    #context.load_d8().load_rd16(r_A).sub().flags(Z,1,H,C)
-
-    cpu.pc += 1
-    n = mmu.read(cpu.pc)
-    A = cpu.reg.GET_A()
-    cpu.reg.SET_SUBSTRACT()
-    result = A - n
-    if result == 0x00:
-        cpu.reg.SET_ZERO()
-    else:
-        cpu.reg.CLEAR_ZERO()
-
-    if A < n:
-        cpu.reg.SET_CARRY()
-    else:
-        cpu.reg.CLEAR_CARRY()
-
-    half_carry = (A & 0x0F) < (n & 0x0F)
-
-    if half_carry:
-        cpu.reg.SET_HALF_CARRY()
-    else:
-        cpu.reg.CLEAR_HALF_CARRY()
-
+    context.load_d8().load_rd16(r_A).sub().flags(Z,1,H,C)
 # length: 3 bytes
 # Put value A into nn
 # 0xEA 16 bit immediate value

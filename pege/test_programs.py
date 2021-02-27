@@ -838,8 +838,8 @@ class ProgramTests(unittest.TestCase):
 
         assert gb.CPU.reg.GET_ZERO()
         assert gb.CPU.reg.GET_SUBSTRACT()
-        #assert gb.CPU.reg.GET_HALF_CARRY() != True
-        #assert gb.CPU.reg.GET_CARRY() != True
+        assert gb.CPU.reg.GET_HALF_CARRY() == False
+        assert gb.CPU.reg.GET_CARRY() == False
 
 
     def test_CALLnn_opcode(self):

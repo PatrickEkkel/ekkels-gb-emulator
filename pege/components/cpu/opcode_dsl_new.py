@@ -1,43 +1,44 @@
 from constants import *
 from components.cpu.opcode_dsl import Opcode
 
+
+CARRY_SUB = 0 
+NORMAL_CARRY = 1
+
 class NewOpcodeContext:
     def __init__(self, cpu, mmu, meta):
         self._mmu = mmu
         self._cpu = cpu
         self._meta = meta
         #self.value = 0x00
+        self.value_a = None
+        self.value_b = None
+        self.carry_mode = NORMAL_CARRY
         self.values = [0x00,0x00]
         self.pointer = 0
         if meta:
             self.opcode = Opcode(self._meta)
 
     def _check_carry(self):
-        pass
-        #value_a = self.opcode_state.left_operand
-        #value_b = self.opcode_state.right_operand
-
-        #carry = (value_a & 0x80) and (value_b & 0x80)
-
-        #if carry:
-        #    self._cpu.reg.SET_CARRY()
-        #else:
-        #    self._cpu.reg.CLEAR_CARRY()
+        if self.carry_mode == CARRY_SUB:
+            carry =  self.value_a < self.value_b
+        elif self.carry_mode == NORMAL_CARRY:
+            carry = (self.value_a & 0x80) and (self.value_b & 0x80)
+        if carry:
+            self._cpu.reg.SET_CARRY()
+        else:
+            self._cpu.reg.CLEAR_CARRY()
     
     def _check_substract(self):
         pass
 
     def _check_half_carry(self):
         pass
-        #value_a = self.opcode_state.left_operand
-        #value_b = self.opcode_state.right_operand
-        #half_carry = ((value_a & 0xF) + (value_b & 0xf)) & 0x10
-        #if half_carry:
-        #    self._cpu.reg.SET_HALF_CARRY()
-        #else:
-        #    self._cpu.reg.CLEAR_HALF_CARRY()
-
-    
+        half_carry = ((self.value_a & 0xF) + (self.value_b & 0xf)) & 0x10
+        if half_carry:
+            self._cpu.reg.SET_HALF_CARRY()
+        else:
+            self._cpu.reg.CLEAR_HALF_CARRY()
 
     def _check_zero(self):
         value = self._pop()
@@ -71,11 +72,12 @@ class NewOpcodeContext:
         return self
 
     def sub(self, register=None):
-        value_a = self._pop()
-        value_b = self._pop()
-        value = value_b - value_a
+        self.value_a = self._pop()
+        self.value_b = self._pop()
+        value = self.value_b - self.value_a
         # we need to store the a and b value in a seperate buffer so we can use it at any time in the flags register
         self._push(value)
+        self.carry_mode = CARRY_SUB
         return self
 
     def dec(self):
