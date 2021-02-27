@@ -128,8 +128,9 @@ def LDCA(mmu, cpu, meta, context):
     r2 = register_operand_2[opcode]
     context.load_FFOO(r1, r2).store_a8()
 
-def CPn(mmu, cpu, meta, context):
- 
+def CP_n(mmu, cpu, meta, context):
+    #context.load_d8().load_rd16(r_A).sub().flags(Z,1,H,C)
+
     cpu.pc += 1
     n = mmu.read(cpu.pc)
     A = cpu.reg.GET_A()

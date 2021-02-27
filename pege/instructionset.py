@@ -31,7 +31,7 @@ instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XOR_r 
                 {'m': 'JPZ nnnn'   , 'datatype': 'a16', 'opcode': opcodes.JP_Z_nnnn, 'length': 3, 'cycles': [12, 16],'jump_instruction': True , 'register_options': {'x': 0xCA   } },
                 {'m': 'JR nnnn'    , 'datatype': 'r8',  'opcode': opcodes.JRn      , 'length': 2, 'cycles': [12, 12],'jump_instruction': True , 'register_options': {'x': 0x18   } },
                 {'m': 'DI'         , 'datatype': ''  ,  'opcode': opcodes.DI       , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'x': 0xF3   } },
-                {'m': 'CP'         , 'datatype': 'd8',  'opcode': opcodes.CPn      , 'length': 2, 'cycles': 8,       'jump_instruction': False, 'register_options': {'x': 0xFE   } },
+                {'m': 'CP nn'      , 'datatype': 'd8',  'opcode': opcodes.CP_n     , 'length': 2, 'cycles': 8,       'jump_instruction': False, 'register_options': {'x': 0xFE   }, 'oc_handler': NewOpcodeContext },
                 {'m': 'EI'         , 'datatype': ''  ,  'opcode': opcodes.EI       , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'x': 0xFB   } },
                 {'m': 'LD (rr) nn' , 'datatype': 'd8',  'opcode': opcodes.LD_rr_nn , 'length': 2, 'cycles': 12,      'jump_instruction': False, 'register_options': {'(HL)': 0x36, '(DE)': 0x12 } },
                 {'m': 'LD (r) r'   , 'datatype': ''  ,  'opcode': opcodes.LDCA     , 'length': 2, 'cycles': 8,       'jump_instruction': False, 'register_options': {'(C) A':  0xE2  }, 'oc_handler': NewOpcodeContext },

@@ -825,6 +825,23 @@ class ProgramTests(unittest.TestCase):
         gb.CPU.reg.SET_A(0xAB)
         gb._run()
         assert gb.mmu.read(0x8000) == 0xAB
+
+    
+    def test_CP_nn_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['CP 90']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0x90)
+        gb._run()
+
+        assert gb.CPU.reg.GET_ZERO()
+        assert gb.CPU.reg.GET_SUBSTRACT()
+        #assert gb.CPU.reg.GET_HALF_CARRY() != True
+        #assert gb.CPU.reg.GET_CARRY() != True
+
+
     def test_CALLnn_opcode(self):
         gbasm = GBA_ASM()
 

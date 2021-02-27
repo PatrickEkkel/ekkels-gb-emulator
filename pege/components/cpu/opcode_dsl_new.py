@@ -14,15 +14,33 @@ class NewOpcodeContext:
 
     def _check_carry(self):
         pass
+        #value_a = self.opcode_state.left_operand
+        #value_b = self.opcode_state.right_operand
+
+        #carry = (value_a & 0x80) and (value_b & 0x80)
+
+        #if carry:
+        #    self._cpu.reg.SET_CARRY()
+        #else:
+        #    self._cpu.reg.CLEAR_CARRY()
     
     def _check_substract(self):
         pass
 
     def _check_half_carry(self):
         pass
+        #value_a = self.opcode_state.left_operand
+        #value_b = self.opcode_state.right_operand
+        #half_carry = ((value_a & 0xF) + (value_b & 0xf)) & 0x10
+        #if half_carry:
+        #    self._cpu.reg.SET_HALF_CARRY()
+        #else:
+        #    self._cpu.reg.CLEAR_HALF_CARRY()
+
+    
 
     def _check_zero(self):
-        value = self._get_value()
+        value = self._pop()
         if value == 0x00:
             self._cpu.reg.SET_ZERO()
         else:
@@ -31,13 +49,13 @@ class NewOpcodeContext:
     def init(self):
         pass
     
-    # set a value to the stack TODO: rename to push
-    def _set_value(self, value):
+    # push a value to the stack 
+    def _push(self, value):
         self.values[self.pointer] = value
         self.pointer += 1
 
-    # get a value from the stack TODO: rename to pop
-    def _get_value(self):
+    # pop a value from the stack 
+    def _pop(self):
         self.pointer -= 1
         return self.values[self.pointer]
     
@@ -53,12 +71,17 @@ class NewOpcodeContext:
         return self
 
     def sub(self, register=None):
+        value_a = self._pop()
+        value_b = self._pop()
+        value = value_b - value_a
+        # we need to store the a and b value in a seperate buffer so we can use it at any time in the flags register
+        self._push(value)
         return self
 
     def dec(self):
-        value = self._get_value()
+        value = self._pop()
         #value -= 0x1
-        self._set_value(value - 0x01)
+        self._push(value - 0x01)
         return self
 
     def branch(self, flag, invert=False):
@@ -107,14 +130,15 @@ class NewOpcodeContext:
         return self
 
     def shift_right(self, position):
-        value = self._get_value()
-        self._set_value(value >> position)
+        value = self._pop()
+        self._push(value >> position)
         return self
     
     def bitwise_and(self):
-        value_b = self._get_value()
-        value_a = self._get_value()
-        self._set_value(value_a & value_b)
+        value_b = self._pop()
+        value_a = self._pop()
+        self._push(value_a & value_b)
+        # we need to store the a and b value in a seperate buffer so we can use it at any time in the flags register
         return self
 
     def load_FFOO(self, r1, r2):
@@ -122,30 +146,36 @@ class NewOpcodeContext:
         reg_value_b = self._cpu.reg.reg_read_dict[r2]()
         address = 0xFF00 + reg_value_a
         self.address = address
-        self._set_value(reg_value_b)
+        self._push(reg_value_b)
         return self
 
     # load 8 bit register into buffer
     def load_rd8(self, r1):
-        self._set_value(self._cpu.reg.reg_read_dict[r1]())
+        self._push(self._cpu.reg.reg_read_dict[r1]())
         return self
 
     # load a hardcoded value into the buffer
     def load_v8(self, value):
-        self._set_value(value)
+        self._push(value)
         return self
 
     # load 16 bit direct data into buffer
     def load_d16(self):
         self._cpu.pc += 1
-        self._set_value(self._mmu.read_u16(self._cpu.pc))
+        self._push(self._mmu.read_u16(self._cpu.pc))
         self._cpu.pc += 1
+        return self
+    
+    # load direct 8 bit value into buffer
+    def load_d8(self):
+        self._cpu.pc += 1
+        self._push(self._mmu.read(self._cpu.pc))
         return self
 
     # load 16 bit register into buffer
     def load_rd16(self, r1):
         reg = self._cpu.reg.reg_read_dict[r1]()
-        self._set_value(reg)
+        self._push(reg)
         return self
 
     def load_a16(self):
@@ -169,7 +199,7 @@ class NewOpcodeContext:
 
     # push current value as a 16bit value on the stack 
     def push_d16(self):
-        value = self._get_value()
+        value = self._pop()
         self._cpu.stack.push_u16bit(value)
         return self
     
@@ -180,29 +210,29 @@ class NewOpcodeContext:
         return self
 
     def store_rd8(self, r1):
-        value = self._get_value()
+        value = self._pop()
         self._cpu.reg.reg_write_dict[r1](value)
         
     def store_rd16(self, r1):
-        value = self._get_value()
+        value = self._pop()
         self._cpu.reg.reg_write_dict[r1](value)
 
     # store 8 bit data into address
     def store_a8(self):
-        value = self._get_value()
+        value = self._pop()
         self._cpu._mmu.write(self.address, value)
         return 
     
     # store value in the loaded memory address
     def store_a16(self):
-        value = self._get_value()
+        value = self._pop()
         self._cpu._mmu.write(self.address, value)
-        self._set_value(self.address)
+        self._push(self.address)
         return self
     
     # store 16 data into register BC,DE,HL,SP,PC
     def store_d16(self, r1):
-        value = self._get_value()
+        value = self._pop()
         self._cpu.reg.reg_write_dict[r1](value)
         return self
 
