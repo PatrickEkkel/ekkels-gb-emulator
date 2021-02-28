@@ -27,6 +27,7 @@ class Registers:
                               r_A:  self.GET_A,
                               r_C:  self.GET_C,
                               r_H:  self.GET_H,
+                              r_DE: self.GET_DE,
                               r_HL: self.GET_HL,
                               r_PC: self.GET_PC }
 

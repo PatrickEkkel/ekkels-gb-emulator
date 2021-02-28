@@ -133,7 +133,10 @@ class NewOpcodeContext:
 
         return self
 
-    def inc(self, register=None):
+    def inc(self):
+        value = self._pop()
+        value += 0x01
+        self._push(value)
         return self
 
     def shift_right(self, position):

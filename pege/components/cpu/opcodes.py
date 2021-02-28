@@ -62,26 +62,11 @@ def DI(mmu, cpu, meta, context):
 def EI(mmu, cpu, meta, context):
     context.set(0xFFFF).store(value=0xFFFF)
 
-
-def INCnn(mmu, cpu, meta, context):
-    cpu.debugger.print_opcode('INCnn')
-    parameter = cpu.read_upper_opcode_parameter()
-    result = False
-
-    if parameter == 0x01:
-        result = True
-        DE = cpu.reg.GET_DE()
-        DE += 1
-        cpu.reg.SET_DE(DE)
-
-    elif parameter == 0x02:
-        result = True
-        HL = cpu.reg.GET_HL()
-        HL += 1
-        cpu.reg.SET_HL(HL)
-
-    return result
-
+def INC_rr(mmu, cpu, meta, context):
+    opcode = cpu.read_opcode()
+    registers = {0x13: r_DE, 0x23: r_HL}
+    r1 = registers[opcode]
+    context.load_rd16(r1).inc().store_rd16(r1)
 
 def INC_r(mmu, cpu, meta, context):
 

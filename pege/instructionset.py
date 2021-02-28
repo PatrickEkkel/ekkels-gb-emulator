@@ -49,7 +49,7 @@ instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XOR_r 
                 {'m': 'PUSH rr'    , 'datatype': ''   , 'opcode': opcodes.PUSH_rr  , 'length': 1, 'cycles': 16,      'jump_instruction': False, 'register_options': {'BC': 0xC5, 'HL': 0xE5, 'DE': 0xD5, 'AF': 0xF5 } },
                 {'m': 'RLA'        , 'datatype': ''   , 'opcode': opcodes.RLA      , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'x': 0x17  } },
                 {'m': 'POP rr'     , 'datatype': ''   , 'opcode': opcodes.POP_rr   , 'length': 1, 'cycles': 12,      'jump_instruction': False, 'register_options': {'BC': 0xC1,'HL': 0xE1,'DE': 0xD1,'AF': 0xF1} },
-                {'m': 'INC rr'     , 'datatype': ''   , 'opcode': opcodes.INCnn    , 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'HL': 0x23, 'DE': 0x13} },
+                {'m': 'INC rr'     , 'datatype': ''   , 'opcode': opcodes.INC_rr   , 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'HL': 0x23, 'DE': 0x13}, 'oc_handler': NewOpcodeContext },
                 {'m': 'CPL'        , 'datatype': ''   , 'opcode': opcodes.CPL      , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'x': 0x2F} },
                 {'m': 'AND nn'     , 'datatype': ''   , 'opcode': opcodes.AND_nn   , 'length': 2, 'cycles': 8,       'jump_instruction': False, 'register_options': {'x': 0xE6 } },
                 {'m': 'AND r'      , 'datatype': ''   , 'opcode': opcodes.AND_r    , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'C': 0xA1, 'A': 0xA7 } },
