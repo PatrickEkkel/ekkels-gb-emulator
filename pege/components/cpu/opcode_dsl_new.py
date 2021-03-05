@@ -5,6 +5,20 @@ from components.cpu.opcode_dsl import Opcode
 CARRY_SUB = 0 
 NORMAL_CARRY = 1
 
+class DummyOpcodeContext:
+    def __init__(self):
+        pass
+
+    def load_rd16(self, r1):
+        return self
+    
+    def store_rd16(self, r1):
+        return self
+        
+    def add(self):
+        return self
+
+
 class NewOpcodeContext:
     def __init__(self, cpu, mmu, meta):
         self._mmu = mmu
@@ -91,8 +105,19 @@ class NewOpcodeContext:
         self._push(value - 0x01)
         return self
 
-    def branch(self, flag, invert=False):
-        return self
+    def branch(self, flag):
+        I = '-'
+        E = 0
+        S = 1
+        Z = 2
+        N = 3
+        H = 4
+        C = 5
+        conditional = (flag == Z and self._cpu.reg.GET_ZERO())
+        if conditional:
+            return self
+        else:
+            return DummyOpcodeContext()
     
     def flags(self, zero, substract, halfcarry, carry):
         I = '-'

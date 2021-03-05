@@ -27,7 +27,7 @@ instructions = [{'m': 'XOR r'      , 'datatype': '',    'opcode': opcodes.XOR_r 
                 {'m': 'LDI A (HL+)', 'datatype': '',    'opcode': opcodes.LDI_A_HL , 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'x': 0x2A   } },
                 {'m': 'LDI (HL+) A', 'datatype': '',    'opcode': opcodes.LDI_HL_A , 'length': 1, 'cycles': 8,       'jump_instruction': False, 'register_options': {'x': 0x22   } },
                 {'m': 'JRNZ nnnn'  , 'datatype': 'r8',  'opcode': opcodes.JRNZn    , 'length': 2, 'cycles': [8, 12], 'jump_instruction': True , 'register_options': {'x': 0x20   } },
-                {'m': 'JRZ nn'     , 'datatype': 'r8',  'opcode': opcodes.JRZn     , 'length': 2, 'cycles': [8, 12], 'jump_instruction': True , 'register_options': {'x': 0x28   } },
+                {'m': 'JRZ nnnn'   , 'datatype': 'r8',  'opcode': opcodes.JRZ_nnnn , 'length': 2, 'cycles': [8, 12], 'jump_instruction': True , 'register_options': {'x': 0x28   }, 'oc_handler': NewOpcodeContext },
                 {'m': 'JPZ nnnn'   , 'datatype': 'a16', 'opcode': opcodes.JP_Z_nnnn, 'length': 3, 'cycles': [12, 16],'jump_instruction': True , 'register_options': {'x': 0xCA   } },
                 {'m': 'JR nnnn'    , 'datatype': 'r8',  'opcode': opcodes.JR_nnnn  , 'length': 2, 'cycles': [12, 12],'jump_instruction': True , 'register_options': {'x': 0x18   }, 'oc_handler': NewOpcodeContext },
                 {'m': 'DI'         , 'datatype': ''  ,  'opcode': opcodes.DI       , 'length': 1, 'cycles': 4,       'jump_instruction': False, 'register_options': {'x': 0xF3   } },

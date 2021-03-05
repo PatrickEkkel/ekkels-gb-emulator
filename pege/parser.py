@@ -304,9 +304,12 @@ class GBA_ASM:
                  self.encoded_program.append(encoded_opcode)
                  result = address
                  if address > self.program_counter:
-                     signed_address = address
-                     # TODO: this is not working correctly
-                     self.encoded_program.append(int(0x00))
+                    signed_address = address
+                    fb = (signed_address >> 8) & 0xFF
+                    sb = signed_address & 0xFF
+                    self.encoded_program.append(sb)
+                    self.encoded_program.append(fb)
+                      #self.encoded_program.append(int(signed_address))
                  else:
                      signed_address = ((self.program_counter) - address - self.offset) * -1
                      signed_address = address

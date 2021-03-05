@@ -247,7 +247,7 @@ class CPU:
         self.cb_opcodes = instructionset.create_cb_opcode_map('opcode')
 
         self.opcodes[0x20] = opcodes.JRNZn
-        self.opcodes[0x28] = opcodes.JRZn
+        #self.opcodes[0x28] = opcodes.JRZn
         self.opcodes[0x06] = opcodes.LD_r_nn
 
     def read_opcode(self):
