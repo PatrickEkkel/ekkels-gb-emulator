@@ -340,27 +340,15 @@ def CB(mmu, cpu, meta, context):
 def JR_nnnn(mmu, cpu, meta, context):
     context.load_sd8().load_rd8(r_PC).add().store_rd8(r_PC)
 
-def JRZ_nnnn(mmu, cpu, meta, context):
+def JRZ_r8(mmu, cpu, meta, context):
     context.load_sd8().branch(Z).load_rd16(r_PC).add().store_rd16(r_PC)
     
-
 def JP_nnnn(mmu, cpu, meta, context):
     r1 = 'PC'
     context.load(r1, addressing_mode=AddressingMode.d16).store(r1).load(r1).dec().store(r1)
 
-def JRNZn(mmu, cpu, meta, context):
-    pc = cpu.pc + 1
-    cpu.pc += 1
-    val = mmu.read_s8(pc)
-    cpu.debugger.print_iv(val)
-    jump_address = pc
-    
-    if not cpu.reg.GET_ZERO():
-        jump_address += val
-        cpu.pc = jump_address
-    
-
-
+def JRNZ_r8(mmu, cpu, meta, context):
+    context.load_sd8().branch(Z,invert=True).load_rd16(r_PC).add().store_rd16(r_PC)
     
 # length: 3 bytes
 # 0xCD

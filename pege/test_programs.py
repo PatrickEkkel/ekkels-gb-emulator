@@ -1159,8 +1159,21 @@ class ProgramTests(unittest.TestCase):
         value =  gb.CPU.reg.GET_A()
         assert value == expected_value
     
-    def test_JRNZ_n_opcode(self):
-        # TODO JRZ loop: parsing is not completly correct yet
+
+    def test_JRNZ_r8_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['JRNZ loop:','INC A','INC A','INC A','loop:']
+        bitstream = gbasm.parse(test_program)
+        for b in bitstream:
+            self.print_hex(b)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_A(0x00)
+        gb.CPU.reg.CLEAR_ZERO()
+        gb._run()
+        assert gb.CPU.reg.GET_A() == 0x00
+
+    def test_JRZ_r8_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['JRZ loop:','INC A','INC A','INC A','loop:']
         bitstream = gbasm.parse(test_program)
@@ -1171,7 +1184,7 @@ class ProgramTests(unittest.TestCase):
         gb.CPU.reg.SET_A(0x00)
         gb.CPU.reg.SET_ZERO()
         gb._run()
-        assert True
+        assert gb.CPU.reg.GET_A() == 0x00
 
 if __name__ == '__main__':
     unittest.main()

@@ -62,8 +62,8 @@ class NewOpcodeContext:
             self._cpu.reg.CLEAR_ZERO()
         
     def init(self):
-        pass
-    
+        self.pointer = 0
+
     # push a value to the stack 
     def _push(self, value):
         self.values[self.pointer] = value
@@ -105,7 +105,7 @@ class NewOpcodeContext:
         self._push(value - 0x01)
         return self
 
-    def branch(self, flag):
+    def branch(self, flag, invert=False):
         I = '-'
         E = 0
         S = 1
@@ -113,7 +113,13 @@ class NewOpcodeContext:
         N = 3
         H = 4
         C = 5
-        conditional = (flag == Z and self._cpu.reg.GET_ZERO())
+
+
+        if invert:
+            conditional = (flag == Z and not self._cpu.reg.GET_ZERO())
+        else:
+            conditional = (flag == Z and self._cpu.reg.GET_ZERO())
+          
         if conditional:
             return self
         else:
