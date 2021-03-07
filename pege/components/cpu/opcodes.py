@@ -341,14 +341,8 @@ def JR_nnnn(mmu, cpu, meta, context):
     context.load_sd8().load_rd8(r_PC).add().store_rd8(r_PC)
 
 def JRZ_nnnn(mmu, cpu, meta, context):
-    #context.load_sd8().branch(Z).load_rd16(r_PC).add().store_rd16(r_PC)
-    cpu.pc += 1
-    val = mmu.read_s8(cpu.pc)
-    cpu.debugger.print_iv(val)
-    if cpu.reg.GET_ZERO():
-        jump_address = cpu.pc + val
-        cpu.pc = jump_address
-
+    context.load_sd8().branch(Z).load_rd16(r_PC).add().store_rd16(r_PC)
+    
 
 def JP_nnnn(mmu, cpu, meta, context):
     r1 = 'PC'

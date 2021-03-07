@@ -305,10 +305,9 @@ class GBA_ASM:
                  result = address
                  if address > self.program_counter:
                     signed_address = address
-                    fb = (signed_address >> 8) & 0xFF
-                    sb = signed_address & 0xFF
-                    self.encoded_program.append(sb)
-                    self.encoded_program.append(fb)
+                    jump_address = signed_address - self.offset
+                    self.encoded_program.append(jump_address)
+                    #self.encoded_program.append(fb)
                       #self.encoded_program.append(int(signed_address))
                  else:
                      signed_address = ((self.program_counter) - address - self.offset) * -1
