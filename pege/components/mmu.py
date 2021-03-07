@@ -95,7 +95,8 @@ class MMU:
     def write(self,address, value):
 
         if address == 0xFFB6:
-            input('start DMA')
+            pass
+            #input('start DMA')
         if not self._handle_write(address, value):
             # writing to VRAM
             if self._is_vram(address):

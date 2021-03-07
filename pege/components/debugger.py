@@ -20,6 +20,8 @@ class Debugger:
         self.stop_and_step_at = None
         self.stop_and_step_at = None # 0x66 # 0x2824 # 0x29a8 #0x29B3
         self.exit_at_breakpoint = False
+        self.instr_executed = 0
+        self.instr_stop = 1000
 
 
     def format_hex(self, opcode):
@@ -28,6 +30,10 @@ class Debugger:
     def print_opcode(self, opcode_description):
         if self.show_opcodes:
             print(opcode_description, end=' ')
+
+    def is_execution_cap_reached(self):
+       # input(self.instr_executed)
+        return self.instr_executed > self.instr_stop
 
     def show_opcode_description(self,mnemonic):
         if self.show_description:
@@ -70,7 +76,7 @@ class Debugger:
             print(f'Memory address {memory_address}: {memory_value} ')
 
 
-                
+      
     def print_vram(self):
         if self.show_vram:
             start =  MMU.VRAM_START

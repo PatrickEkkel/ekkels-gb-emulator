@@ -245,11 +245,12 @@ class CPU:
         self.opcode_contexts = instructionset.create_opcode_contexts(self, self._mmu)
         self.cb_opcode_contexts = instructionset.create_cb_opcode_contexts(self, self._mmu)
         self.cb_opcodes = instructionset.create_cb_opcode_map('opcode')
-        
+
         self.opcodes[0x06] = opcodes.LD_r_nn
 
     def read_opcode(self):
         # PUT CPU in execute NOP forever, very handy when working on GPU
+        self.debugger.instr_executed += 1
         if self.disable_cpu:
             return 0x00
         else:
@@ -289,7 +290,12 @@ class CPU:
         # handle interrupts 
         self.interrupt_handler.step()
         success = False
+        #print(self.debugger.instr_executed)
+        if self.debugger.is_execution_cap_reached():
+            return False
+
         opcode = self.read_opcode()
+
         opcode_meta = None
         if opcode == 0xcb:
             instruction = self.cb_opcodes[opcode]
