@@ -1,10 +1,11 @@
 import config
 from gameboy import GameBoy
 from cartridges.tetris import Tetris
+from cartridges.blargh_interrupts import BlarghInterrupts
 from cartridges.empty import Empty
 #import testdata
 
-game = Tetris()
+game = BlarghInterrupts()
 game.print_cartridge_info()
 
 gb = GameBoy(game)
