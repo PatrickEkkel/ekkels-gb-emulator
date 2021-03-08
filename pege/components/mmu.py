@@ -118,7 +118,8 @@ class MMU:
                 #print('wram bank oam')
                 self.oam[address]  = value
             elif self._is_not_usable(address):
-                print('not usable')
+                pass
+                #print('not usable')
             else:
                 # just dump all illigal writes in this array, so we can use it for testing
                 self.unmapped[address] = value

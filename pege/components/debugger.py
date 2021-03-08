@@ -5,6 +5,7 @@ class Debugger:
     def __init__(self, cpu, mmu):
         self.cpu = cpu
         self.mmu = mmu
+        self.instr_cap = True
         self.show_registers = True
         self.show_stack = False
         self.show_vram = False
@@ -33,7 +34,7 @@ class Debugger:
 
     def is_execution_cap_reached(self):
        # input(self.instr_executed)
-        return self.instr_executed > self.instr_stop
+        return self.instr_executed > self.instr_stop and self.instr_cap
 
     def show_opcode_description(self,mnemonic):
         if self.show_description:

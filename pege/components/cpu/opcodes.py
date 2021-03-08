@@ -123,11 +123,15 @@ def LD_nnnn_A(mmu, cpu, meta, context):
 
 def AND_r(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
-    register_operand_1 = {0xA1: 'C', 0xA7: 'A'}
-    r1 = 'A'
+
+    register_operand_1 = {0xA1: r_C, 0xA7: r_A } 
+    #register_operand_1 = {0xA1: 'C', 0xA7: 'A'}
+    #r1 = 'A'
+    r1 = r_A
     r2 = register_operand_1[opcode]
-    context.load(r2).bitwise(
-        r1, operation=BitwiseOperators.AND).store(r1).flags(Z, 0, 1, 0)
+    context.load_rd8(r2).load_rd8(r1).bitwise_and().store_rd8(r1).flags(Z, 0, 1, 0)
+    #context.load(r2).bitwise(
+    #    r1, operation=BitwiseOperators.AND).store(r1).flags(Z, 0, 1, 0)
 
 
 def AND_nn(mmu, cpu, meta, context):
@@ -349,7 +353,7 @@ def JP_nnnn(mmu, cpu, meta, context):
 
 def JRNZ_r8(mmu, cpu, meta, context):
     context.load_sd8().branch(Z,invert=True).load_rd16(r_PC).add().store_rd16(r_PC)
-    
+
 # length: 3 bytes
 # 0xCD
 # pushes the PC to the stack and jump to specified 16 bit operand

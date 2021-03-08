@@ -259,6 +259,7 @@ class NewOpcodeContext:
     def store_rd8(self, r1):
         value = self._pop()
         self._cpu.reg.reg_write_dict[r1](value)
+        return self
         
     def store_rd16(self, r1):
         value = self._pop()

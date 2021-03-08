@@ -251,10 +251,7 @@ class CPU:
     def read_opcode(self):
         # PUT CPU in execute NOP forever, very handy when working on GPU
         self.debugger.instr_executed += 1
-        if self.disable_cpu:
-            return 0x00
-        else:
-            return self._mmu.read(self.pc)
+        return self._mmu.read(self.pc)
 
     def read_lower_opcode_parameter(self):
         return self._mmu.read(self.pc) << 4 & 0xFF
@@ -290,7 +287,6 @@ class CPU:
         # handle interrupts 
         self.interrupt_handler.step()
         success = False
-        #print(self.debugger.instr_executed)
         if self.debugger.is_execution_cap_reached():
             return False
 
@@ -307,11 +303,11 @@ class CPU:
             context = self.opcode_contexts[opcode]
         if instruction:
             context.init()
-            success = self.debug(context, opcode)
+            #success = self.debug(context, opcode)
             instruction(self._mmu,self, opcode_meta, context)
             cycle = context.opcode.get_cycles()
-            self.debugger.print_cpu_flags()
-            self.debugger.end()
+            #self.debugger.print_cpu_flags()
+            #self.debugger.end()
             if cycle == -1:
                 self._handle_opcode_failure(opcode)
                 success = False
