@@ -22,13 +22,12 @@ class InterruptHandler(Component):
 
         # set the interrupt vector
         context.load_rd16(r1).inc().push_d16().load_v16(vector).store_rd16(r1)
-        #context.load(r1).inc().push().set(vector).store(r1)
         
     def step(self):
         # 
-        IM = (self.mapping[IF_REGISTER] & self.mapping[IE_REGISTER]) 
+        IM = ((0xFF00 | self.mapping[IF_REGISTER]) & self.mapping[IE_REGISTER]) 
         if IM == InterruptHandler.VBLANK:
-            #input('vblank interrupt triggered')
+            input('vblank interrupt triggered')
             self._handle_vblank_interrupt(0x40)
             
         
@@ -36,9 +35,7 @@ class InterruptHandler(Component):
         return self.mapping[address]
 
     def write(self, address, value):
-        #input(self._format_hex(address))
-        #input(self._format_hex(value))
-        self.mapping[address] = 0xFF00 | value
+        self.mapping[address] = value
         
         
     def is_in_range(self, address):

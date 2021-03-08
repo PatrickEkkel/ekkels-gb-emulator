@@ -955,6 +955,18 @@ class ProgramTests(unittest.TestCase):
         assert gb.CPU.reg.GET_B() == 0x03
         assert gb.CPU.reg.GET_SUBSTRACT() == False
 
+    def test_INC_D_opcode(self):
+        gbasm = GBA_ASM()
+        test_program  = ['INC D']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_D(0x02)
+        gb.CPU.reg.SET_SUBSTRACT()
+        gb._run()
+        assert gb.CPU.reg.GET_D() == 0x03
+        assert gb.CPU.reg.GET_SUBSTRACT() == False
+
     def test_INC_C_opcode(self):
         gbasm = GBA_ASM()
         test_program  = ['INC C']

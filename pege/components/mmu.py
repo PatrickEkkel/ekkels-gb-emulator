@@ -94,6 +94,7 @@ class MMU:
 
     def write(self,address, value):
 
+        
         if address == 0xFFB6:
             pass
             #input('start DMA')
@@ -174,7 +175,6 @@ class MMU:
         # everything above 0x104 to 7FFF is 'cartrdige ROM' space, switchable via MBC if available
 
         value =  self._handle_read(address)
-            
         if value:
             return value
         else:

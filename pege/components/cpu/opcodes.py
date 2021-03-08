@@ -79,7 +79,7 @@ def INC_rr(mmu, cpu, meta, context):
 
 def INC_r(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
-    registers = {0x3C: 'A', 0xC: 'C', 0x04: 'B', 0x24: 'H',0x1C: 'E', 0x2C: 'L'}
+    registers = {0x3C: 'A', 0xC: 'C', 0x04: 'B', 0x24: 'H',0x1C: 'E', 0x2C: 'L', 0x14: 'D'}
     r1 = registers[opcode]
     context.load(r1).inc().store(r1).flags(Z, 0, H, '-')
 
