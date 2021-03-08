@@ -1,5 +1,5 @@
 from ..component import Component
-from .opcode_dsl import OpcodeContext
+from .opcode_dsl_new import NewOpcodeContext
 from constants import *
 
 class InterruptHandler(Component):
@@ -17,23 +17,28 @@ class InterruptHandler(Component):
         # reset interrupt flag 
         self._mmu.write(IF_REGISTER,0x1F00)
         # build context so we can use the cpu core to construct a jump
-        context = OpcodeContext(self._cpu, self._mmu,None)
-        r1 = 'PC' 
+        context = NewOpcodeContext(self._cpu, self._mmu,None)
+        r1 = r_PC
+
         # set the interrupt vector
-        context.load(r1).inc().push().set(vector).store(r1)
+        context.load_rd16(r1).inc().push_d16().load_v16(vector).store_rd16(r1)
+        #context.load(r1).inc().push().set(vector).store(r1)
         
     def step(self):
         # 
         IM = (self.mapping[IF_REGISTER] & self.mapping[IE_REGISTER]) 
         if IM == InterruptHandler.VBLANK:
-            input('vblank interrupt triggered')
+            #input('vblank interrupt triggered')
             self._handle_vblank_interrupt(0x40)
+            
         
     def read(self, address):
         return self.mapping[address]
 
     def write(self, address, value):
-        self.mapping[address] = value
+        #input(self._format_hex(address))
+        #input(self._format_hex(value))
+        self.mapping[address] = 0xFF00 | value
         
         
     def is_in_range(self, address):

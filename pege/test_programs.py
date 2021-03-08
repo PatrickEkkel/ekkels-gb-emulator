@@ -512,6 +512,17 @@ class ProgramTests(unittest.TestCase):
         assert gb.CPU.reg.GET_BC() == 0xAFBF
 
 
+    def test_inc_hl_opcode(self):
+        gbasm = GBA_ASM()
+        test_program = ['INC (HL)']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_HL(0x8000)
+        gb.mmu.write(0x8000,0xFFFD)
+        gb._run()
+        assert gb.mmu.read(0x8000) == 0xFFFE
+
     def test_dec_hl_opcode(self):
         gbasm = GBA_ASM()
         test_program = ['DEC (HL)']
@@ -521,7 +532,7 @@ class ProgramTests(unittest.TestCase):
         gb.CPU.reg.SET_HL(0x8000)
         gb.mmu.write(0x8000,0xFFFF)
         gb._run()
-        gb.mmu.read(0x8000) == 0xFFFE
+        assert gb.mmu.read(0x8000) == 0xFFFE
 
     
     def test_LD_DE_nnnn_opcode(self):

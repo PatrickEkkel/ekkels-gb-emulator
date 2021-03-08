@@ -303,11 +303,11 @@ class CPU:
             context = self.opcode_contexts[opcode]
         if instruction:
             context.init()
-            #success = self.debug(context, opcode)
+            success = self.debug(context, opcode)
             instruction(self._mmu,self, opcode_meta, context)
             cycle = context.opcode.get_cycles()
-            #self.debugger.print_cpu_flags()
-            #self.debugger.end()
+            self.debugger.print_cpu_flags()
+            self.debugger.end()
             if cycle == -1:
                 self._handle_opcode_failure(opcode)
                 success = False

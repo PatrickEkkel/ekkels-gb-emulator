@@ -5,7 +5,7 @@ class Debugger:
     def __init__(self, cpu, mmu):
         self.cpu = cpu
         self.mmu = mmu
-        self.instr_cap = True
+        self.instr_cap = False
         self.show_registers = True
         self.show_stack = False
         self.show_vram = False
@@ -19,7 +19,7 @@ class Debugger:
         self.stop_at = None
         self.stop_at_opcode = None #0xEF
         self.stop_and_step_at = None
-        self.stop_and_step_at = None # 0x66 # 0x2824 # 0x29a8 #0x29B3
+        #self.stop_and_step_at = None # 0x66 # 0x2824 # 0x29a8 #0x29B3
         self.exit_at_breakpoint = False
         self.instr_executed = 0
         self.instr_stop = 1000

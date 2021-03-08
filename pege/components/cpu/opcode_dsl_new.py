@@ -100,9 +100,9 @@ class NewOpcodeContext:
         return self
 
     def dec(self):
-        value = self._pop()
-        #value -= 0x1
-        self._push(value - 0x01)
+        self.value_a = self._pop()
+        self.value_b = self.value_a - 0x01
+        self._push(self.value_b)
         return self
 
     def branch(self, flag, invert=False):
@@ -165,9 +165,9 @@ class NewOpcodeContext:
         return self
 
     def inc(self):
-        value = self._pop()
-        value += 0x01
-        self._push(value)
+        self.value_a = self._pop()
+        self.value_b = self.value_a + 0x01
+        self._push(self.value_b)
         return self
 
     def shift_right(self, position):
@@ -194,12 +194,14 @@ class NewOpcodeContext:
     def load_rd8(self, r1):
         self._push(self._cpu.reg.reg_read_dict[r1]())
         return self
-
-    # load a hardcoded value into the buffer
+    # load a hardcodes 16 bit value into the buffer
+    def load_v16(self, value):
+        self._push(value)
+        return self
+    # load a hardcoded 8 bit value into the buffer
     def load_v8(self, value):
         self._push(value)
         return self
-
     # load 16 bit direct data into buffer
     def load_d16(self):
         self._cpu.pc += 1
@@ -207,6 +209,12 @@ class NewOpcodeContext:
         self._cpu.pc += 1
         return self
     
+    # load indirect 16 bit value into buffer. take value of memory address stored at r1
+    def load_ir16(self, r1):
+        self.address = self._cpu.reg.reg_read_dict[r1]()
+        self._push(self._mmu.read(self.address))
+        return self
+
     # load direct 8 bit value into buffer
     def load_d8(self):
         self._cpu.pc += 1
@@ -224,7 +232,7 @@ class NewOpcodeContext:
         reg = self._cpu.reg.reg_read_dict[r1]()
         self._push(reg)
         return self
-
+    # load 16 bit opcode operand into buffer
     def load_a16(self):
         self._cpu.pc += 1
         self.address = self._mmu.read_u16(self._cpu.pc)
@@ -241,6 +249,10 @@ class NewOpcodeContext:
     def reset(self, position):
         return self
 
+    def set_address(self, address):
+        self.address = address
+        return self
+
     def set(self, address):
         return self
 
@@ -250,7 +262,11 @@ class NewOpcodeContext:
         self._cpu.stack.push_u16bit(value)
         return self
     
-    def pop(self):
+    def pop_a16(self):
+        value_b =  self._cpu.stack.pop()
+        value_a =  self._cpu.stack.pop()
+        value = (value_a << 8) | value_b
+        self._push(value)
         return self
 
     def merge(self):

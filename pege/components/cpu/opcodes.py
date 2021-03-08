@@ -18,8 +18,9 @@ def NOP(mmu, cpu, meta, context):
 
 
 def DEC_HL(mmu, cpu, meta, context):
-    r1 = 'HL'
-    context.load(r1,AddressingMode.ir16).dec().store()
+    r1 = r_HL
+    context.load_ir16(r1).dec().store_a16().flags(Z, 1, H,'-')
+    
 def DEC_rr(mmu, cpu, meta, context):
     upper_param = cpu.read_upper_opcode_parameter()
     operand_mapping = {0x00: 'BC'}
@@ -54,6 +55,9 @@ def RET(mmu, cpu, meta, context):
     cpu.debugger.print_iv(jump_address)
     cpu.pc = jump_address
 
+def RETI(mmu, cpu, meta, context):
+    r1 = r_PC
+    context.set_address(0xFFFF).load_v16(0xFFFF).store_a16().pop_a16().store_rd16(r1)
 
 def DI(mmu, cpu, meta, context):
     context.set(0xFFFF).store(value=0x0000)
@@ -61,6 +65,11 @@ def DI(mmu, cpu, meta, context):
 
 def EI(mmu, cpu, meta, context):
     context.set(0xFFFF).store(value=0xFFFF)
+
+
+def INC_HL(mmu, cpu, meta, context):
+    r1 = r_HL
+    context.load_ir16(r1).inc().store_a16().flags(Z, 0, H,'-')
 
 def INC_rr(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()

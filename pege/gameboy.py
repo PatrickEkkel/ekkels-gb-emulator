@@ -27,7 +27,7 @@ class GameBoy:
 
     def _init(self, skipbios):
         # disable interrupts
-        self.mmu.write(IE_REGISTER,0x0000)
+        #self.mmu.write(IE_REGISTER,0xFFFF)
         if skipbios:
             self.mmu.disable_bootrom()
             self.CPU.pc = 0x100
