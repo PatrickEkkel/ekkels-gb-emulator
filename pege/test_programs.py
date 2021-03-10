@@ -324,15 +324,17 @@ class ProgramTests(unittest.TestCase):
         gb._run()
         assert gb.CPU.reg.GET_A() == 0xFF
 
-    def test_LD_DEnn_opcode(self):
-        gbasm = GBA_ASM()
-        test_program = ['LD (DE) 32']
-        bitstream = gbasm.parse(test_program)
-        gb = self.create_gameboy(bitstream,run=False)
-        gb.power_on(skipbios=True,standby=True)
-        gb.CPU.reg.SET_DE(0x8000)
-        gb._run()
-        assert gb.mmu.read(0x8000) == 0x32
+    # This opcode does not exist lol
+    #def test_LD_DEnn_opcode(self):
+    #    gbasm = GBA_ASM()
+    #    test_program = ['LD (DE) 32']
+    #    bitstream = gbasm.parse(test_program)
+    #    gb = self.create_gameboy(bitstream,run=False)
+    #    gb.power_on(skipbios=True,standby=True)
+    #    gb.CPU.reg.SET_DE(0x8000)
+    #    gb._run()
+    #    assert gb.mmu.read(0x8000) == 0x32
+
 
     def test_LDHLnn_opcode(self):
         gbasm = GBA_ASM()
@@ -602,6 +604,20 @@ class ProgramTests(unittest.TestCase):
         gb.CPU.reg.SET_A(0xFF)
         gb._run()
         assert gb.mmu.read(0x8000) == 0xFF
+
+    
+    def test_ld_de_a(self):
+        gbasm = GBA_ASM()
+        test_program = ['LD (DE) A']
+        bitstream = gbasm.parse(test_program)
+        gb = self.create_gameboy(bitstream,run=False)
+        gb.power_on(skipbios=True,standby=True)
+        gb.CPU.reg.SET_DE(0x8000)
+        gb.CPU.reg.SET_A(0xFF)
+        gb._run()
+        assert gb.mmu.read(0x8000) == 0xFF
+
+
 
     def test_ld_d_hl_opcode(self):
         gbasm = GBA_ASM()

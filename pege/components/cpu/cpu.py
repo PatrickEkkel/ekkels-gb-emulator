@@ -25,8 +25,12 @@ class Registers:
         self.SET_HL(0x0000)
         self.reg_read_dict = {r_AF: self.GET_AF,
                               r_A:  self.GET_A,
+                              r_B:  self.GET_B,
                               r_C:  self.GET_C,
+                              r_D:  self.GET_D,
+                              r_E:  self.GET_E,
                               r_H:  self.GET_H,
+                              r_L:  self.GET_L,
                               r_DE: self.GET_DE,
                               r_HL: self.GET_HL,
                               r_PC: self.GET_PC }
@@ -37,7 +41,12 @@ class Registers:
                                r_HL: self.SET_HL,
                                r_BC: self.SET_BC,
                                r_A:  self.SET_A,
+                               r_B:  self.SET_B,
+                               r_C:  self.SET_C,
+                               r_D:  self.SET_D,
+                               r_E:  self.SET_E,
                                r_H:  self.SET_H,
+                               r_L:  self.SET_L,
                                r_C:  self.SET_C,
                                r_PC: self.SET_PC }
 

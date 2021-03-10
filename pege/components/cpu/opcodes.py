@@ -79,9 +79,11 @@ def INC_rr(mmu, cpu, meta, context):
 
 def INC_r(mmu, cpu, meta, context):
     opcode = cpu.read_opcode()
-    registers = {0x3C: 'A', 0xC: 'C', 0x04: 'B', 0x24: 'H',0x1C: 'E', 0x2C: 'L', 0x14: 'D'}
+    registers = {0x3C: r_A, 0xC: r_C, 0x04: r_B, 0x24: r_H, 0x1C: r_E, 0x2C: r_L, 0x14: r_D} 
+    #registers = {0x3C: 'A', 0xC: 'C', 0x04: 'B', 0x24: 'H',0x1C: 'E', 0x2C: 'L', 0x14: 'D'}
     r1 = registers[opcode]
-    context.load(r1).inc().store(r1).flags(Z, 0, H, '-')
+    context.load_rd8(r1).inc().store_rd8(r1).flags(Z, 0, H, '-')
+    #context.load(r1).inc().store(r1).flags(Z, 0, H, '-')
 
 
 # length: 2 bytes
@@ -276,8 +278,15 @@ def LDnn16d(mmu, cpu, meta, context):
 def LD_r_nnnn(mmu, cpu, meta, context):
     context.load('A', addressing_mode=AddressingMode.a16).store('A')
 
-def LDHL8A(mmu, cpu, meta, context):
-    context.load('HL').store('A', AddressingMode.dr16)
+def LD_i_rr_r(mmu, cpu, meta, context):
+    opcode = cpu.read_opcode()
+    register_operand_1 = {0x12: 'DE', 0x77: 'HL'}
+    register_operand_2 = {0x12: 'A' , 0x77: 'A' }
+    
+    r1 = register_operand_1[opcode]
+    r2 = register_operand_2[opcode]
+
+    context.load(r1).store(r2, AddressingMode.dr16)
 
 
 def LDI_HL_A(mmu, cpu, meta, context):

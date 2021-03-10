@@ -6,6 +6,7 @@ from cartridges.empty import Empty
 #import testdata
 
 game = BlarghInterrupts()
+#game = Tetris()
 game.print_cartridge_info()
 
 gb = GameBoy(game)
