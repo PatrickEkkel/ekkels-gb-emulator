@@ -211,7 +211,7 @@ class MMU:
             pack_method = 'b'
 
         if self.booted:
-            return struct.pack(pack_method, self.rom.read(address))
+            return struct.pack(pack_method, self.read(address))
         else:
             return struct.pack(pack_method, self.bios.read(address))
 

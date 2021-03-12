@@ -27,7 +27,7 @@ class InterruptHandler(Component):
         # 
         IM = ((0xFF00 | self.mapping[IF_REGISTER]) & self.mapping[IE_REGISTER]) 
         if IM == InterruptHandler.VBLANK:
-            input('vblank interrupt triggered')
+            #input('vblank interrupt triggered')
             self._handle_vblank_interrupt(0x40)
             
         

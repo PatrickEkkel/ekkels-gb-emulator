@@ -202,6 +202,7 @@ class NewOpcodeContext:
     def load_v8(self, value):
         self._push(value)
         return self
+        
     # load 16 bit direct data into buffer
     def load_d16(self):
         self._cpu.pc += 1
@@ -232,6 +233,7 @@ class NewOpcodeContext:
         reg = self._cpu.reg.reg_read_dict[r1]()
         self._push(reg)
         return self
+
     # load 16 bit opcode operand into buffer
     def load_a16(self):
         self._cpu.pc += 1

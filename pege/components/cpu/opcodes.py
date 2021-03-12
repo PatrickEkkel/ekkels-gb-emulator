@@ -366,8 +366,9 @@ def JRZ_r8(mmu, cpu, meta, context):
     context.load_sd8().branch(Z).load_rd16(r_PC).add().store_rd16(r_PC)
     
 def JP_nnnn(mmu, cpu, meta, context):
-    r1 = 'PC'
-    context.load(r1, addressing_mode=AddressingMode.d16).store(r1).load(r1).dec().store(r1)
+    r1 = r_PC
+    context.load_d16().dec().store_rd16(r1)
+    #context.load(r1, addressing_mode=AddressingMode.d16).store(r1).load(r1).dec().store(r1)
 
 def JRNZ_r8(mmu, cpu, meta, context):
     context.load_sd8().branch(Z,invert=True).load_rd16(r_PC).add().store_rd16(r_PC)
