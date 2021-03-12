@@ -93,10 +93,10 @@ def INC_r(mmu, cpu, meta, context):
 def LDH_nn_A(mmu, cpu, meta, context):
     context.load('A').load(addressing_mode=AddressingMode.d8).store('A',AddressingMode.a8)
 
-def LDH_r_nn(mmu, cpu, meta, context):
-    context.load(addressing_mode=AddressingMode.a8).store('A',AddressingMode.d8)
-
- 
+def LDH_A_nn(mmu, cpu, meta, context):
+    r1 = r_A
+    context.load_d8().load_rd8(r1).load_FFOO().load_ia8().store_rd8(r1)
+    
 # length: 1 byte
 # 0x1A
 # Read the Value of register DE from memory and put the contents of adress DE in A
@@ -120,7 +120,7 @@ def LDCA(mmu, cpu, meta, context):
     register_operand_2 = {0xE2: r_A}
     r1 = register_operand_1[opcode]
     r2 = register_operand_2[opcode]
-    context.load_FFOO(r1, r2).store_a8()
+    context.load_rd8(r1).load_rd8(r2).load_FFOO().store_a8()
 
 def CP_n(mmu, cpu, meta, context):
     context.load_d8().load_rd16(r_A).sub().flags(Z,1,H,C)

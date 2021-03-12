@@ -27,6 +27,7 @@ class InterruptHandler(Component):
         # 
         IM = ((0xFF00 | self.mapping[IF_REGISTER]) & self.mapping[IE_REGISTER]) 
         if IM == InterruptHandler.VBLANK:
+            #print(self._mmu.read(0xFF85))
             #input('vblank interrupt triggered')
             self._handle_vblank_interrupt(0x40)
             
@@ -40,3 +41,6 @@ class InterruptHandler(Component):
         
     def is_in_range(self, address):
         return IF_REGISTER == address or IE_REGISTER == address
+
+    def get_memory_map(self):
+        return [IF_REGISTER, IE_REGISTER]

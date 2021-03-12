@@ -17,3 +17,7 @@ class Component:
     def is_in_range(self, address):
         input('not implemented')
         return False
+
+    def get_memory_map(self):
+        input('not implemented')
+        return []

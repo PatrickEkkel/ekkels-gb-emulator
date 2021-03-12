@@ -5,7 +5,7 @@ class Debugger:
     def __init__(self, cpu, mmu):
         self.cpu = cpu
         self.mmu = mmu
-        self.instr_cap = False
+        self.instr_cap = True
         self.show_registers = True
         self.show_stack = False
         self.show_vram = False

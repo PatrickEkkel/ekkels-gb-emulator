@@ -17,14 +17,14 @@ class Screen:
         self.mmu = mmu
         # set up pygame
         pygame.init()
-
+        self._frame_buffer = []
         self.enabled = True
         self.current_x = 0
         self.current_y = 0
         self.grid = True
         self.multiply_factor = 1
-        self.width = 256 * self.multiply_factor
-        self.height = 256 * self.multiply_factor
+        self.width = 256 
+        self.height = 256 
         # set up the window
 
         self.windowSurface = pygame.display.set_mode((self.width, self.height), 0, 32)
@@ -38,18 +38,11 @@ class Screen:
 
         pygame.display.update()
 
-    def _render_pixel(self, start_x, start_y, value):
-        if self.enabled:
-            for y in range(self.multiply_factor):
-                for x in range(self.multiply_factor):
-                    offset_x = start_x + x
-                    offset_y = start_y + y
-                    gfxdraw.pixel(self.windowSurface, offset_x, offset_y, value)
-
     def render_pixel(self,start_y, value):
         self.current_x += 1
         self.current_y = start_y
-        self._render_pixel(self.current_x, self.current_y, value)
+        #gfxdraw.pixel(self.windowSurface, self.current_x, self.current_y, value)
+        self._frame_buffer.append((self.current_x, self.current_y, value))
 
     def new_scanline(self):
         self.current_x = 0
@@ -65,6 +58,10 @@ class Screen:
 
     def update(self):
         if self.enabled:
+            for pixel in self._frame_buffer:
+                gfxdraw.pixel(self.windowSurface,pixel[0] , pixel[1], pixel[2])
+            
+            self._frame_buffer = []
             pygame.display.update()
 
     def render_tile(self, tile):

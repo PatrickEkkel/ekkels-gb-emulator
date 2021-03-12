@@ -182,9 +182,9 @@ class NewOpcodeContext:
         # we need to store the a and b value in a seperate buffer so we can use it at any time in the flags register
         return self
 
-    def load_FFOO(self, r1, r2):
-        reg_value_a = self._cpu.reg.reg_read_dict[r1]()
-        reg_value_b = self._cpu.reg.reg_read_dict[r2]()
+    def load_FFOO(self):
+        reg_value_b = self._pop()
+        reg_value_a = self._pop()
         address = 0xFF00 + reg_value_a
         self.address = address
         self._push(reg_value_b)
@@ -213,6 +213,10 @@ class NewOpcodeContext:
     # load indirect 16 bit value into buffer. take value of memory address stored at r1
     def load_ir16(self, r1):
         self.address = self._cpu.reg.reg_read_dict[r1]()
+        self._push(self._mmu.read(self.address))
+        return self
+    
+    def load_ia8(self):
         self._push(self._mmu.read(self.address))
         return self
 

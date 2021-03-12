@@ -18,8 +18,8 @@ class PerformanceTests(unittest.TestCase):
     def test_20second_tetris_runtime(self):
         start_time = time.time()
         
-        #cProfile.run('run_tetris()')
-        run_tetris()
+        cProfile.run('run_tetris()')
+        #run_tetris()
         #gb.power_on(skipbios=True)
         
         print(time.time() - start_time, "seconds")

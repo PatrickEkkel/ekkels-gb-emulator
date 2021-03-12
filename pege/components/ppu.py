@@ -124,12 +124,14 @@ class PPU(Component):
 
     def read(self, address):
         return self.mapping[address]
-    
     def write(self, address, value):
         self.mapping[address] = value
 
     def is_in_range(self, address):
         return address == LCDC_REGISTER or address == LY_REGISTER
+
+    def get_memory_map(self):
+        return [LCDC_REGISTER, LY_REGISTER]
 
     def step(self):
 

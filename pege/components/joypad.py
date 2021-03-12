@@ -38,4 +38,6 @@ class JoyPad(Component):
         
     def is_in_range(self, address):
         return JP_REGISTER == address
-            
+    
+    def get_memory_map(self):
+        return [JP_REGISTER]

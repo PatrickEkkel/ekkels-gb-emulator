@@ -1,4 +1,30 @@
 import struct
+import constants
+
+class MemoryMap:
+    def __init__(self):
+        self._memory_map =  [0x0000] * (0xFFFF + 1)
+
+
+    def init_read_memory_map(self):
+        result = []
+        for address in range(0xFFFF + 1):
+            result.append(self.read)
+
+        return result
+
+    def init_write_memory_map(self):
+        result = []
+        for address in range(0xFFFF + 1):
+            result.append(self.write)
+        
+        return result
+
+    def read(self, address):
+        return self._memory_map[address]
+
+    def write(self, address, value):
+        self._memory_map[address] = value
 
 class MMU:
 
@@ -54,19 +80,25 @@ class MMU:
         self.wram_bank_1 = self.init_memory(MMU.WRAM_BANK_1_START, MMU.WRAM_BANK_1_END)
         self.oam = self.init_memory(MMU.OAM_START, MMU.OAM_END)
         self.unmapped = self.init_memory(0x0,0xFFFF)
-        #self.init_io_registers()
+        self._memory_device = MemoryMap()
+        self._read_memory_map = self._memory_device.init_read_memory_map()
+        self._write_memory_map = self._memory_device.init_write_memory_map()
+        self.memory_map = self.init_memory(0x0000,0xFFFF)
         self.components = []
 
 
+    #def register_component(self, component):
+    #    self.components.append(component)
+    
     def register_component(self, component):
         self.components.append(component)
+        ppu_memory_addresses = component.get_memory_map()
+        for address in ppu_memory_addresses:
+            self._read_memory_map[address] = component.read
+            self._write_memory_map[address] = component.write
 
-    #def init_io_registers(self):
-    #    self.io[0xFF00] = MMU.FF00
-
-
-    def init_memory(self, start,end):
-        size = end - start
+    def init_memory(self, start, end):
+        #size = end - start
         result = [0x0000] * (end + 1)
         return result
 
@@ -93,38 +125,12 @@ class MMU:
         return value & 0xFF
 
     def write(self,address, value):
-
         
-        if address == 0xFFB6:
-            pass
-            #input('start DMA')
-        if not self._handle_write(address, value):
-            # writing to VRAM
-            if self._is_vram(address):
-                self.vram[address] = value
-            elif self._is_rom(address):
-                print('ignoring rom writes')
-            elif self._is_io(address):
-                self.io[address] = value
-            elif self._is_hram(address):
-                #print('hram write')
-                self.hram[address] = value
-            elif self._is_wram_bank0(address):
-                #print('wram bank 0')
-                self.wram_bank_0[address] = value
-            elif self._is_wram_bank1(address):
-                #print('wram bank 1')
-                self.wram_bank_1[address] = value
-            elif self._is_oam(address):
-                #print('wram bank oam')
-                self.oam[address]  = value
-            elif self._is_not_usable(address):
-                pass
-                #print('not usable')
-            else:
-                # just dump all illigal writes in this array, so we can use it for testing
-                self.unmapped[address] = value
-            
+        if self._is_rom(address):
+            print('ignoring rom writes')
+        else:
+            self._write_memory_map[address](address, value)
+         
     def _is_not_usable(self, address):
         return address >= MMU.NOT_USABLE_START and address <= MMU.NOT_USABLE_END
 
@@ -149,62 +155,17 @@ class MMU:
     def _is_hram(self, address):
         return address >= MMU.HRAM_START and address <= MMU.HRAM_END
     
-    def _handle_read(self, address):
-        result = None
-        for c in self.components:
-            if c.is_in_range(address):
-                result = c.read(address)
-                break
-        
-        return result
-
-    def _handle_write(self, address, value):
-        result = False
-        for c in self.components:
-            if c.is_in_range(address):
-                c.write(address, value)
-                break
-        return result
-        
-
     def read(self, address):
-        local_data = None
-
-        # determine if we are above 0x00FF,
-        # this implies that we are not trying to read addresses from the bootrom
-        # everything above 0x104 to 7FFF is 'cartrdige ROM' space, switchable via MBC if available
-
-        value =  self._handle_read(address)
-        if value:
-            return value
-        else:
-            if self._is_rom(address):
-                if self.booted:
-                    return self.rom.read(address)
-                elif not self.booted and address >= MMU.BOOTROM_END:
-                    return self.rom.read(address)
-                else:
-                    return self.bios.read(address)
-            elif self._is_hram(address):
-                return self.hram[address]
-            elif self._is_vram(address):
-                return self.vram[address]
-            elif self._is_io(address):
-                return self.io[address]
-            elif self._is_wram_bank1(address):
-                return self.wram_bank_1[address]
-            elif self._is_wram_bank0(address):
-                return self.wram_bank_0[address]
-            elif self._is_oam(address):
-                return self.oam[address]
+        if self._is_rom(address):
+            if self.booted:
+                return self.rom.read(address)
             else:
-                # trying to access unmapped memory
-                # just return the garbage array
-                return self.unmapped[address]
+                return self.bios.read(address)
+        else:
+         
+            return self._read_memory_map[address](address)
+  
         
-                #return 0x0000
-
-
     def _getbyte(self,address, signed=False):
         pack_method = 'B'
         if signed:
