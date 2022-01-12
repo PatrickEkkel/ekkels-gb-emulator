@@ -1,0 +1,9 @@
+
+rootProject.name = 'ekkels-gameboy-emulator'
+include 'ekkel.emulib'
+include 'ekkel.gameboy'
+include 'ekkel.emugui'
+include 'ekkel.emudbg'
+
+
+

@@ -1,5 +1,11 @@
-**/__pycache__/**
-__init__.pyc
-pege/cartridges/roms/**
-boot/**
+.idea
+out
+javagb.iml
+.gradle/*
+ekkel.emulib/build/*
+gradlew.bat
+gradlew
+gradle/*
+*.class
+~
 
